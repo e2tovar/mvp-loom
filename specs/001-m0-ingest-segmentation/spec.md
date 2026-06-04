@@ -142,16 +142,21 @@ ejecución no crea duplicados.
   deterministas:
   - **Nivel 0** — toda frontera de capítulo es inicio de escena; un capítulo sin
     separadores internos constituye una única escena.
-  - **Nivel 1** — dentro de un capítulo, cada separador tipográfico explícito (línea
-    centrada compuesta solo de símbolos como `* * *`, `***`, `~`, `· · ·`, un ornamento;
-    o en `.docx` un párrafo vacío/ornamental con estilo o alineación de separador, o
-    doble espaciado) inicia una nueva escena.
+  - **Nivel 1** — dentro de un capítulo, cada separador tipográfico explícito inicia una
+    nueva escena. Un separador válido es **una de estas dos señales** (nunca un simple
+    salto de párrafo):
+    - una línea compuesta **únicamente** de símbolos separadores tras normalizar
+      espacios (`* * *`, `***`, `~`, `· · ·`, un ornamento), en cualquier formato; o
+    - en `.docx` exclusivamente, un párrafo con **estilo o alineación de separador**
+      (p. ej. párrafo ornamental centrado, o estilo de separador con su espaciado
+      asociado). El "espaciado" cuenta solo como atributo de ese estilo de párrafo en
+      `.docx`; **nunca** como líneas en blanco en texto plano.
   La detección semántica de cortes no marcados (Nivel 2, asistida por LLM) queda
   **fuera de alcance de M0** y se aborda en un milestone propio posterior.
-- **FR-004a**: El sistema MUST distinguir un separador de escena real de un simple
-  espacio entre párrafos: la señal válida es una línea compuesta únicamente de símbolos
-  separadores (o, en `.docx`, un párrafo con estilo/alineación de separador), no
-  cualquier salto de párrafo.
+- **FR-004a**: El sistema MUST distinguir un separador de escena real de un simple salto
+  o espacio entre párrafos. Las líneas en blanco por sí solas (en cualquier formato)
+  **no** constituyen un separador: solo lo son las dos señales definidas en FR-004
+  (línea de solo-símbolos, o estilo/alineación de separador en `.docx`).
 - **FR-005**: El sistema MUST conservar metadatos de posición que permitan rastrear cada
   capítulo y escena de vuelta a su ubicación en el manuscrito original.
 - **FR-006**: El sistema MUST tratar la capa cruda resultante como **inmutable**: una

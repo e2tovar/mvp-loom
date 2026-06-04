@@ -1,0 +1,95 @@
+# ─────────────────────────────────────────────────────────────
+# Python
+# ─────────────────────────────────────────────────────────────
+__pycache__/
+*.py[oc]
+build/
+dist/
+wheels/
+*.egg-info/
+*.egg
+
+# Virtual environments (uv.lock IS tracked, .venv is not)
+.venv/
+venv/
+env/
+
+# Test / type-check / lint caches and coverage
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.cache/
+.coverage
+.coverage.*
+htmlcov/
+coverage.xml
+.hypothesis/
+
+# ─────────────────────────────────────────────────────────────
+# Secrets & environment
+# ─────────────────────────────────────────────────────────────
+.env
+.env.*
+!.env.example
+*.key
+*.pem
+secrets/
+
+# ─────────────────────────────────────────────────────────────
+# Neo4j / docker local data (mounted volumes)
+# ─────────────────────────────────────────────────────────────
+neo4j/data/
+neo4j/logs/
+neo4j/import/
+neo4j/plugins/
+data/
+docker-compose.override.yml
+
+# ─────────────────────────────────────────────────────────────
+# Frontend (React + TypeScript + Vite) — planned in frontend/
+# ─────────────────────────────────────────────────────────────
+node_modules/
+frontend/dist/
+frontend/.vite/
+*.tsbuildinfo
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# ─────────────────────────────────────────────────────────────
+# Eval harness & LLM run artifacts (datasets/reports ARE tracked;
+# local run outputs and caches are not)
+# ─────────────────────────────────────────────────────────────
+eval/runs/
+eval/.cache/
+.llm_cache/
+
+# ─────────────────────────────────────────────────────────────
+# Logs & temp
+# ─────────────────────────────────────────────────────────────
+*.log
+logs/
+tmp/
+*.tmp
+
+# ─────────────────────────────────────────────────────────────
+# Editors / IDE
+# ─────────────────────────────────────────────────────────────
+.idea/
+.vscode/*
+!.vscode/extensions.json
+!.vscode/settings.json
+*.swp
+
+# ─────────────────────────────────────────────────────────────
+# OS
+# ─────────────────────────────────────────────────────────────
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# ─────────────────────────────────────────────────────────────
+# Claude Code — local/personal settings only (skills are tracked)
+# ─────────────────────────────────────────────────────────────
+.claude/settings.local.json

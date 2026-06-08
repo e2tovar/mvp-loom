@@ -1,0 +1,8 @@
+{
+  "source_file": "pride-and-prejudice.txt",
+  "format": "txt",
+  "title": "Pride and Prejudice",
+  "expected_chapter_count": 61,
+  "expected_scene_separators": 0,
+  "notes": "61 capítulos (CHAPTER I..LXI; el primero aparece como leyenda 'Chapter I.]'). Sin separadores tipográficos de escena: cada capítulo es una escena por Nivel 0. Front matter incluye boilerplate de Gutenberg y una LIST OF ILLUSTRATIONS que debe excluirse."
+}

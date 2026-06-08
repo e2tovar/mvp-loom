@@ -1,0 +1,8 @@
+{
+  "source_file": "crafted-two-chapters.docx",
+  "format": "docx",
+  "title": "Crafted Two Chapters",
+  "expected_chapter_count": 2,
+  "expected_scene_separators": 1,
+  "notes": "Dos capítulos con estilo Heading 1; el capítulo 1 contiene un párrafo separador '* * *' centrado."
+}

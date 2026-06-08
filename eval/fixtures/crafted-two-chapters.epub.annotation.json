@@ -1,0 +1,8 @@
+{
+  "source_file": "crafted-two-chapters.epub",
+  "format": "epub",
+  "title": "Crafted Two Chapters",
+  "expected_chapter_count": 2,
+  "expected_scene_separators": 1,
+  "notes": "Dos capítulos; el capítulo 1 contiene un <hr/> que separa dos escenas."
+}

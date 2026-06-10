@@ -1,4 +1,4 @@
-"""App FastAPI de Loom (M0).
+"""App FastAPI de Loom (M0 + M1).
 
 En el arranque aplica el esquema del grafo de forma idempotente. La aplicación del
 esquema es resiliente: si Neo4j no está disponible se registra un aviso y la app
@@ -13,6 +13,7 @@ from contextlib import asynccontextmanager
 
 from fastapi import FastAPI
 
+from backend.api.routes_characters import router as characters_router
 from backend.api.routes_manuscripts import router as manuscripts_router
 from backend.graph import client, schema
 
@@ -35,8 +36,12 @@ async def lifespan(app: FastAPI) -> AsyncIterator[None]:
     client.close_driver()
 
 
-app = FastAPI(title="Loom — M0 Ingestión y segmentación", lifespan=lifespan)
+app = FastAPI(
+    title="Loom — M0+M1 Ingestión, segmentación y extracción de personajes",
+    lifespan=lifespan,
+)
 app.include_router(manuscripts_router)
+app.include_router(characters_router)
 
 
 @app.get("/health")

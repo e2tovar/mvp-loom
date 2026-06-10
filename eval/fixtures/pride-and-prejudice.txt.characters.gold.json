@@ -1,0 +1,86 @@
+{
+  "work": "pride-and-prejudice.txt",
+  "annotation_criteria": "eval/fixtures/README.md#characters",
+  "characters": [
+    {
+      "gold_id": "elizabeth-bennet",
+      "canonical_name": "Elizabeth Bennet",
+      "aliases": ["Lizzy", "Eliza", "Miss Elizabeth", "Miss Bennet", "Miss Elizabeth Bennet"],
+      "role": "protagonist",
+      "is_mentioned_only": false,
+      "appearances": ["c0/s0", "c1/s0", "c2/s0", "c3/s0", "c4/s0"]
+    },
+    {
+      "gold_id": "fitzwilliam-darcy",
+      "canonical_name": "Mr. Darcy",
+      "aliases": ["Darcy", "Mr. Fitzwilliam Darcy", "Fitzwilliam"],
+      "role": "protagonist",
+      "is_mentioned_only": false,
+      "appearances": ["c2/s0", "c3/s0", "c4/s0"]
+    },
+    {
+      "gold_id": "jane-bennet",
+      "canonical_name": "Jane Bennet",
+      "aliases": ["Jane", "Miss Bennet", "Miss Jane Bennet"],
+      "role": "secondary",
+      "is_mentioned_only": false,
+      "appearances": ["c0/s0", "c1/s0", "c2/s0"]
+    },
+    {
+      "gold_id": "charles-bingley",
+      "canonical_name": "Mr. Bingley",
+      "aliases": ["Bingley", "Charles Bingley"],
+      "role": "secondary",
+      "is_mentioned_only": false,
+      "appearances": ["c1/s0", "c2/s0", "c3/s0"]
+    },
+    {
+      "gold_id": "mrs-bennet",
+      "canonical_name": "Mrs. Bennet",
+      "aliases": [],
+      "role": "secondary",
+      "is_mentioned_only": false,
+      "appearances": ["c0/s0", "c1/s0"]
+    },
+    {
+      "gold_id": "mr-bennet",
+      "canonical_name": "Mr. Bennet",
+      "aliases": [],
+      "role": "secondary",
+      "is_mentioned_only": false,
+      "appearances": ["c0/s0", "c1/s0"]
+    },
+    {
+      "gold_id": "george-wickham",
+      "canonical_name": "Wickham",
+      "aliases": ["Mr. Wickham", "George Wickham"],
+      "role": "antagonist",
+      "is_mentioned_only": false,
+      "appearances": ["c15/s0", "c16/s0"]
+    },
+    {
+      "gold_id": "mr-collins",
+      "canonical_name": "Mr. Collins",
+      "aliases": ["Collins"],
+      "role": "secondary",
+      "is_mentioned_only": false,
+      "appearances": ["c12/s0", "c13/s0"]
+    },
+    {
+      "gold_id": "charlotte-lucas",
+      "canonical_name": "Charlotte Lucas",
+      "aliases": ["Charlotte", "Miss Lucas", "Mrs. Collins"],
+      "role": "secondary",
+      "is_mentioned_only": false,
+      "appearances": ["c4/s0", "c5/s0"]
+    },
+    {
+      "gold_id": "lady-catherine",
+      "canonical_name": "Lady Catherine de Bourgh",
+      "aliases": ["Lady Catherine", "Lady de Bourgh"],
+      "role": "secondary",
+      "is_mentioned_only": false,
+      "appearances": ["c28/s0", "c29/s0"]
+    }
+  ]
+}

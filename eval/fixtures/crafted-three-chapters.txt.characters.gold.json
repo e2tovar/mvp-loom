@@ -1,0 +1,22 @@
+{
+  "work": "crafted-three-chapters.txt",
+  "annotation_criteria": "eval/fixtures/README.md#characters",
+  "characters": [
+    {
+      "gold_id": "elena",
+      "canonical_name": "Elena",
+      "aliases": [],
+      "role": "protagonist",
+      "is_mentioned_only": false,
+      "appearances": ["c1/s0", "c2/s1"]
+    },
+    {
+      "gold_id": "marco",
+      "canonical_name": "Marco",
+      "aliases": [],
+      "role": "secondary",
+      "is_mentioned_only": false,
+      "appearances": ["c2/s0"]
+    }
+  ]
+}

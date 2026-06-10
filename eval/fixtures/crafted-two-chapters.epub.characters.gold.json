@@ -1,0 +1,22 @@
+{
+  "work": "crafted-two-chapters.epub",
+  "annotation_criteria": "eval/fixtures/README.md#characters",
+  "characters": [
+    {
+      "gold_id": "elena",
+      "canonical_name": "Elena",
+      "aliases": [],
+      "role": "protagonist",
+      "is_mentioned_only": false,
+      "appearances": ["c0/s0"]
+    },
+    {
+      "gold_id": "marco",
+      "canonical_name": "Marco",
+      "aliases": [],
+      "role": "secondary",
+      "is_mentioned_only": false,
+      "appearances": ["c1/s0"]
+    }
+  ]
+}

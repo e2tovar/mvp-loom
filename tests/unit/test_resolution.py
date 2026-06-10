@@ -1,0 +1,168 @@
+"""Tests unitarios de resolución de entidades (T017).
+
+Sin red, sin Neo4j: LLM falso inyectado donde se necesita.
+"""
+
+from __future__ import annotations
+
+from unittest.mock import MagicMock
+
+import pytest
+
+from backend.extraction.registry import EntityRegistry
+from backend.extraction.resolution import (
+    MergeCandidateProposal,
+    is_collective,
+    resolve_candidate,
+)
+from backend.extraction.schemas import CharacterCandidateOut, MergeJudgement
+
+
+def _candidate(name: str, aliases=None, role="unknown", present=True) -> CharacterCandidateOut:
+    return CharacterCandidateOut(
+        canonical_name=name,
+        aliases=aliases or [],
+        role=role,
+        is_present_in_scene=present,
+    )
+
+
+def _registry(*names: str) -> EntityRegistry:
+    reg = EntityRegistry()
+    for n in names:
+        reg.add(n, [], "unknown")
+    return reg
+
+
+# ── Normalización ─────────────────────────────────────────────────────────────
+
+
+def test_normalize_honorifics():
+    """Entidades con y sin honorífico se reconocen como iguales."""
+    reg = EntityRegistry()
+    reg.add("Darcy", [], "secondary")
+    cand = _candidate("Mr. Darcy")
+    result = resolve_candidate(cand, reg)
+    assert result.merged_into == "Darcy"
+
+
+def test_normalize_accents():
+    """Nombres con/sin acentos se normalizan al mismo token."""
+    reg = EntityRegistry()
+    reg.add("Inés", [], "secondary")
+    cand = _candidate("Inés")
+    result = resolve_candidate(cand, reg)
+    assert result.merged_into == "Inés"
+
+
+# ── Auto-merge determinista ───────────────────────────────────────────────────
+
+
+def test_exact_match_auto_merges():
+    """Match exacto → merged_into sin llamar al LLM."""
+    reg = _registry("Elizabeth Bennet")
+    result = resolve_candidate(_candidate("Elizabeth Bennet"), reg)
+    assert result.merged_into == "Elizabeth Bennet"
+    assert result.merge_candidate is None
+
+
+def test_alias_match_auto_merges():
+    """Match por alias → merged_into sin llamar al LLM."""
+    reg = EntityRegistry()
+    reg.add("Elizabeth Bennet", ["Lizzy", "Eliza"], "protagonist")
+    result = resolve_candidate(_candidate("Lizzy"), reg)
+    assert result.merged_into == "Elizabeth Bennet"
+
+
+def test_new_entity_no_merge():
+    """Entidad completamente nueva → sin merge, sin propuesta."""
+    reg = _registry("Elizabeth Bennet")
+    result = resolve_candidate(_candidate("Mr. Collins"), reg)
+    assert result.merged_into is None
+    assert result.merge_candidate is None
+    assert result.canonical_name == "Mr. Collins"
+
+
+# ── Homónimos NO fusionados por similitud ─────────────────────────────────────
+
+
+def test_homonym_not_merged_without_llm():
+    """Sin LLM client, entidades similares pero distintas no se fusionan."""
+    reg = _registry("Thomas Hardy")
+    cand = _candidate("Thomas")
+    result = resolve_candidate(cand, reg, llm_client=None)
+    assert result.merged_into is None
+
+
+# ── Colectivos filtrados ──────────────────────────────────────────────────────
+
+
+@pytest.mark.parametrize(
+    "name",
+    ["los soldados", "la multitud", "todos", "the crowd", "some villagers"],
+)
+def test_collective_is_detected(name):
+    assert is_collective(name) is True
+
+
+def test_collective_returns_as_is():
+    """Colectivo → ResolutionResult sin merge ni propuesta."""
+    reg = _registry("Ana")
+    result = resolve_candidate(_candidate("los guardias"), reg)
+    assert result.merged_into is None
+    assert result.merge_candidate is None
+
+
+# ── Zona gris va a cola (LLM falso) ──────────────────────────────────────────
+
+
+def _fake_llm(same: bool, confidence: float) -> MagicMock:
+    client = MagicMock()
+    client.complete_structured.return_value = MergeJudgement(
+        same_entity=same,
+        confidence=confidence,
+        rationale="test",
+    )
+    return client
+
+
+def test_high_confidence_auto_merges_via_llm():
+    """Confianza ≥ 0.9 → auto-merge."""
+    reg = _registry("Darcy")
+    cand = _candidate("Mr Darcy")
+    result = resolve_candidate(cand, reg, llm_client=_fake_llm(True, 0.95))
+    assert result.merged_into == "Darcy"
+
+
+def test_gray_zone_queues_candidate():
+    """0.5 ≤ confianza < 0.9 → MergeCandidate, entidades separadas."""
+    reg = _registry("Elizabeth")
+    cand = _candidate("Eliza")
+    result = resolve_candidate(cand, reg, llm_client=_fake_llm(True, 0.72))
+    assert result.merged_into is None
+    assert isinstance(result.merge_candidate, MergeCandidateProposal)
+    assert result.merge_candidate.confidence == 0.72
+
+
+def test_low_confidence_no_queue():
+    """Confianza < 0.5 → sin merge, sin propuesta (demasiado dudoso)."""
+    reg = _registry("Ana")
+    cand = _candidate("Annie")
+    result = resolve_candidate(cand, reg, llm_client=_fake_llm(True, 0.3))
+    assert result.merged_into is None
+    assert result.merge_candidate is None
+
+
+# ── Decisiones previas respetadas ────────────────────────────────────────────
+
+
+def test_rejected_decision_not_re_proposed():
+    """Un par previamente rechazado no se vuelve a proponer (INV-M1-4)."""
+    reg = _registry("Ana")
+    cand = _candidate("Annie")
+    cid_a = "ms::ana"
+    cid_b = "ms::annie"
+    pair = (cid_a, cid_b) if cid_a < cid_b else (cid_b, cid_a)
+    prior = {pair: "rejected"}
+    result = resolve_candidate(cand, reg, llm_client=_fake_llm(True, 0.8), prior_decisions=prior)
+    assert result.merge_candidate is None

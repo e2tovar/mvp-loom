@@ -35,3 +35,29 @@ class ManuscriptNotFoundError(LoomError):
     """No existe un manuscrito con el id solicitado."""
 
     code = "not_found"
+
+
+# ── M1: extracción de personajes ──────────────────────────────────────────────
+
+class ExtractionError(LoomError):
+    """Error durante el pipeline de extracción de personajes."""
+
+    code = "extraction_error"
+
+
+class NotExtractedError(LoomError):
+    """El manuscrito existe pero aún no se ha ejecutado la extracción."""
+
+    code = "not_extracted"
+
+
+class AlreadyResolvedError(LoomError):
+    """El candidato de fusión ya fue aceptado o rechazado."""
+
+    code = "already_resolved"
+
+
+class LLMUnavailableError(LoomError):
+    """El proveedor LLM no está disponible o no está configurado."""
+
+    code = "llm_unavailable"

@@ -15,6 +15,7 @@ dependencies = [
     "beautifulsoup4>=4.12",
     "lxml>=5.3",
     "python-docx>=1.1",
+    "litellm>=1.56",
 ]
 
 [dependency-groups]
@@ -46,6 +47,6 @@ testpaths = ["tests"]
 markers = [
     "unit: tests unitarios sin dependencias externas",
     "integration: requieren Neo4j en ejecución (docker compose up)",
-    "eval: proto-eval de segmentación (gate de CI)",
+    "eval: harness de evaluación — segmentación (M0) y personajes (M1); gate de CI",
 ]
 addopts = "-q"

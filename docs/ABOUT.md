@@ -124,7 +124,7 @@ sin coste adicional.
 | Milestone | Aporte al grafo | Estado |
 |-----------|-----------------|--------|
 | M0 — Ingesta | `Manuscript` / `Chapter` / `Scene` | ✅ Completo |
-| M1 — Personajes | `Character` / `Mention` / `MergeCandidate` + eval | ✅ Completo |
+| M1 — Personajes | `Character` / `Mention` / `MergeCandidate` + eval | 🔚 Cierre en curso |
 | M2 — Relaciones | `RELATES_TO` entre personajes, atributos, continuidad | 🔜 Planificado |
 | M3 — Eventos | Nodos de evento y orden cronológico real | 🔜 Planificado |
 | M4 — Retrieval | `Passage` y búsqueda híbrida (GraphRAG) | 🔜 Planificado |
@@ -139,7 +139,8 @@ Cada milestone solo añade nodos y relaciones; nunca altera las capas previas.
 Ninguna funcionalidad se valida por inspección visual. Cada milestone incluye un dataset de oro
 anotado a mano y métricas automáticas —precisión, recall, F1— que se ejecutan en CI y bloquean
 el merge si la calidad cae. Un cambio de prompt o de modelo solo entra si supera los umbrales
-vigentes: detección F1 ≥ 0.90, resolución B³ ≥ 0.85.
+vigentes: detección F1 ≥ 0.90, resolución B³ ≥ 0.85 (B³ se mide sobre las obras con
+gold anotado a nivel de mención; sin esa anotación el eval reporta "no medido").
 
 ---
 

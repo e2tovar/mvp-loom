@@ -7,7 +7,7 @@ resolverse antes de dar una métrica por válida. Cada entrada cita su ubicació
 
 ## M1 · La resolución B³ no está realmente cableada (stub)
 
-**Estado:** deuda · detectado 2026-06-15
+**Estado:** ✅ resuelto 2026-07-11 · detectado 2026-06-15
 
 La detección F1 mide algo real al ejecutar el harness. La **resolución B³ no**: hoy
 devolvería `0.0` aunque se lance el flujo completo, por dos motivos independientes de
@@ -29,13 +29,9 @@ ejecutar la extracción.
 Relacionado: `count_silent_bad_merges` se invoca con `[]` en `runner.py:104` — no carga
 los `MergeCandidate` reales del grafo, así que esa métrica tampoco refleja el estado real.
 
-**Camino de salida (cuando se aborde):**
-- Pasar `pred_clusters` reales a `bcubed_f1` (dejar de descartarlos).
-- Anotar menciones en el gold (clusters de `mention_id` con surface/offsets) para que gold
-  y pred compartan el mismo espacio de IDs y B³ sea fiel a research R4.
-- Cargar los pares `MergeCandidate` reales para `count_silent_bad_merges`.
-
-**Nota de coherencia:** mientras esto sea deuda, `docs/ABOUT.md` (M1 "✅ Completo";
-"resolución B³ ≥ 0.85" como umbral vigente que corre en CI y bloquea el merge) sobre-afirma
-el estado real. El gate de `tests/eval/test_characters_gate.py` hace SKIP cuando no hay
-extracción, no PASS.
+**Resolución (2026-07-11):** `eval/characters/alignment.py` alinea gold↔pred en el
+espacio de claves `"c{cap}/s{escena}::{surface}"`; los golds de las obras del gate
+llevan `mentions` anotadas; el runner pasa los clusters reales a `bcubed_f1` y los
+pares reales de `MergeCandidate` a `count_silent_bad_merges`. Los golds sin anotación
+de menciones (pride-and-prejudice) reportan `resolution_b3: null` — no medido, nunca
+un valor inventado. El gate exige B³ no-null para sus obras.

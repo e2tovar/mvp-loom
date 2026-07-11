@@ -27,17 +27,17 @@ def build_epub() -> Path:
     c1.content = (
         "<html><body>"
         "<h1>Capítulo 1</h1>"
-        "<p>Párrafo uno con acentós y eñes.</p>"
+        "<p>Elena abrió la puerta con acentós y eñes.</p>"
         "<p>Párrafo dos del primer capítulo.</p>"
         "<hr/>"
-        "<p>Segunda escena tras el separador tipográfico.</p>"
+        "<p>Elena bajó del tren tras el separador tipográfico.</p>"
         "</body></html>"
     )
     c2 = epub.EpubHtml(title="Capítulo 2", file_name="c2.xhtml", lang="es")
     c2.content = (
         "<html><body>"
         "<h1>Capítulo 2</h1>"
-        "<p>El segundo capítulo no tiene separadores internos.</p>"
+        "<p>Marco esperaba en la estación del segundo capítulo.</p>"
         "</body></html>"
     )
     book.add_item(c1)

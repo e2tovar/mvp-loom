@@ -8,7 +8,11 @@
       "aliases": [],
       "role": "protagonist",
       "is_mentioned_only": false,
-      "appearances": ["c1/s0", "c2/s1"]
+      "appearances": ["c1/s0", "c2/s1"],
+      "mentions": [
+        {"scene": "c1/s0", "surface": "Elena"},
+        {"scene": "c2/s1", "surface": "Elena"}
+      ]
     },
     {
       "gold_id": "marco",
@@ -16,7 +20,10 @@
       "aliases": [],
       "role": "secondary",
       "is_mentioned_only": false,
-      "appearances": ["c2/s0"]
+      "appearances": ["c2/s0"],
+      "mentions": [
+        {"scene": "c2/s0", "surface": "Marco"}
+      ]
     }
   ]
 }

@@ -109,3 +109,20 @@ def test_silent_bad_merge_detected():
     pred = [_entity("Ana", aliases=["María"])]
     sbm = count_silent_bad_merges(gold, pred, [])
     assert sbm == 1
+
+
+def test_bad_merge_with_registered_candidate_not_counted():
+    """Una fusión con MergeCandidate registrado NO es silenciosa, aunque los
+    nombres del candidato no coincidan exactamente con los del gold."""
+    gold = [_entity("Ana"), _entity("María")]
+    pred = [_entity("Ana", aliases=["María"])]
+    # El candidato registra el par vía alias, no vía canonical exacto
+    pairs = [(_entity("Ana"), _entity("Mari", aliases=["María"]))]
+    assert count_silent_bad_merges(gold, pred, pairs) == 0
+
+
+def test_bad_merge_with_unrelated_candidate_still_counted():
+    gold = [_entity("Ana"), _entity("María")]
+    pred = [_entity("Ana", aliases=["María"])]
+    pairs = [(_entity("Pedro"), _entity("Juan"))]
+    assert count_silent_bad_merges(gold, pred, pairs) == 1

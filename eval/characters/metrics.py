@@ -148,12 +148,18 @@ def bcubed_f1(
 def count_silent_bad_merges(
     gold_entities: list[dict],
     pred_entities: list[dict],
-    pending_or_accepted_candidate_pairs: list[tuple[str, str]],
+    candidate_pairs: list[tuple[dict, dict]],
 ) -> int:
     """Pares del gold distintos que aparecen fusionados en pred sin candidate.
 
     Un "silent bad merge" es: dos gold_ids que el sistema colapsó en una sola
     entidad predicha pero sin MergeCandidate registrado para ese par.
+
+    Args:
+        candidate_pairs: Pares (char_a, char_b) de MergeCandidate del grafo
+            (cualquier status); cada elemento es un dict de entidad con
+            `canonical_name` y `aliases`. El matching usa solapamiento de
+            aliases, igual que la detección.
     """
     bad = 0
     for i, ga in enumerate(gold_entities):
@@ -167,12 +173,11 @@ def count_silent_bad_merges(
             if pred_a is None or pred_b is None:
                 continue
             if pred_a["canonical_name"] == pred_b["canonical_name"]:
-                # Están fusionadas — ¿existe un candidate?
-                a_name = ga["canonical_name"].casefold()
-                b_name = gb["canonical_name"].casefold()
+                # Están fusionadas — ¿existe un candidate para el par?
                 pair_known = any(
-                    (a.casefold() in (a_name, b_name) and b.casefold() in (a_name, b_name))
-                    for a, b in pending_or_accepted_candidate_pairs
+                    (_entities_match(ga, ca) and _entities_match(gb, cb))
+                    or (_entities_match(ga, cb) and _entities_match(gb, ca))
+                    for ca, cb in candidate_pairs
                 )
                 if not pair_known:
                     bad += 1

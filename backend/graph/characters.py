@@ -264,6 +264,24 @@ def get_character_detail(
     return char
 
 
+def get_scene_coordinates(sess: Session, manuscript_id: str) -> dict[str, str]:
+    """Mapa scene_id → coordenada 'c{cap}/s{escena}' (mismo formato que el gold del eval)."""
+    result = sess.run(
+        """
+        MATCH (m:Manuscript {manuscript_id: $mid})-[:HAS_CHAPTER]->(c:Chapter)
+              -[:HAS_SCENE]->(s:Scene)
+        RETURN s.scene_id AS scene_id,
+               c.order_narrative AS chapter_order,
+               s.order_in_chapter AS scene_order
+        """,
+        mid=manuscript_id,
+    )
+    return {
+        rec["scene_id"]: f"c{rec['chapter_order']}/s{rec['scene_order']}"
+        for rec in result
+    }
+
+
 def count_pending_merge_candidates(sess: Session, manuscript_id: str) -> int:
     result = sess.run(
         """

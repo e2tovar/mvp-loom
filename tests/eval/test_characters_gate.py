@@ -71,6 +71,10 @@ def test_characters_gate(work: str) -> None:
 
     result = run_eval(work, manuscript_id=manuscript_id)
 
+    assert result["resolution_b3"] is not None, (
+        f"El gold de '{work}' perdió la anotación de menciones: el gate exige B³ real."
+    )
+
     assert result["passed"], (
         f"Gate FAIL para '{work}':\n"
         f"  Detection F1 = {result['detection']['f1']:.3f} "

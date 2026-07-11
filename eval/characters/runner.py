@@ -38,32 +38,30 @@ def _load_gold(work: str) -> dict:
     return json.loads(path.read_text(encoding="utf-8"))
 
 
-def _load_system_output(manuscript_id: str) -> tuple[list[dict], list[list[str]]]:
-    """Carga personajes y clusters de menciones del grafo Neo4j."""
+def _load_system_output(
+    manuscript_id: str,
+) -> tuple[list[dict], list[list[str]], list[tuple[dict, dict]]]:
+    """Carga del grafo: entidades, clusters de menciones alineados y pares de candidatos."""
     from dotenv import load_dotenv
 
     load_dotenv()
     from backend.graph import characters as char_graph
     from backend.graph.client import session as db_session
+    from backend.graph.merge_candidates import get_merge_candidates
+    from eval.characters.alignment import pred_mention_clusters
 
     with db_session() as sess:
         char_list = char_graph.get_characters_list(sess, manuscript_id)
-        # Clusters de menciones: una lista de mention_ids por personaje
-        clusters = []
+        scene_coords = char_graph.get_scene_coordinates(sess, manuscript_id)
+        per_char_mentions = []
         for c in char_list:
             detail = char_graph.get_character_detail(sess, manuscript_id, c["character_id"])
             if detail:
-                cluster = [m["mention_id"] for m in detail.get("mentions", [])]
-                if cluster:
-                    clusters.append(cluster)
-    return char_list, clusters
-
-
-def _build_gold_clusters(gold: dict) -> tuple[list[dict], list[list[str]]]:
-    """Construye clusters ficticios de gold (gold_id como pseudo-mention_id)."""
-    gold_entities = gold["characters"]
-    clusters = [[f"gold:{c['gold_id']}:{i}" for i in range(1)] for c in gold_entities]
-    return gold_entities, clusters
+                per_char_mentions.append(detail.get("mentions", []))
+        clusters = pred_mention_clusters(per_char_mentions, scene_coords)
+        candidates = get_merge_candidates(sess, manuscript_id, status="all")
+        pairs = [(mc["characters"][0], mc["characters"][1]) for mc in candidates]
+    return char_list, clusters, pairs
 
 
 def run_eval(work: str, manuscript_id: str | None = None) -> dict:
@@ -80,7 +78,7 @@ def run_eval(work: str, manuscript_id: str | None = None) -> dict:
 
     mid = manuscript_id or work
     try:
-        pred_entities, pred_clusters = _load_system_output(mid)
+        pred_entities, pred_clusters, candidate_pairs = _load_system_output(mid)
     except Exception as exc:
         print(f"[eval] No se pudo cargar la salida del sistema: {exc}", file=sys.stderr)
         print(
@@ -89,23 +87,27 @@ def run_eval(work: str, manuscript_id: str | None = None) -> dict:
         )
         sys.exit(1)
 
-    # Para B-cubed gold usamos un cluster por entidad gold (simplificado: cada entidad = 1 mention)
-    # Los clusters de pred se alinean a clusters de gold por alias matching (simplificado)
-    # Para una eval completa se necesitan mention_ids compartidos; aquí usamos entity-level
     det = detection_f1(gold_entities, pred_entities)
 
-    # B-cubed a nivel de entidades (proxy cuando no hay mention_ids de gold)
-    gold_entity_clusters = [[c["gold_id"]] for c in gold_entities]
-    pred_entity_clusters = [
-        [f"pred:{p['character_id']}"] for p in pred_entities
-    ]
-    b3 = bcubed_f1(gold_entity_clusters, pred_entity_clusters)
+    # B³ real sobre menciones — solo si el gold está anotado a nivel de mención.
+    from eval.characters.alignment import gold_mention_clusters
 
-    sbm = count_silent_bad_merges(gold_entities, pred_entities, [])
+    gold_clusters = gold_mention_clusters(gold)
+    if gold_clusters is None:
+        b3 = None
+        print(
+            f"[eval] Gold de '{work}' sin anotación de menciones — B³ no medido "
+            "(ver eval/fixtures/README.md#mentions).",
+            file=sys.stderr,
+        )
+    else:
+        b3 = bcubed_f1(gold_clusters, pred_clusters)
+
+    sbm = count_silent_bad_merges(gold_entities, pred_entities, candidate_pairs)
 
     passed = (
         det.f1 >= DETECTION_F1
-        and b3.f1 >= RESOLUTION_B3_F1
+        and (b3 is None or b3.f1 >= RESOLUTION_B3_F1)
         and sbm <= SILENT_BAD_MERGES
     )
 
@@ -121,7 +123,11 @@ def run_eval(work: str, manuscript_id: str | None = None) -> dict:
         "prompt_version": PROMPT_VERSION,
         "model": model,
         "detection": {"precision": det.precision, "recall": det.recall, "f1": det.f1},
-        "resolution_b3": {"precision": b3.precision, "recall": b3.recall, "f1": b3.f1},
+        "resolution_b3": (
+            None
+            if b3 is None
+            else {"precision": b3.precision, "recall": b3.recall, "f1": b3.f1}
+        ),
         "silent_bad_merges": sbm,
         "thresholds": {
             "detection_f1": DETECTION_F1,
@@ -160,17 +166,25 @@ def _print_result(result: dict, compare: dict | None = None) -> None:
     print(f"  Gate       : {gate}")
     det_f1 = result["detection"]["f1"]
     det_thr = result["thresholds"]["detection_f1"]
-    b3_f1 = result["resolution_b3"]["f1"]
-    b3_thr = result["thresholds"]["resolution_b3_f1"]
     sbm = result["silent_bad_merges"]
     sbm_thr = result["thresholds"]["silent_bad_merges"]
+    b3 = result["resolution_b3"]
+    b3_thr = result["thresholds"]["resolution_b3_f1"]
     print(f"  Detection  : F1={det_f1:.3f}  (≥{det_thr})")
-    print(f"  B³ Resol.  : F1={b3_f1:.3f}  (≥{b3_thr})")
+    if b3 is None:
+        print("  B³ Resol.  : no medido — gold sin anotación de menciones")
+    else:
+        print(f"  B³ Resol.  : F1={b3['f1']:.3f}  (≥{b3_thr})")
     print(f"  Silent err.: {sbm}  (≤{sbm_thr})")
     if compare:
         dd = result["detection"]["f1"] - compare.get("detection", {}).get("f1", 0)
-        db = result["resolution_b3"]["f1"] - compare.get("resolution_b3", {}).get("f1", 0)
-        print(f"  Δ Detection: {dd:+.3f}   Δ B³: {db:+.3f}  (vs {compare.get('run_at','?')[:10]})")
+        prev_b3 = compare.get("resolution_b3") or {}
+        prev_date = compare.get("run_at", "?")[:10]
+        if b3 is not None and prev_b3:
+            db = b3["f1"] - prev_b3.get("f1", 0)
+            print(f"  Δ Detection: {dd:+.3f}   Δ B³: {db:+.3f}  (vs {prev_date})")
+        else:
+            print(f"  Δ Detection: {dd:+.3f}  (vs {prev_date})")
     print(f"{'─'*60}\n")
 
 

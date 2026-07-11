@@ -38,6 +38,21 @@ def _neo4j_available() -> bool:
         return False
 
 
+def _manuscript_id(work: str) -> str:
+    """Deriva el manuscript_id real (hash de contenido) para una obra de fixtures.
+
+    `parse_manuscript` es puro (parsea y segmenta sin tocar el grafo) y
+    determinista: el mismo contenido siempre produce el mismo `manuscript_id`
+    (backend/ingest/pipeline.py:89, `content_id(narrative)`). El nombre de
+    archivo (`work`) NO es el manuscript_id.
+    """
+    from backend.ingest.pipeline import parse_manuscript
+
+    source_format = Path(work).suffix.lstrip(".")
+    manuscript = parse_manuscript(FIXTURES_DIR / work, source_format)  # type: ignore[arg-type]
+    return manuscript.manuscript_id
+
+
 def _has_extraction(manuscript_id: str) -> bool:
     try:
         from backend.graph import characters as char_graph
@@ -60,7 +75,7 @@ def test_characters_gate(work: str) -> None:
     if not gold_path.exists():
         pytest.skip(f"Gold dataset no encontrado: {gold_path}")
 
-    manuscript_id = work
+    manuscript_id = _manuscript_id(work)
     if not _has_extraction(manuscript_id):
         pytest.skip(
             f"Extracción no ejecutada para '{work}'. "
@@ -84,3 +99,10 @@ def test_characters_gate(work: str) -> None:
         f"  Silent bad merges = {result['silent_bad_merges']} "
         f"(umbral ≤ {result['thresholds']['silent_bad_merges']})"
     )
+
+
+@pytest.mark.parametrize("work", EVAL_WORKS)
+def test_manuscript_id_resolves_to_content_hash(work: str) -> None:
+    """El gate deriva el manuscript_id real (hash de contenido), no el filename."""
+    mid = _manuscript_id(work)
+    assert mid and mid != work

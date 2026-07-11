@@ -54,6 +54,10 @@ class LiteLLMClient:
             )
         self._api_base = os.environ.get("LOOM_LLM_API_BASE") or None
         self._api_key = os.environ.get("LOOM_LLM_API_KEY") or None
+        # LOOM_LLM_EXTRA_BODY: JSON opcional para parámetros específicos del proveedor,
+        # p. ej. '{"thinking_budget_tokens": 0}' para desactivar thinking en Kimi K2.5.
+        raw_extra = os.environ.get("LOOM_LLM_EXTRA_BODY", "")
+        self._extra_body: dict | None = json.loads(raw_extra) if raw_extra.strip() else None
 
     def complete_structured(
         self,
@@ -82,6 +86,8 @@ class LiteLLMClient:
             kwargs["api_base"] = self._api_base
         if self._api_key:
             kwargs["api_key"] = self._api_key
+        if self._extra_body:
+            kwargs["extra_body"] = self._extra_body
 
         last_exc: Exception | None = None
         for attempt in range(_MAX_RETRIES + 1):

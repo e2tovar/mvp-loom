@@ -106,7 +106,14 @@ class LiteLLMClient:
 
             tool_calls = response.choices[0].message.tool_calls
             if not tool_calls:
-                raise ExtractionError("El LLM no devolvió ninguna tool call.")
+                last_exc = ExtractionError("El LLM no devolvió ninguna tool call.")
+                if attempt < _MAX_RETRIES:
+                    log.warning(
+                        "Reintentando llamada LLM (intento %d): respuesta sin tool call.",
+                        attempt + 1,
+                    )
+                    continue
+                raise last_exc
 
             raw = tool_calls[0].function.arguments
             try:

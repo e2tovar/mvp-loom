@@ -69,6 +69,30 @@ def test_raises_extraction_error_after_retries_exhausted(client, monkeypatch):
             client.complete_structured("sys", "user", _SimpleSchema)
 
 
+def test_retries_once_when_no_tool_call_then_succeeds(client, monkeypatch):
+    """Si la primera respuesta no trae tool call, reintenta una vez y acepta la segunda."""
+    no_tool_response = _make_response({"name": "Hamlet", "value": 42})
+    no_tool_response.choices[0].message.tool_calls = None
+    good_response = _make_response({"name": "Hamlet", "value": 42})
+    with patch("backend.llm.litellm_client.litellm.completion") as mock_completion:
+        mock_completion.side_effect = [no_tool_response, good_response]
+        result = client.complete_structured("sys", "user", _SimpleSchema)
+    assert result.name == "Hamlet"
+    assert result.value == 42
+    assert mock_completion.call_count == 2
+
+
+def test_raises_after_retries_when_no_tool_call_persists(client, monkeypatch):
+    """Si ninguna respuesta trae tool call, se agota el reintento y se lanza ExtractionError."""
+    no_tool_response = _make_response({"name": "Hamlet", "value": 42})
+    no_tool_response.choices[0].message.tool_calls = []
+    with patch("backend.llm.litellm_client.litellm.completion") as mock_completion:
+        mock_completion.return_value = no_tool_response
+        with pytest.raises(ExtractionError):
+            client.complete_structured("sys", "user", _SimpleSchema)
+    assert mock_completion.call_count == 2
+
+
 def test_raises_llm_unavailable_without_model(monkeypatch):
     """Sin LOOM_LLM_MODEL configurado se lanza LLMUnavailableError al construir."""
     monkeypatch.delenv("LOOM_LLM_MODEL", raising=False)

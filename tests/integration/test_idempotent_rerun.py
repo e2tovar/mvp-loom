@@ -37,7 +37,7 @@ def _build_ms() -> Manuscript:
         char_count=len(SCENE_TEXT),
         start_offset=0,
         end_offset=len(SCENE_TEXT),
-        boundary_reason="manual",
+        boundary_reason="separator",
         snippet=SCENE_TEXT,
     )
     chapter = Chapter(

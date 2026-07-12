@@ -71,7 +71,7 @@ def _build_manuscript() -> Manuscript:
         char_count=len(SCENE_TEXT),
         start_offset=0,
         end_offset=len(SCENE_TEXT),
-        boundary_reason="manual",
+        boundary_reason="separator",
         snippet=SCENE_TEXT[:80],
     )
     chapter = Chapter(
@@ -102,14 +102,18 @@ def _build_manuscript() -> Manuscript:
 
 @pytest.fixture(autouse=True)
 def clean_m1_nodes(neo4j_session):
-    """Limpia nodos de M1 antes/después de cada test."""
-    neo4j_session.run("MATCH (n:Character) DETACH DELETE n")
-    neo4j_session.run("MATCH (n:Mention) DETACH DELETE n")
-    neo4j_session.run("MATCH (n:MergeCandidate) DETACH DELETE n")
+    """Limpia nodos de M1 del manuscrito de prueba antes/después de cada test.
+
+    Scoped por manuscript_id (como en test_idempotent_rerun / test_merge_review_flow):
+    un DELETE sin scope borraría la extracción de obras reales en la BD de desarrollo.
+    """
+    _wipe = (
+        "MATCH (n) WHERE n.manuscript_id = $mid "
+        "AND (n:Character OR n:Mention OR n:MergeCandidate) DETACH DELETE n"
+    )
+    neo4j_session.run(_wipe, mid=MANUSCRIPT_ID)
     yield
-    neo4j_session.run("MATCH (n:Character) DETACH DELETE n")
-    neo4j_session.run("MATCH (n:Mention) DETACH DELETE n")
-    neo4j_session.run("MATCH (n:MergeCandidate) DETACH DELETE n")
+    neo4j_session.run(_wipe, mid=MANUSCRIPT_ID)
 
 
 @pytest.fixture

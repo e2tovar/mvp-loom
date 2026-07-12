@@ -64,6 +64,25 @@ def _has_extraction(manuscript_id: str) -> bool:
         return False
 
 
+def _has_raw_layer(manuscript_id: str) -> bool:
+    """True si la capa cruda (Manuscript/Chapter/Scene) sigue presente.
+
+    Los tests de integración (`tests/conftest.py::neo4j_session`) borran
+    Manuscript/Chapter/Scene globalmente pero dejan Character/Mention intactos.
+    Si eso ocurrió antes de este gate, `_has_extraction` seguiría dando True
+    (hay Character) pero no hay coordenadas de escena contra las que alinear
+    menciones — correr el harness en ese estado daría B³=0.0 falso.
+    """
+    try:
+        from backend.graph import characters as char_graph
+        from backend.graph.client import session as db_session
+
+        with db_session() as sess:
+            return bool(char_graph.get_scene_coordinates(sess, manuscript_id))
+    except Exception:
+        return False
+
+
 @pytest.mark.eval
 @pytest.mark.parametrize("work", EVAL_WORKS)
 def test_characters_gate(work: str) -> None:
@@ -81,6 +100,8 @@ def test_characters_gate(work: str) -> None:
             f"Extracción no ejecutada para '{work}'. "
             f"Ejecuta: python -m backend.extraction.run {manuscript_id}"
         )
+    if not _has_raw_layer(manuscript_id):
+        pytest.skip("Capa cruda destruida (wipe de la suite de integración) — re-ingerir la obra")
 
     from eval.characters.runner import run_eval
 

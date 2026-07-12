@@ -86,6 +86,37 @@ def test_b3_null_when_gold_not_annotated(monkeypatch):
     assert result["passed"] is False
 
 
+def test_validate_system_output_raises_when_char_list_empty():
+    with pytest.raises(RuntimeError, match="Sin extracción o capa cruda ausente"):
+        runner._validate_system_output([], {"m:s:1": "c1/s0"}, "mid-x")
+
+
+def test_validate_system_output_raises_when_scene_coords_empty_but_chars_present():
+    """Caso real: conftest.py borra Manuscript/Chapter/Scene pero deja Character/Mention."""
+    with pytest.raises(RuntimeError, match="Sin extracción o capa cruda ausente"):
+        runner._validate_system_output([{"character_id": "m:ch:1"}], {}, "mid-x")
+
+
+def test_validate_system_output_ok_when_both_present():
+    runner._validate_system_output(
+        [{"character_id": "m:ch:1"}], {"m:s:1": "c1/s0"}, "mid-x"
+    )  # no debe lanzar
+
+
+def test_run_eval_exits_when_system_output_missing(monkeypatch):
+    """Si el grafo no tiene datos utilizables, run_eval debe sys.exit(1), no dar 0.0."""
+    monkeypatch.setattr(runner, "_load_gold", lambda work: GOLD_ANNOTATED)
+
+    def _raise(mid):
+        raise RuntimeError(f"Sin extracción o capa cruda ausente para manuscript_id={mid!r}")
+
+    monkeypatch.setattr(runner, "_load_system_output", _raise)
+
+    with pytest.raises(SystemExit) as exc_info:
+        runner.run_eval("obra-test")
+    assert exc_info.value.code == 1
+
+
 def test_b3_null_does_not_block_when_detection_ok(monkeypatch):
     gold = {
         "work": "obra-test",

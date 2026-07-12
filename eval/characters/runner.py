@@ -38,6 +38,26 @@ def _load_gold(work: str) -> dict:
     return json.loads(path.read_text(encoding="utf-8"))
 
 
+def _validate_system_output(
+    char_list: list[dict],
+    scene_coords: dict[str, str],
+    manuscript_id: str,
+) -> None:
+    """Guarda contra falso B³=0.0: sin extracción o sin capa cruda, no se mide nada.
+
+    Si `char_list` está vacío (sin extracción) o `scene_coords` está vacío mientras
+    `char_list` no lo está (capa cruda destruida — p.ej. wipe de la suite de
+    integración dejando Character/Mention huérfanos), no hay base real para
+    calcular métricas. Medir en ese estado produciría B³=0.0 inventado en vez de
+    reflejar "no medido" (Principio: métrica no medida = null/skip, jamás valor
+    inventado).
+    """
+    if not char_list or not scene_coords:
+        raise RuntimeError(
+            f"Sin extracción o capa cruda ausente para manuscript_id={manuscript_id!r}"
+        )
+
+
 def _load_system_output(
     manuscript_id: str,
 ) -> tuple[list[dict], list[list[str]], list[tuple[dict, dict]]]:
@@ -53,6 +73,7 @@ def _load_system_output(
     with db_session() as sess:
         char_list = char_graph.get_characters_list(sess, manuscript_id)
         scene_coords = char_graph.get_scene_coordinates(sess, manuscript_id)
+        _validate_system_output(char_list, scene_coords, manuscript_id)
         per_char_mentions = []
         for c in char_list:
             detail = char_graph.get_character_detail(sess, manuscript_id, c["character_id"])

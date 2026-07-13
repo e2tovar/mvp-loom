@@ -174,6 +174,8 @@ def run_pipeline(
         )
 
         scene_res = SceneResult(scene_id=scene_id)
+        present_canonicals: set[str] = set()
+        mentioned_canonicals: set[str] = set()
 
         # Cache lookup (T033 integra la cache aquí)
         extraction: SceneExtraction | None = None
@@ -213,6 +215,9 @@ def run_pipeline(
                 continue
 
             canonical = res.canonical_name if res.merged_into is None else res.merged_into
+
+            if candidate.is_present_in_scene:
+                present_canonicals.add(canonical)
 
             # Registrar en el registry (si es entidad nueva o alias actualizado)
             if res.merged_into is None:
@@ -283,20 +288,20 @@ def run_pipeline(
                 )
 
             scene_res.mentions_written += 1
+            mentioned_canonicals.add(canonical)
 
-        # APPEARS_IN por escena (si hubo menciones)
-        if scene_res.mentions_written > 0:
-            for canonical in set(scene_res.characters_seen):
-                cid = char_graph.character_id(manuscript_id, canonical)
-                with db_session() as sess:
-                    char_graph.upsert_appears_in(
-                        sess=sess,
-                        character_id_val=cid,
-                        scene_id=scene_id,
-                        kind="present",
-                        mention_count_in_scene=scene_res.mentions_written,
-                        first_mention_id="",
-                    )
+        # APPEARS_IN para todo personaje con mención en la escena — no solo los
+        # nuevos: un personaje conocido que reaparece también gana aparición.
+        for canonical in mentioned_canonicals | present_canonicals:
+            kind = "present" if canonical in present_canonicals else "mentioned"
+            cid = char_graph.character_id(manuscript_id, canonical)
+            with db_session() as sess:
+                char_graph.upsert_appears_in(
+                    sess=sess,
+                    character_id_val=cid,
+                    scene_id=scene_id,
+                    kind=kind,
+                )
 
         result.total_mentions += scene_res.mentions_written
         result.total_merge_candidates += len(scene_res.merge_proposals)
@@ -310,6 +315,9 @@ def run_pipeline(
             len(scene_res.characters_seen),
             scene_res.cache_hit,
         )
+
+    with db_session() as sess:
+        char_graph.recompute_counters(sess, manuscript_id)
 
     result.total_characters = len(registry)
     return result

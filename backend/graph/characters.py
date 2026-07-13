@@ -125,11 +125,6 @@ def upsert_mention(
         quote=quote,
         cid=character_id_val,
     )
-    # Incrementar contadores
-    sess.run(
-        "MATCH (c:Character {character_id: $cid}) SET c.mention_count = c.mention_count + 1",
-        cid=character_id_val,
-    )
     return mid
 
 
@@ -138,29 +133,72 @@ def upsert_appears_in(
     character_id_val: str,
     scene_id: str,
     kind: str,
-    mention_count_in_scene: int,
-    first_mention_id: str,
+    first_mention_id: str = "",
 ) -> None:
-    """MERGE idempotente de relación APPEARS_IN entre Character y Scene."""
+    """MERGE idempotente de APPEARS_IN. kind solo mejora (mentioned → present).
+
+    Los contadores NO se tocan aquí: los deriva recompute_counters() al final
+    del pipeline (idempotencia, INV-M1-1).
+    """
     sess.run(
         """
         MATCH (c:Character {character_id: $cid})
         MATCH (s:Scene {scene_id: $scene_id})
         MERGE (c)-[r:APPEARS_IN]->(s)
         ON CREATE SET
-            r.kind              = $kind,
-            r.mention_count     = $mention_count_in_scene,
-            r.first_mention_id  = $first_mention_id
+            r.kind             = $kind,
+            r.first_mention_id = $first_mention_id
         ON MATCH SET
-            r.mention_count     = r.mention_count + $mention_count_in_scene
-        WITH c
-        SET c.appearance_count = c.appearance_count + 1
+            r.kind = CASE
+                WHEN r.kind = 'present' OR $kind = 'present' THEN 'present'
+                ELSE r.kind
+            END
         """,
         cid=character_id_val,
         scene_id=scene_id,
         kind=kind,
-        mention_count_in_scene=mention_count_in_scene,
         first_mention_id=first_mention_id,
+    )
+
+
+def recompute_counters(sess: Session, manuscript_id: str) -> None:
+    """Deriva todos los contadores del grafo (idempotente por construcción).
+
+    Reemplaza los incrementos in-place que inflaban mention_count ~11x en
+    re-runs (Elizabeth: 2961 acumulado vs 273 real).
+    """
+    sess.run(
+        """
+        MATCH (c:Character {manuscript_id: $mid})
+        OPTIONAL MATCH (c)-[:HAS_MENTION]->(mn:Mention)
+        WITH c, count(mn) AS mc
+        SET c.mention_count = mc
+        """,
+        mid=manuscript_id,
+    )
+    sess.run(
+        """
+        MATCH (c:Character {manuscript_id: $mid})
+        OPTIONAL MATCH (c)-[:APPEARS_IN]->(s:Scene)
+        WITH c, count(s) AS ac
+        SET c.appearance_count = ac
+        """,
+        mid=manuscript_id,
+    )
+    sess.run(
+        """
+        MATCH (c:Character {manuscript_id: $mid})-[r:APPEARS_IN]->(s:Scene)
+        OPTIONAL MATCH (c)-[:HAS_MENTION]->(mn:Mention)
+        WHERE mn.scene_id = s.scene_id
+        WITH r, count(mn) AS rmc, collect(mn) AS mns
+        SET r.mention_count = rmc
+        WITH r, mns
+        UNWIND CASE WHEN size(mns) = 0 THEN [null] ELSE mns END AS mn
+        WITH r, mn ORDER BY mn.start_offset ASC
+        WITH r, collect(mn.mention_id)[0] AS first_id
+        SET r.first_mention_id = coalesce(first_id, r.first_mention_id)
+        """,
+        mid=manuscript_id,
     )
 
 

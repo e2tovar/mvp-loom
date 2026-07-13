@@ -317,3 +317,79 @@ def test_character_props_monotonic(neo4j_session):
     neo4j_session.run(
         "MATCH (n) WHERE n.manuscript_id = $mid DETACH DELETE n", mid=mid
     )
+
+
+@pytest.mark.integration
+def test_known_character_gains_appearance_and_counters(neo4j_session):
+    """Un personaje conocido que reaparece gana APPEARS_IN; contadores derivados, no acumulados."""
+    from backend.graph import characters as char_graph
+
+    mid = "test-appears-counters"
+    neo4j_session.run(
+        "MATCH (n) WHERE n.manuscript_id = $mid DETACH DELETE n", mid=mid
+    )
+    neo4j_session.run("MERGE (:Manuscript {manuscript_id: $mid})", mid=mid)
+    for sid in ["ta:s1", "ta:s2"]:
+        neo4j_session.run(
+            "MERGE (s:Scene {scene_id: $sid}) SET s.manuscript_id = $mid",
+            sid=sid, mid=mid,
+        )
+
+    cid = char_graph.upsert_character(
+        neo4j_session, mid, "Ana", [], "secondary", False, "ta:s1"
+    )
+    # Dos menciones en s1, una en s2
+    char_graph.upsert_mention(neo4j_session, "ta:s1", mid, cid, "Ana", "name", 0, 3, "Ana entró.")
+    char_graph.upsert_mention(neo4j_session, "ta:s1", mid, cid, "Anita", "alias", 10, 15, "…Anita…")
+    char_graph.upsert_mention(neo4j_session, "ta:s2", mid, cid, "Ana", "name", 5, 8, "…Ana…")
+    char_graph.upsert_appears_in(neo4j_session, cid, "ta:s1", "present")
+    char_graph.upsert_appears_in(neo4j_session, cid, "ta:s2", "mentioned")
+
+    # Recompute dos veces: idempotente
+    char_graph.recompute_counters(neo4j_session, mid)
+    char_graph.recompute_counters(neo4j_session, mid)
+
+    rec = neo4j_session.run(
+        "MATCH (c:Character {character_id: $cid}) "
+        "RETURN c.mention_count AS mc, c.appearance_count AS ac", cid=cid,
+    ).single()
+    assert rec["mc"] == 3
+    assert rec["ac"] == 2
+
+    rel = neo4j_session.run(
+        "MATCH (c:Character {character_id: $cid})-[r:APPEARS_IN]->(s:Scene {scene_id: 'ta:s1'}) "
+        "RETURN r.mention_count AS rmc, r.kind AS kind, r.first_mention_id AS fm", cid=cid,
+    ).single()
+    assert rel["rmc"] == 2          # menciones DEL personaje en ESA escena
+    assert rel["kind"] == "present"
+    assert rel["fm"]                 # primera mención por offset
+
+    neo4j_session.run(
+        "MATCH (n) WHERE n.manuscript_id = $mid DETACH DELETE n", mid=mid
+    )
+    neo4j_session.run("MATCH (s:Scene) WHERE s.scene_id STARTS WITH 'ta:' DETACH DELETE s")
+
+
+@pytest.mark.integration
+def test_appears_in_kind_upgrades_to_present(neo4j_session):
+    """kind solo mejora: mentioned → present, nunca al revés."""
+    from backend.graph import characters as char_graph
+
+    mid = "test-kind-upgrade"
+    neo4j_session.run("MATCH (n) WHERE n.manuscript_id = $mid DETACH DELETE n", mid=mid)
+    neo4j_session.run("MERGE (:Manuscript {manuscript_id: $mid})", mid=mid)
+    neo4j_session.run("MERGE (s:Scene {scene_id: 'tk:s1'}) SET s.manuscript_id = $mid", mid=mid)
+
+    cid = char_graph.upsert_character(neo4j_session, mid, "Bo", [], "minor", False, "tk:s1")
+    char_graph.upsert_appears_in(neo4j_session, cid, "tk:s1", "mentioned")
+    char_graph.upsert_appears_in(neo4j_session, cid, "tk:s1", "present")
+    char_graph.upsert_appears_in(neo4j_session, cid, "tk:s1", "mentioned")
+
+    rec = neo4j_session.run(
+        "MATCH (:Character {character_id: $cid})-[r:APPEARS_IN]->() RETURN r.kind AS k",
+        cid=cid,
+    ).single()
+    assert rec["k"] == "present"
+
+    neo4j_session.run("MATCH (n) WHERE n.manuscript_id = $mid DETACH DELETE n", mid=mid)
+    neo4j_session.run("MATCH (s:Scene {scene_id: 'tk:s1'}) DETACH DELETE s")

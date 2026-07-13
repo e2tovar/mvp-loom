@@ -279,3 +279,41 @@ def test_api_unknown_manuscript_returns_404(api_client):
     """GET /characters con manuscrito inexistente devuelve 404."""
     resp = api_client.get("/manuscripts/nonexistent-id/characters")
     assert resp.status_code == 404
+
+
+@pytest.mark.integration
+def test_character_props_monotonic(neo4j_session):
+    """is_mentioned_only nunca vuelve a true; role no se degrada a unknown."""
+    from backend.graph import characters as char_graph
+
+    mid = "test-monotonic-props"
+    neo4j_session.run(
+        "MATCH (n) WHERE n.manuscript_id = $mid "
+        "AND (n:Character OR n:Mention OR n:MergeCandidate) DETACH DELETE n",
+        mid=mid,
+    )
+    neo4j_session.run("MERGE (:Manuscript {manuscript_id: $mid})", mid=mid)
+
+    # Aparece presente y con rol
+    char_graph.upsert_character(
+        neo4j_session, mid, "Elizabeth Bennet", ["Lizzy"],
+        role="protagonist", is_mentioned_only=False, first_scene_id="s1",
+    )
+    # Re-aparece como solo-mencionada y con rol unknown (candidato tardío)
+    char_graph.upsert_character(
+        neo4j_session, mid, "Elizabeth Bennet", ["Lizzy"],
+        role="unknown", is_mentioned_only=True, first_scene_id="s9",
+    )
+
+    rec = neo4j_session.run(
+        "MATCH (c:Character {manuscript_id: $mid, canonical_name: 'Elizabeth Bennet'}) "
+        "RETURN c.is_mentioned_only AS m, c.role AS r, c.first_scene_id AS f",
+        mid=mid,
+    ).single()
+    assert rec["m"] is False          # no se degrada
+    assert rec["r"] == "protagonist"  # no se pisa con unknown
+    assert rec["f"] == "s1"           # first_scene_id es ON CREATE only
+
+    neo4j_session.run(
+        "MATCH (n) WHERE n.manuscript_id = $mid DETACH DELETE n", mid=mid
+    )

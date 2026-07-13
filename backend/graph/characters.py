@@ -67,8 +67,8 @@ def upsert_character(
             c.mention_count      = 0
         ON MATCH SET
             c.aliases            = $aliases,
-            c.role               = $role,
-            c.is_mentioned_only  = $is_mentioned_only
+            c.role               = CASE WHEN c.role = 'unknown' THEN $role ELSE c.role END,
+            c.is_mentioned_only  = c.is_mentioned_only AND $is_mentioned_only
         WITH c
         MATCH (m:Manuscript {manuscript_id: $manuscript_id})
         MERGE (m)-[:HAS_CHARACTER]->(c)

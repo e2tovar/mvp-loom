@@ -7,9 +7,11 @@ from __future__ import annotations
 
 import json
 
+import pytest
+
 from backend.extraction.pipeline import _find_offset
 from backend.extraction.prompts import SYSTEM_PROMPT, build_user_prompt
-from backend.extraction.registry import EntityRegistry
+from backend.extraction.registry import EntityRegistry, is_valid_alias
 from backend.extraction.schemas import MentionOut
 
 # ── Verificación de surfaces/offsets ─────────────────────────────────────────
@@ -122,3 +124,38 @@ def test_registry_merge_into():
     reg.merge_into("Ana", "Annie")
     assert len(reg) == 1
     assert reg.find("Annie").canonical_name == "Ana"
+
+
+@pytest.mark.parametrize(
+    "alias",
+    ["she", "her", "his sister", "her friend", "mamma", "Mamma", "your mother",
+     "the mother", "their mother", "ella", "su madre", "my cousin"],
+)
+def test_invalid_alias_rejected(alias):
+    assert is_valid_alias(alias) is False
+
+
+@pytest.mark.parametrize(
+    "alias",
+    ["Lizzy", "Miss Lucas", "Georgiana", "Eliza", "William Collins", "Kitty"],
+)
+def test_valid_alias_kept(alias):
+    assert is_valid_alias(alias) is True
+
+
+def test_registry_does_not_index_pronoun_aliases():
+    """Regresión P&P: 'she' como alias de Darcy fusionaba a cualquiera con 'she'."""
+    reg = EntityRegistry()
+    reg.add("Mr. Darcy", ["she", "Georgiana"], "unknown")
+    assert reg.find("she") is None
+    assert reg.find("Georgiana") is not None
+
+
+def test_merge_into_filters_invalid_aliases():
+    reg = EntityRegistry()
+    reg.add("Mr. Bennet", [], "secondary")
+    reg.add("Mrs. Bennet", ["mamma", "her mother"], "secondary")
+    reg.merge_into("Mr. Bennet", "Mrs. Bennet")
+    entry = reg.find("Mr. Bennet")
+    assert "mamma" not in entry.aliases
+    assert "her mother" not in entry.aliases

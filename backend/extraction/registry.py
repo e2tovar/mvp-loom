@@ -17,6 +17,53 @@ _HONORIFIC = re.compile(
     re.IGNORECASE,
 )
 
+_PRONOUNS = frozenset({
+    "she", "he", "her", "him", "his", "hers", "they", "them", "their", "theirs",
+    "it", "its", "i", "you", "we", "me", "us", "myself", "herself", "himself",
+    "ella", "el", "le", "la", "lo", "les", "las", "los", "su", "sus", "yo",
+    "tu", "usted", "ustedes", "nosotros", "nosotras", "ellos", "ellas",
+})
+
+_GENERIC_HEAD = frozenset({
+    "mother", "father", "mamma", "mama", "papa", "mom", "dad", "parents",
+    "sister", "brother", "aunt", "uncle", "cousin", "niece", "nephew",
+    "wife", "husband", "son", "daughter", "child", "children", "family",
+    "friend", "friends", "neighbour", "neighbor",
+    "madre", "padre", "mama", "papa", "hermana", "hermano", "tia", "tio",
+    "prima", "primo", "esposa", "esposo", "marido", "mujer", "hija", "hijo",
+    "amiga", "amigo", "vecina", "vecino", "familia", "nina", "nino",
+})
+
+_ALIAS_PREFIX = re.compile(
+    r"^(my|your|her|his|their|our|the|that|this|"
+    r"mi|tu|su|nuestra|nuestro|la|el|esa|ese|esta|este)\s+",
+    re.IGNORECASE,
+)
+
+
+def _ascii_fold(text: str) -> str:
+    nfkd = unicodedata.normalize("NFKD", text)
+    return nfkd.encode("ascii", "ignore").decode("ascii").casefold().strip()
+
+
+def is_valid_alias(alias: str) -> bool:
+    """Un alias válido es un nombre propio, no un pronombre ni un parentesco.
+
+    Rechaza: pronombres ("she", "ella"), y descriptores relacionales con o sin
+    posesivo/artículo ("her friend", "your mother", "mamma", "la madre").
+    Un error del LLM aquí envenena el nivel 1 de la cascada para siempre
+    (auto-merge determinista por alias) — de ahí el filtro duro.
+    """
+    norm = _ascii_fold(alias)
+    if not norm:
+        return False
+    if norm in _PRONOUNS:
+        return False
+    head = _ALIAS_PREFIX.sub("", norm).strip()
+    if head in _GENERIC_HEAD:
+        return False
+    return True
+
 
 def _split(name: str) -> tuple[str, str]:
     """Separa un nombre en (honorífico_norm, base_norm).
@@ -80,6 +127,7 @@ class EntityRegistry:
 
     def add(self, canonical_name: str, aliases: list[str], role: str) -> RegistryEntry:
         """Registra una entidad nueva o actualiza aliases/rol de una existente."""
+        aliases = [a for a in aliases if is_valid_alias(a)]
         canonical = self._lookup(canonical_name)
         if canonical is not None:
             entry = self._entries[canonical]
@@ -106,7 +154,8 @@ class EntityRegistry:
         entry_b = self._entries.get(canonical_b)
         if entry_a is None or entry_b is None:
             return
-        merged_aliases = list({*entry_a.aliases, canonical_b, *entry_b.aliases} - {canonical_a})
+        aliases_b = [a for a in entry_b.aliases if is_valid_alias(a)]
+        merged_aliases = list({*entry_a.aliases, canonical_b, *aliases_b} - {canonical_a})
         self._entries[canonical_a] = RegistryEntry(
             canonical_name=canonical_a,
             aliases=merged_aliases,
@@ -115,7 +164,7 @@ class EntityRegistry:
         del self._entries[canonical_b]
         # canonical_b y sus aliases pasan a apuntar a canonical_a en el índice.
         self._register_key(canonical_b, canonical_a)
-        for alias in entry_b.aliases:
+        for alias in aliases_b:
             self._register_key(alias, canonical_a)
 
     # ── Lectura ───────────────────────────────────────────────────────────────

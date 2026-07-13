@@ -55,6 +55,50 @@ def test_normalize_accents():
     assert result.merged_into == "Inés"
 
 
+# ── Honoríficos distintos NO fusionan (bug de cascada P&P) ────────────────────
+
+
+def test_different_honorifics_same_surname_not_merged():
+    """Mr. X y Mrs. X comparten apellido pero distinto honorífico → NO auto-merge.
+
+    Caso real P&P: `Mrs. Bennet` fue absorbida en `Mr. Bennet` porque ambos
+    normalizaban a "bennet". El honorífico es lo único que los distingue.
+    """
+    reg = _registry("Mr. Bennet")
+    result = resolve_candidate(_candidate("Mrs. Bennet"), reg, llm_client=None)
+    assert result.merged_into is None
+    assert result.canonical_name == "Mrs. Bennet"
+
+
+def test_conflicting_honorific_alias_not_merged():
+    """Miss Lucas (alias de Charlotte) y Lady Lucas → distinto honorífico → separados.
+
+    Caso real P&P: `Charlotte Lucas` (alias "Miss Lucas") fue absorbida en
+    `Lady Lucas` porque "miss lucas" y "lady lucas" normalizaban a "lucas".
+    """
+    reg = EntityRegistry()
+    reg.add("Charlotte Lucas", ["Miss Lucas"], "secondary")
+    result = resolve_candidate(_candidate("Lady Lucas"), reg, llm_client=None)
+    assert result.merged_into is None
+    assert result.canonical_name == "Lady Lucas"
+
+
+def test_registry_keeps_distinct_honorifics_separate():
+    """El registro no colapsa dos honoríficos distintos sobre el mismo apellido."""
+    reg = EntityRegistry()
+    reg.add("Mr. Bennet", [], "secondary")
+    reg.add("Mrs. Bennet", [], "secondary")
+    assert len(reg) == 2
+
+
+def test_bare_name_still_matches_single_honorific_form():
+    """Un apellido sin honorífico sí resuelve a la única forma con honorífico (Darcy)."""
+    reg = EntityRegistry()
+    reg.add("Mr. Darcy", [], "protagonist")
+    result = resolve_candidate(_candidate("Darcy"), reg, llm_client=None)
+    assert result.merged_into == "Mr. Darcy"
+
+
 # ── Auto-merge determinista ───────────────────────────────────────────────────
 
 

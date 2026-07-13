@@ -5,6 +5,41 @@ resolverse antes de dar una métrica por válida. Cada entrada cita su ubicació
 
 ---
 
+## M1 · La cascada de resolución sobre-fusiona personajes por apellido
+
+**Estado:** ✅ resuelto 2026-07-13 · detectado 2026-07-13
+
+`EntityRegistry._normalize` eliminaba los honoríficos de forma incondicional, así que
+dos personajes que difieren **solo** por el honorífico sobre un apellido compartido
+colapsaban a la misma clave de índice: `Mr. Bennet`/`Mrs. Bennet` → `"bennet"`;
+`Lady Lucas`/`Miss Lucas` (alias de `Charlotte Lucas`) → `"lucas"`. Esa colisión
+disparaba la ruta **determinista de nivel 1** (`registry.find` en `resolve_candidate`,
+y la rama de colisión en `registry.add`): fusión con confianza 1.0, sin LLM ni cola.
+Como el `merged_into` canónico alimenta el `character_id`, la segunda entidad nunca
+obtenía nodo propio → absorción silenciosa.
+
+El honorífico es descartable solo para emparejar una forma sin título contra su forma
+con título (`Darcy` ↔ `Mr. Darcy`, misma persona). **Dos honoríficos distintos** sobre
+la misma base son personas distintas.
+
+**Resolución:** índice honorífico-aware en `backend/extraction/registry.py`. El índice
+pasa de `dict[str, str]` a `dict[base, dict[honorífico, canonical]]`. La resolución:
+honorífico exacto → esa entidad; forma con título contra la única forma sin título de
+esa base → misma entidad; base sin título con varias formas con título distintas →
+ambiguo, sin auto-merge. Cubierto por tests deterministas en
+`tests/unit/test_resolution.py` (`test_different_honorifics_same_surname_not_merged`,
+`test_conflicting_honorific_alias_not_merged`,
+`test_registry_keeps_distinct_honorifics_separate`,
+`test_bare_name_still_matches_single_honorific_form`). El eval gate sobre las obras
+crafted sigue verde (F1 ≥ 0.90, B³ ≥ 0.85, `silent_bad_merges = 0`).
+
+**Pendiente:** re-correr `pride-and-prejudice.txt` completo para reconfirmar sobre
+datos reales (coste de cuota LLM). El nivel 2 (auto-merge del LLM) no se tocó: si un
+modelo juzgara `Mr. X` y `Mrs. X` como el mismo personaje con confianza ≥ 0.9 seguiría
+fusionando, pero ya no de forma silenciosa por normalización.
+
+---
+
 ## M1 · La resolución B³ no está realmente cableada (stub)
 
 **Estado:** ✅ resuelto 2026-07-11 · detectado 2026-06-15
@@ -64,6 +99,13 @@ este blind spot exista. Arreglarlo de verdad requiere procedencia a nivel de men
 tiene ningún representante en pred porque fue tragado por Y") — es un rediseño de la
 métrica, no un parche puntual.
 
+**Actualización 2026-07-13:** el *disparador* concreto de esta absorción (la cascada
+que fusionaba `Mrs. Bennet` dentro de `Mr. Bennet`) está **resuelto** — ver la entrada
+"cascada de resolución sobre-fusiona por apellido" abajo. El blind spot de la métrica
+sigue siendo **deuda**: la absorción ya no ocurre por esa vía, pero la métrica seguiría
+sin detectarla si otra ruta (p. ej. un auto-merge del LLM en nivel 2) la reintrodujera.
+El rediseño con procedencia a nivel de mención queda diferido.
+
 ---
 
 ## M1 · Edge de `pair_known` en `count_silent_bad_merges`: infra-conteo posible
@@ -106,7 +148,10 @@ Primera corrida real end-to-end sobre `pride-and-prejudice.txt` (2026-07-12, git
   fusionada dentro de `Mr. Bennet` (ver entrada de `silent_bad_merges` arriba), y
   `Charlotte Lucas` fusionada dentro de `Lady Lucas` (el nodo `Lady Lucas` terminó
   con aliases `["Charlotte", "Miss Lucas"]`, propios de `Charlotte Lucas` en el
-  gold).
+  gold). **Resueltos 2026-07-13** — ver la entrada "cascada de resolución
+  sobre-fusiona por apellido" abajo. Falta re-correr P&P completo para reconfirmar
+  sobre datos reales (coste de cuota LLM); el mecanismo exacto está cubierto por
+  tests unitarios deterministas.
 - **Entidades sin nombre propio** emitidas por el extractor y presentes en el grafo:
   p. ej. `"the waiter"` y `"Pemberley"` (esta última es un lugar, no un personaje) —
   bajan precision sin ser errores de resolución.

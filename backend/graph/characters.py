@@ -196,14 +196,22 @@ def get_characters_list(
         WHERE {where}
         OPTIONAL MATCH (c)-[:APPEARS_IN]->(s:Scene)
         WITH c, min(s.order_narrative_global) AS first_order
-        OPTIONAL MATCH (c)-[:APPEARS_IN]->(fs:Scene)
+        OPTIONAL MATCH (c)-[r:APPEARS_IN]->(fs:Scene)
         WHERE fs.order_narrative_global = first_order
+        OPTIONAL MATCH (primary_mn:Mention {{mention_id: r.first_mention_id}})
+        WITH c, first_order, fs, primary_mn
+        OPTIONAL MATCH (c)-[:HAS_MENTION]->(fallback_mn:Mention)
+        WHERE fallback_mn.scene_id = fs.scene_id
+        WITH c, first_order, fs, primary_mn, fallback_mn
+        ORDER BY fallback_mn.start_offset ASC
+        WITH c, first_order, fs, primary_mn, collect(fallback_mn)[0] AS fallback_first
         RETURN c {{
             .character_id, .canonical_name, .aliases, .role,
             .is_mentioned_only, .appearance_count, .mention_count,
             .first_scene_id
         }}, fs.scene_id AS first_scene_id_actual,
-           first_order AS chapter_order
+           first_order AS chapter_order,
+           coalesce(primary_mn.quote, fallback_first.quote) AS first_quote
         ORDER BY {order_clause}
         """,
         **params,
@@ -214,7 +222,7 @@ def get_characters_list(
         char["first_appearance"] = {
             "scene_id": rec["first_scene_id_actual"],
             "chapter_order": rec["chapter_order"],
-            "quote": None,
+            "quote": rec["first_quote"],
         }
         rows.append(char)
     return rows

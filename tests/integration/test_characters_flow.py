@@ -152,6 +152,24 @@ def test_pipeline_writes_characters_and_mentions(neo4j_session, manuscript_in_gr
 
 
 @pytest.mark.integration
+def test_first_appearance_quote_populated(neo4j_session, manuscript_in_graph, fake_llm):
+    """contracts/api.md:60 — first_appearance.quote no debe quedar hardcodeado a None."""
+    from backend.extraction.pipeline import run_pipeline
+
+    run_pipeline(MANUSCRIPT_ID, llm_client=fake_llm)
+
+    with db_session() as sess:
+        chars = char_graph.get_characters_list(sess, MANUSCRIPT_ID)
+
+    assert chars, "Se esperaban personajes tras la extracción"
+    for char in chars:
+        quote = char["first_appearance"]["quote"]
+        assert quote is not None and len(quote) > 0, (
+            f"{char['canonical_name']}: first_appearance.quote sigue en None"
+        )
+
+
+@pytest.mark.integration
 def test_inv_m1_2_provenance_verifiable(neo4j_session, manuscript_in_graph, fake_llm):
     """INV-M1-2: cada Mention tiene scene_id, start_offset, end_offset y quote."""
     from backend.extraction.pipeline import run_pipeline

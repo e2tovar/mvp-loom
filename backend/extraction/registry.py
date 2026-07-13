@@ -106,10 +106,14 @@ class EntityRegistry:
 
         - Honorífico exacto (o base sin honorífico exacta) → esa entidad.
         - Nombre con honorífico + existe la forma sin título de esa base → misma
-          entidad (`Mr. Darcy` encuentra `Darcy`).
+          entidad (`Mr. Darcy` encuentra `Darcy`) SOLO si no hay otro honorífico
+          explícito distinto en el bucket. Si lo hay (p. ej. el bucket ya tiene
+          `"mr"`), la forma desnuda pertenece a esa persona titulada y matchear un
+          honorífico distinto (`Miss Darcy`) sería fusionar hermanos → se difiere
+          al nivel 2.
         - Nombre sin honorífico + una única forma con título → esa entidad
           (`Darcy` encuentra `Mr. Darcy`). Si hay varias formas con título
-          distintas (p. ej. `Mr. Bennet` y `Mrs. Bennet`), es ambiguo → sin match.
+          distintas, es ambiguo → sin match.
         """
         hon, base = _split(name)
         buckets = self._index.get(base)
@@ -118,7 +122,9 @@ class EntityRegistry:
         if hon in buckets:
             return buckets[hon]
         if hon and "" in buckets:
-            return buckets[""]
+            if not any(h not in ("", hon) for h in buckets):
+                return buckets[""]
+            return None
         if not hon and len(buckets) == 1:
             return next(iter(buckets.values()))
         return None

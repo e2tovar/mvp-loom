@@ -192,7 +192,18 @@ def _are_similar(name_a: str, name_b: str) -> tuple[bool, bool]:
     if hon_a and hon_b and hon_a != hon_b:
         return False, False
 
-    if base_a == base_b or base_a in base_b or base_b in base_a:
+    if base_a == base_b:
+        return True, True
+    if base_a in base_b or base_b in base_a:
+        shorter, longer = (
+            (base_a, base_b) if len(base_a) < len(base_b) else (base_b, base_a)
+        )
+        longer_parts = longer.split()
+        # El más corto contenido en el más largo: misma persona si es un prefijo
+        # de nombre de pila, pero un apellido compartido (el corto == último token
+        # del largo) puede ser un pariente → cola humana, nunca auto-merge (SC-003).
+        if len(longer_parts) > 1 and shorter == longer_parts[-1]:
+            return True, False
         return True, True
 
     parts_a, parts_b = base_a.split(), base_b.split()

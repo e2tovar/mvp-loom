@@ -286,6 +286,45 @@ def test_same_surname_different_given_name_queues_not_merges():
     assert isinstance(result.merge_candidate, MergeCandidateProposal)
 
 
+# ── Over-merge honorífico vía alias desnudo (bug descubierto en Task 4) ────────
+
+
+def test_lookup_miss_does_not_match_mr_with_bare_alias():
+    """'Miss Darcy' NO debe resolver a 'Mr. Darcy' en nivel 1 aunque exista el
+    alias desnudo 'Darcy' (son hermanos: Georgiana vs Fitzwilliam)."""
+    reg = EntityRegistry()
+    reg.add("Mr. Darcy", ["Darcy"], "protagonist")
+    assert reg.find("Miss Darcy") is None
+    # las formas legítimas siguen resolviendo
+    assert reg.find("Mr. Darcy").canonical_name == "Mr. Darcy"
+    assert reg.find("Darcy").canonical_name == "Mr. Darcy"
+
+
+def test_miss_darcy_not_merged_into_mr_darcy_at_level1():
+    """Sin LLM, el candidato con alias 'Miss Darcy' no se fusiona en nivel 1."""
+    reg = EntityRegistry()
+    reg.add("Mr. Darcy", ["Darcy"], "protagonist")
+    result = resolve_candidate(
+        _candidate("Georgiana Darcy", aliases=["Miss Darcy"]), reg, llm_client=None
+    )
+    assert result.merged_into is None
+
+
+def test_given_name_plus_shared_surname_queues_not_auto_merges():
+    """'Georgiana Darcy' vs el apellido desnudo de 'Mr. Darcy': aunque el LLM
+    diga same=0.95, como máximo cola humana — jamás auto-merge silencioso (SC-003)."""
+    reg = EntityRegistry()
+    reg.add("Mr. Darcy", ["Darcy"], "protagonist")
+    result = resolve_candidate(
+        _candidate("Georgiana Darcy"),
+        reg,
+        llm_client=_fake_llm(True, 0.95),
+        scene_text="Georgiana greeted them at Pemberley.",
+    )
+    assert result.merged_into is None
+    assert isinstance(result.merge_candidate, MergeCandidateProposal)
+
+
 # ── Prompt de merge lleva contexto evidencial (no pregunta a ciegas) ─────────
 
 

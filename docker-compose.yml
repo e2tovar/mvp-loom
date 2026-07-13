@@ -6,8 +6,9 @@ services:
     image: neo4j:5.26
     container_name: loom-neo4j
     ports:
-      - "7474:7474" # HTTP (Neo4j Browser)
-      - "7687:7687" # Bolt
+      # Puertos no estándar: conviven varios Neo4j locales (7474/7687 los usa otro proyecto)
+      - "17474:7474" # HTTP (Neo4j Browser)
+      - "17687:7687" # Bolt
     environment:
       NEO4J_AUTH: "neo4j/loom-dev-password"
       NEO4J_PLUGINS: '["apoc"]'

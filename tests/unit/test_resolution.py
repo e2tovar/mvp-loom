@@ -284,3 +284,30 @@ def test_same_surname_different_given_name_queues_not_merges():
     )
     assert result.merged_into is None
     assert isinstance(result.merge_candidate, MergeCandidateProposal)
+
+
+# ── Prompt de merge lleva contexto evidencial (no pregunta a ciegas) ─────────
+
+
+def test_merge_llm_receives_context():
+    """El prompt de merge lleva aliases, roles y fragmento de escena.
+
+    Nota: sin alias "Darcy" en el registro para no chocar con el bug latente
+    (fuera de alcance de esta tarea) de `registry._lookup`, donde un alias
+    honorífico entrante ("Miss Darcy") empareja de forma determinista (nivel 1)
+    contra un alias sin honorífico ya registrado, sin comprobar compatibilidad
+    de honoríficos — eso saltaría el nivel 2 (LLM) que este test verifica.
+    """
+    reg = EntityRegistry()
+    reg.add("Fitzwilliam Darcy", [], "protagonist")
+    client = _fake_llm(False, 0.2)
+    resolve_candidate(
+        _candidate("Georgiana Darcy", aliases=["Miss Darcy"]),
+        reg,
+        llm_client=client,
+        scene_text="Georgiana, his sister, was at Pemberley.",
+    )
+    system_arg, user_arg = client.complete_structured.call_args[0][:2]
+    assert "Pemberley" in user_arg
+    assert "Miss Darcy" in user_arg
+    assert "extracción" not in system_arg.lower()  # no reutiliza el prompt de extracción

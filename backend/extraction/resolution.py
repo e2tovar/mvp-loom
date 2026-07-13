@@ -80,6 +80,7 @@ def resolve_candidate(
     registry: EntityRegistry,
     llm_client=None,
     prior_decisions: dict[tuple[str, str], str] | None = None,
+    scene_text: str = "",
 ) -> ResolutionResult:
     """Resuelve un candidato de extracción contra el registro.
 
@@ -89,6 +90,8 @@ def resolve_candidate(
         llm_client: Implementación de LLMClient para el nivel 2 (opcional en tests).
         prior_decisions: Diccionario {(a, b) → "accepted"|"rejected"} de decisiones
                          humanas previas (INV-M1-4).
+        scene_text: Texto completo de la escena donde apareció `candidate`, usado
+                    como evidencia (fragmento) en el juicio LLM de nivel 2.
 
     Returns:
         ResolutionResult con el nombre canónico final y posibles candidatos de fusión.
@@ -136,11 +139,7 @@ def resolve_candidate(
             if not similar:
                 continue
 
-            judgement = _ask_llm_merge(
-                candidate.canonical_name,
-                entry.canonical_name,
-                llm_client,
-            )
+            judgement = _ask_llm_merge(candidate, entry, scene_text, llm_client)
             if judgement is None:
                 continue
 
@@ -203,19 +202,33 @@ def _are_similar(name_a: str, name_b: str) -> tuple[bool, bool]:
     return False, False
 
 
+_SCENE_EXCERPT_CHARS = 1500
+
+
 def _ask_llm_merge(
-    name_a: str,
-    name_b: str,
+    candidate: CharacterCandidateOut,
+    entry,
+    scene_text: str,
     llm_client,
 ) -> MergeJudgement | None:
     try:
-        from backend.extraction.prompts import SYSTEM_PROMPT
+        from backend.extraction.prompts import MERGE_SYSTEM_PROMPT, build_merge_prompt
 
-        user = (
-            f"¿Son «{name_a}» y «{name_b}» el mismo personaje?\n"
-            "Responde con same_entity, confidence (0.0–1.0) y rationale."
+        user = build_merge_prompt(
+            name_a=entry.canonical_name,
+            aliases_a=entry.aliases,
+            role_a=entry.role,
+            name_b=candidate.canonical_name,
+            aliases_b=candidate.aliases,
+            role_b=candidate.role,
+            scene_excerpt=scene_text[:_SCENE_EXCERPT_CHARS],
         )
-        return llm_client.complete_structured(SYSTEM_PROMPT, user, MergeJudgement)
+        return llm_client.complete_structured(MERGE_SYSTEM_PROMPT, user, MergeJudgement)
     except Exception as exc:
-        log.warning("Error al consultar LLM para merge %s/%s: %s", name_a, name_b, exc)
+        log.warning(
+            "Error al consultar LLM para merge %s/%s: %s",
+            entry.canonical_name,
+            candidate.canonical_name,
+            exc,
+        )
         return None

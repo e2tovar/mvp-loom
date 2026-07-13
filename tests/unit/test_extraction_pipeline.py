@@ -10,7 +10,12 @@ import json
 import pytest
 
 from backend.extraction.pipeline import _find_offset
-from backend.extraction.prompts import SYSTEM_PROMPT, build_user_prompt
+from backend.extraction.prompts import (
+    MERGE_SYSTEM_PROMPT,
+    SYSTEM_PROMPT,
+    build_merge_prompt,
+    build_user_prompt,
+)
 from backend.extraction.registry import EntityRegistry, is_valid_alias
 from backend.extraction.schemas import MentionOut
 
@@ -159,3 +164,30 @@ def test_merge_into_filters_invalid_aliases():
     entry = reg.find("Mr. Bennet")
     assert "mamma" not in entry.aliases
     assert "her mother" not in entry.aliases
+
+
+# ── Prompt de juicio de fusión (contexto evidencial) ─────────────────────────
+
+
+def test_merge_prompt_contains_evidence():
+    prompt = build_merge_prompt(
+        "Mr. Darcy", ["Darcy"], "protagonist",
+        "Georgiana Darcy", ["Miss Darcy"], "secondary",
+        "Georgiana, his sister, greeted them at Pemberley.",
+    )
+    assert "Mr. Darcy" in prompt and "Georgiana Darcy" in prompt
+    assert "Darcy" in prompt and "Miss Darcy" in prompt
+    assert "protagonist" in prompt and "secondary" in prompt
+    assert "Pemberley" in prompt
+
+
+def test_merge_prompt_scene_text_delimited():
+    prompt = build_merge_prompt("A", [], "unknown", "B", [], "unknown", "EVIL text")
+    idx_open = prompt.index("<scene_text>")
+    idx_close = prompt.index("</scene_text>")
+    assert idx_open < prompt.index("EVIL") < idx_close
+
+
+def test_merge_system_prompt_biases_against_merging():
+    assert "same_entity" in MERGE_SYSTEM_PROMPT
+    assert "duda" in MERGE_SYSTEM_PROMPT.lower()

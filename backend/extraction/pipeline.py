@@ -199,7 +199,11 @@ def run_pipeline(
         # Procesar entidades nuevas
         for candidate in extraction.new_characters:
             res: ResolutionResult = resolve_candidate(
-                candidate, registry, llm_client=llm_client, prior_decisions=prior
+                candidate,
+                registry,
+                llm_client=llm_client,
+                prior_decisions=prior,
+                scene_text=scene_text,
             )
 
             if res.filtered:

@@ -393,3 +393,29 @@ def test_appears_in_kind_upgrades_to_present(neo4j_session):
 
     neo4j_session.run("MATCH (n) WHERE n.manuscript_id = $mid DETACH DELETE n", mid=mid)
     neo4j_session.run("MATCH (s:Scene {scene_id: 'tk:s1'}) DETACH DELETE s")
+
+
+@pytest.mark.integration
+def test_wipe_extraction_removes_only_m1_layer(neo4j_session):
+    """wipe_extraction borra Character/Mention/MergeCandidate sin tocar la capa cruda."""
+    from backend.extraction.wipe import wipe_extraction
+    from backend.graph import characters as char_graph
+
+    mid = "test-wipe-m1"
+    neo4j_session.run("MATCH (n) WHERE n.manuscript_id = $mid DETACH DELETE n", mid=mid)
+    neo4j_session.run("MERGE (:Manuscript {manuscript_id: $mid})", mid=mid)
+    neo4j_session.run("MERGE (s:Scene {scene_id: 'tw:s1'}) SET s.manuscript_id = $mid", mid=mid)
+
+    cid = char_graph.upsert_character(neo4j_session, mid, "Ana", [], "minor", False, "tw:s1")
+    char_graph.upsert_mention(neo4j_session, "tw:s1", mid, cid, "Ana", "name", 0, 3, "Ana.")
+
+    counts = wipe_extraction(neo4j_session, mid)
+    assert counts["Character"] == 1
+    assert counts["Mention"] == 1
+
+    remaining = neo4j_session.run(
+        "MATCH (n) WHERE n.manuscript_id = $mid RETURN labels(n)[0] AS l", mid=mid
+    ).value()
+    assert set(remaining) == {"Manuscript", "Scene"}  # capa cruda intacta
+
+    neo4j_session.run("MATCH (n) WHERE n.manuscript_id = $mid DETACH DELETE n", mid=mid)

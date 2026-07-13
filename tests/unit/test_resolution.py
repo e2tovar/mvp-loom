@@ -247,3 +247,40 @@ def test_rejected_decision_not_re_proposed():
     prior = {pair: "rejected"}
     result = resolve_candidate(cand, reg, llm_client=_fake_llm(True, 0.8), prior_decisions=prior)
     assert result.merge_candidate is None
+
+
+# ── Nivel 2 honorific-aware (cierra el agujero que b05b1f5 dejó abierto) ─────
+
+
+def test_incompatible_honorifics_never_merge_even_with_confident_llm():
+    """El agujero real: nivel 1 separaba Mr./Mrs. Bennet pero nivel 2 los re-fusionaba.
+
+    Con un LLM que responde same_entity=True al 0.95, honoríficos incompatibles
+    NO deben fusionarse NI encolarse: son personas distintas por definición.
+    """
+    reg = _registry("Mr. Bennet")
+    result = resolve_candidate(
+        _candidate("Mrs. Bennet"), reg, llm_client=_fake_llm(True, 0.95)
+    )
+    assert result.merged_into is None
+    assert result.merge_candidate is None
+
+
+def test_miss_vs_mr_same_surname_never_merge():
+    reg = _registry("Mr. Darcy")
+    result = resolve_candidate(
+        _candidate("Miss Darcy"), reg, llm_client=_fake_llm(True, 0.95)
+    )
+    assert result.merged_into is None
+    assert result.merge_candidate is None
+
+
+def test_same_surname_different_given_name_queues_not_merges():
+    """Georgiana Darcy vs Fitzwilliam Darcy: apellido igual, pila distinta →
+    aunque el LLM diga 0.95, como máximo cola humana, jamás auto-merge."""
+    reg = _registry("Fitzwilliam Darcy")
+    result = resolve_candidate(
+        _candidate("Georgiana Darcy"), reg, llm_client=_fake_llm(True, 0.95)
+    )
+    assert result.merged_into is None
+    assert isinstance(result.merge_candidate, MergeCandidateProposal)

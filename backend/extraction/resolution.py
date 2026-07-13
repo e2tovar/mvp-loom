@@ -13,10 +13,9 @@ from __future__ import annotations
 
 import logging
 import re
-import unicodedata
 from dataclasses import dataclass, field
 
-from backend.extraction.registry import EntityRegistry
+from backend.extraction.registry import EntityRegistry, _split
 from backend.extraction.schemas import CharacterCandidateOut, MergeJudgement
 
 log = logging.getLogger(__name__)
@@ -31,20 +30,6 @@ _COLLECTIVE_PATTERN = re.compile(
     r"el grupo|la multitud|todos|todas|varios|varias)\b",
     re.IGNORECASE,
 )
-
-_HONORIFICS = re.compile(
-    r"^(mr\.?|mrs\.?|ms\.?|miss|dr\.?|prof\.?|sir|lord|lady|don|doña|"
-    r"señor|señora|señorita|monsieur|madame|mademoiselle)\s+",
-    re.IGNORECASE,
-)
-
-
-def _normalize(name: str) -> str:
-    nfkd = unicodedata.normalize("NFKD", name)
-    ascii_str = nfkd.encode("ascii", "ignore").decode("ascii")
-    stripped = _HONORIFICS.sub("", ascii_str)
-    return stripped.casefold().strip()
-
 
 def is_collective(name: str) -> bool:
     return bool(_COLLECTIVE_PATTERN.match(name.strip()))
@@ -133,12 +118,9 @@ def resolve_candidate(
 
     # Nivel 2: similitud heurística + LLM
     if llm_client is not None:
-        norm_candidate = _normalize(candidate.canonical_name)
         for entry in registry.all_entries():
-            norm_entry = _normalize(entry.canonical_name)
             pair = _canonical_pair(entry.canonical_name, candidate.canonical_name)
 
-            # Verificar decisiones previas (INV-M1-4)
             prior = prior_decisions.get(pair)
             if prior == "rejected":
                 continue
@@ -148,7 +130,10 @@ def resolve_candidate(
                     merged_into=entry.canonical_name,
                 )
 
-            if not _are_similar(norm_candidate, norm_entry):
+            similar, allow_auto = _are_similar(
+                candidate.canonical_name, entry.canonical_name
+            )
+            if not similar:
                 continue
 
             judgement = _ask_llm_merge(
@@ -159,7 +144,11 @@ def resolve_candidate(
             if judgement is None:
                 continue
 
-            if judgement.same_entity and judgement.confidence >= _MERGE_THRESHOLD:
+            if (
+                judgement.same_entity
+                and allow_auto
+                and judgement.confidence >= _MERGE_THRESHOLD
+            ):
                 log.debug(
                     "Auto-merge LLM: %s → %s (confianza=%.2f)",
                     candidate.canonical_name,
@@ -190,19 +179,28 @@ def _canonical_pair(a: str, b: str) -> tuple[str, str]:
     return (a, b) if a < b else (b, a)
 
 
-def _are_similar(norm_a: str, norm_b: str) -> bool:
-    """Heurística rápida para decidir si vale la pena llamar al LLM."""
-    if norm_a == norm_b:
-        return True
-    # Subcadena (p.ej. "darcy" en "mr darcy")
-    if norm_a in norm_b or norm_b in norm_a:
-        return True
-    # Apellido compartido (última palabra)
-    parts_a = norm_a.split()
-    parts_b = norm_b.split()
+def _are_similar(name_a: str, name_b: str) -> tuple[bool, bool]:
+    """(similar, allow_auto_merge) — decide si consultar al LLM y con qué techo.
+
+    - Honoríficos distintos y ambos presentes (Mr./Mrs./Miss sobre la misma
+      base) → personas distintas por definición: ni similar ni fusionable.
+    - Apellido compartido con nombre de pila distinto → similar, pero el
+      auto-merge queda vetado: como máximo cola humana (SC-003).
+    """
+    hon_a, base_a = _split(name_a)
+    hon_b, base_b = _split(name_b)
+
+    if hon_a and hon_b and hon_a != hon_b:
+        return False, False
+
+    if base_a == base_b or base_a in base_b or base_b in base_a:
+        return True, True
+
+    parts_a, parts_b = base_a.split(), base_b.split()
     if len(parts_a) > 1 and len(parts_b) > 1 and parts_a[-1] == parts_b[-1]:
-        return True
-    return False
+        return True, parts_a[:-1] == parts_b[:-1]
+
+    return False, False
 
 
 def _ask_llm_merge(

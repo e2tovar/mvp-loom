@@ -158,6 +158,7 @@ def run_pipeline(
 
     prior = _prior_decisions(manuscript_id)
     registry = EntityRegistry()
+    filtered_names: set[str] = set()
     result = PipelineResult(manuscript_id=manuscript_id)
 
     for scene_row in scenes:
@@ -200,6 +201,13 @@ def run_pipeline(
             res: ResolutionResult = resolve_candidate(
                 candidate, registry, llm_client=llm_client, prior_decisions=prior
             )
+
+            if res.filtered:
+                filtered_names.add(candidate.canonical_name)
+                for alias in candidate.aliases:
+                    filtered_names.add(alias)
+                continue
+
             canonical = res.canonical_name if res.merged_into is None else res.merged_into
 
             # Registrar en el registry (si es entidad nueva o alias actualizado)
@@ -243,14 +251,18 @@ def run_pipeline(
 
             start, end = offsets
             canonical = mention.links_to or mention.surface
-            # Verificar que links_to es un canonical_name conocido
-            if mention.links_to and registry.find(mention.links_to) is None:
-                log.warning(
-                    "links_to '%s' desconocido en escena %s — tratado como nuevo",
-                    mention.links_to,
-                    scene_id,
-                )
-                canonical = mention.surface
+            entry = registry.find(canonical)
+            if entry is None:
+                if canonical in filtered_names or mention.surface in filtered_names:
+                    log.debug("Mención de entidad filtrada descartada: %s", mention.surface)
+                else:
+                    log.warning(
+                        "Mención sin personaje registrado ('%s') en escena %s — descartada",
+                        canonical,
+                        scene_id,
+                    )
+                continue
+            canonical = entry.canonical_name
 
             cid = char_graph.character_id(manuscript_id, canonical)
             with db_session() as sess:

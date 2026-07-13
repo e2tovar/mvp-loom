@@ -50,6 +50,25 @@ def is_collective(name: str) -> bool:
     return bool(_COLLECTIVE_PATTERN.match(name.strip()))
 
 
+_LEADING_ARTICLE = re.compile(
+    r"^(the|a|an|el|la|los|las|un|una|unos|unas|one of the|one of|some of the)\s+",
+    re.IGNORECASE,
+)
+
+
+def is_unnamed(name: str) -> bool:
+    """Descriptor genérico sin nombre propio («the waiter», «one of the girls»).
+
+    Tras quitar el artículo inicial, si ningún token empieza en mayúscula no hay
+    nombre propio → no es un personaje anotable (criterios del gold,
+    eval/fixtures/README.md).
+    """
+    stripped = _LEADING_ARTICLE.sub("", name.strip())
+    if not stripped:
+        return True
+    return not any(tok[:1].isupper() for tok in stripped.split())
+
+
 @dataclass
 class MergeCandidateProposal:
     """Propuesta de fusión en zona gris para la cola humana."""
@@ -68,6 +87,7 @@ class ResolutionResult:
     canonical_name: str
     merged_into: str | None = None  # None = entidad nueva o auto-merge ya aplicado
     merge_candidate: MergeCandidateProposal | None = None
+    filtered: bool = False  # colectivo/sin-nombre: NO escribir al grafo
 
 
 def resolve_candidate(
@@ -88,9 +108,9 @@ def resolve_candidate(
     Returns:
         ResolutionResult con el nombre canónico final y posibles candidatos de fusión.
     """
-    if is_collective(candidate.canonical_name):
-        log.debug("Colectivo filtrado: %s", candidate.canonical_name)
-        return ResolutionResult(canonical_name=candidate.canonical_name)
+    if is_collective(candidate.canonical_name) or is_unnamed(candidate.canonical_name):
+        log.debug("Filtrado (colectivo/sin nombre): %s", candidate.canonical_name)
+        return ResolutionResult(canonical_name=candidate.canonical_name, filtered=True)
 
     prior_decisions = prior_decisions or {}
 

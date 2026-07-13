@@ -13,6 +13,7 @@ from backend.extraction.registry import EntityRegistry
 from backend.extraction.resolution import (
     MergeCandidateProposal,
     is_collective,
+    is_unnamed,
     resolve_candidate,
 )
 from backend.extraction.schemas import CharacterCandidateOut, MergeJudgement
@@ -155,6 +156,42 @@ def test_collective_returns_as_is():
     result = resolve_candidate(_candidate("los guardias"), reg)
     assert result.merged_into is None
     assert result.merge_candidate is None
+    assert result.filtered is True
+
+
+# ── Descriptores sin nombre propio ────────────────────────────────────────────
+
+
+@pytest.mark.parametrize(
+    "name",
+    ["the waiter", "one of the girls", "the young lady", "el mozo", "the coachman"],
+)
+def test_unnamed_descriptor_detected(name):
+    assert is_unnamed(name) is True
+
+
+@pytest.mark.parametrize("name", ["Sarah", "Mr. Darcy", "Elizabeth Bennet", "Álvaro"])
+def test_named_character_not_unnamed(name):
+    assert is_unnamed(name) is False
+
+
+def test_collective_result_is_filtered():
+    """Colectivo → filtered=True para que el pipeline NO lo escriba."""
+    reg = _registry("Ana")
+    result = resolve_candidate(_candidate("los guardias"), reg)
+    assert result.filtered is True
+
+
+def test_unnamed_result_is_filtered():
+    reg = _registry("Ana")
+    result = resolve_candidate(_candidate("the waiter"), reg)
+    assert result.filtered is True
+
+
+def test_normal_candidate_not_filtered():
+    reg = _registry("Ana")
+    result = resolve_candidate(_candidate("Mr. Collins"), reg)
+    assert result.filtered is False
 
 
 # ── Zona gris va a cola (LLM falso) ──────────────────────────────────────────

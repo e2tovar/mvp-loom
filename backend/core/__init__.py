@@ -1,0 +1,1 @@
+"""Utilidades núcleo: hashing, errores."""

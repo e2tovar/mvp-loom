@@ -1,0 +1,24 @@
+# docker-compose para M0: Neo4j 5.x (grafo + futuro índice vectorial).
+# La API se ejecuta localmente con uvicorn durante el desarrollo (ver quickstart.md).
+
+services:
+  neo4j:
+    image: neo4j:5.26
+    container_name: loom-neo4j
+    ports:
+      # Puertos no estándar: conviven varios Neo4j locales (7474/7687 los usa otro proyecto)
+      - "17474:7474" # HTTP (Neo4j Browser)
+      - "17687:7687" # Bolt
+    environment:
+      NEO4J_AUTH: "neo4j/loom-dev-password"
+      NEO4J_PLUGINS: '["apoc"]'
+      NEO4J_apoc_export_file_enabled: "true"
+      NEO4J_apoc_import_file_enabled: "true"
+    volumes:
+      - ./neo4j/data:/data
+      - ./neo4j/logs:/logs
+    healthcheck:
+      test: ["CMD-SHELL", "wget -qO- http://localhost:7474 || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 10

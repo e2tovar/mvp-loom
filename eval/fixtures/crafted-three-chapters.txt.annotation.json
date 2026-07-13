@@ -1,0 +1,8 @@
+{
+  "source_file": "crafted-three-chapters.txt",
+  "format": "txt",
+  "title": "Una Historia Fabricada",
+  "expected_chapter_count": 4,
+  "expected_scene_separators": 2,
+  "notes": "Prólogo + 3 capítulos; el capítulo 2 contiene 2 separadores '* * *'. Front matter (copyright + TOC) y back matter de licencia deben excluirse."
+}

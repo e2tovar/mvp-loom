@@ -94,3 +94,10 @@ desktop.ini
 # Claude Code — local/personal settings only (skills are tracked)
 # ─────────────────────────────────────────────────────────────
 .claude/settings.local.json
+
+# ─────────────────────────────────────────────────────────────
+# Local MCP config (holds local Neo4j credentials) & SDD/worktree state
+# ─────────────────────────────────────────────────────────────
+.mcp.json
+.sdd-state/
+.worktrees/

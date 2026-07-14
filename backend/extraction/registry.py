@@ -40,6 +40,27 @@ _ALIAS_PREFIX = re.compile(
     re.IGNORECASE,
 )
 
+_LEADING_ARTICLE = re.compile(
+    r"^(the|a|an|el|la|los|las|un|una|unos|unas|one of the|one of|some of the)\s+",
+    re.IGNORECASE,
+)
+
+
+def is_unnamed(name: str) -> bool:
+    """Descriptor genérico sin nombre propio («the waiter», «el anciano»).
+
+    Tras quitar el artículo inicial, si ningún token empieza en mayúscula no hay
+    nombre propio. Se aplica a canonical names (filtro de entidades, resolution)
+    y a aliases (is_valid_alias): un descriptor indexado como clave de fusión
+    fusiona personajes distintos (caso Ollivander/Dumbledore vía «el anciano»).
+    Trade-off: epítetos legítimos en minúscula («el niño que vivió») quedan fuera
+    de aliases — sus menciones siguen enlazadas vía links_to (kind='description').
+    """
+    stripped = _LEADING_ARTICLE.sub("", name.strip())
+    if not stripped:
+        return True
+    return not any(tok[:1].isupper() for tok in stripped.split())
+
 
 def _ascii_fold(text: str) -> str:
     nfkd = unicodedata.normalize("NFKD", text)
@@ -61,6 +82,8 @@ def is_valid_alias(alias: str) -> bool:
         return False
     head = _ALIAS_PREFIX.sub("", norm).strip()
     if head in _GENERIC_HEAD:
+        return False
+    if is_unnamed(alias):
         return False
     return True
 

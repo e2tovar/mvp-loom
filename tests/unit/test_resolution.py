@@ -9,11 +9,10 @@ from unittest.mock import MagicMock
 
 import pytest
 
-from backend.extraction.registry import EntityRegistry
+from backend.extraction.registry import EntityRegistry, is_unnamed
 from backend.extraction.resolution import (
     MergeCandidateProposal,
     is_collective,
-    is_unnamed,
     resolve_candidate,
 )
 from backend.extraction.schemas import CharacterCandidateOut, MergeJudgement

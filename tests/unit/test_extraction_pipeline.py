@@ -186,6 +186,38 @@ def test_merge_into_filters_invalid_aliases():
     assert "her mother" not in entry.aliases
 
 
+@pytest.mark.parametrize(
+    "alias",
+    ["el anciano", "el hombre", "un hombre", "la muchacha", "el gato", "la gata",
+     "el gigante", "el niño pequeño", "the old man", "el chico de cara redonda"],
+)
+def test_descriptive_alias_rejected(alias):
+    """Regresión HP1: 'el anciano' como alias fusionó a Ollivander con Dumbledore."""
+    assert is_valid_alias(alias) is False
+
+
+@pytest.mark.parametrize(
+    "alias",
+    ["Lizzy", "Quien-usted-sabe", "el señor Ollivander", "profesora McGonagall",
+     "Nick Casi Decapitado", "Dumbledore"],
+)
+def test_proper_name_alias_still_valid(alias):
+    assert is_valid_alias(alias) is True
+
+
+def test_lowercase_epithet_rejected_by_design():
+    """'el niño que vivió' queda fuera de aliases (trade-off documentado):
+    sin mayúsculas no hay forma de distinguirlo de 'el anciano'."""
+    assert is_valid_alias("el niño que vivió") is False
+
+
+def test_registry_does_not_index_descriptive_aliases():
+    """El caso Ollivander completo: alias descriptivo compartido NO fusiona."""
+    reg = EntityRegistry()
+    reg.add("Albus Dumbledore", ["Dumbledore", "el anciano"], "secondary")
+    assert reg.find("el anciano") is None  # nunca indexado
+
+
 # ── Prompt de juicio de fusión (contexto evidencial) ─────────────────────────
 
 

@@ -15,7 +15,7 @@ import logging
 import re
 from dataclasses import dataclass, field
 
-from backend.extraction.registry import EntityRegistry, _split
+from backend.extraction.registry import EntityRegistry, _split, is_unnamed
 from backend.extraction.schemas import CharacterCandidateOut, MergeJudgement
 
 log = logging.getLogger(__name__)
@@ -33,25 +33,6 @@ _COLLECTIVE_PATTERN = re.compile(
 
 def is_collective(name: str) -> bool:
     return bool(_COLLECTIVE_PATTERN.match(name.strip()))
-
-
-_LEADING_ARTICLE = re.compile(
-    r"^(the|a|an|el|la|los|las|un|una|unos|unas|one of the|one of|some of the)\s+",
-    re.IGNORECASE,
-)
-
-
-def is_unnamed(name: str) -> bool:
-    """Descriptor genérico sin nombre propio («the waiter», «one of the girls»).
-
-    Tras quitar el artículo inicial, si ningún token empieza en mayúscula no hay
-    nombre propio → no es un personaje anotable (criterios del gold,
-    eval/fixtures/README.md).
-    """
-    stripped = _LEADING_ARTICLE.sub("", name.strip())
-    if not stripped:
-        return True
-    return not any(tok[:1].isupper() for tok in stripped.split())
 
 
 @dataclass

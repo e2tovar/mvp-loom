@@ -160,3 +160,59 @@ Primera corrida real end-to-end sobre `pride-and-prejudice.txt` (2026-07-12, git
 - **B³ de P&P = no medido** (`resolution_b3: null`) — el gold no tiene anotación de
   menciones, por diseño (ver entrada de arriba); nunca se reporta un valor
   inventado.
+
+---
+
+## M1 · Follow-ups tras bugfixes + demo HP1 (rama `m1-extraction-bugfixes`, 2026-07-14/15)
+
+**Estado:** ⏳ abiertos · registrados 2026-07-15
+
+Los 8+ bugs originales quedaron resueltos y verificados (ver commits de la rama;
+crafted PASS 1.0/1.0/0, P&P F1 0.800, HP1 F1 0.806, cero merges silenciosos, cola
+humana resuelta). Lo siguiente son follow-ups descubiertos durante la re-medición y
+la demo de Harry Potter 1 (español), en orden de prioridad:
+
+1. **[CRÍTICO] Aislamiento de la base de test.** `tests/conftest.py:42-43` (fixture
+   `neo4j_session`) hace `MATCH (n:{label}) DETACH DELETE n` sobre
+   `Manuscript/Chapter/Scene/NonNarrativeBlock` **sin filtrar por manuscript_id**,
+   contra la misma base `neo4j` que guarda los datos reales. Cada corrida de
+   integración **destruye la capa cruda de todos los libros** (ocurrió 3 veces en
+   una sola sesión). Fix: instancia/base Neo4j separada para tests (contenedor
+   desechable), o como mínimo wipes scoped por manuscript_id. Es la causa de que el
+   grafo quede con `Character/Mention` huérfanos sin `Scene`.
+
+2. **[M0] Front-matter del epub extraído como personajes.** En HP1 el extractor sacó
+   como personajes a la autora (J. K. Rowling), traductores e ilustradores y nombres
+   de la dedicatoria. El troceado M0 no excluye las páginas de créditos/portada del
+   epub. Fix: marcar front-matter como no-narrativo en el parser epub.
+
+3. **[Filtro] Descriptores relacionales que capitalizan la primera palabra.**
+   `is_unnamed` deja pasar "Abuelo de Harry Potter", "Mr. Darcy's father" (mayúscula
+   inicial engaña al heurístico). Afinar para descriptores relacionales con nombre
+   propio embebido.
+
+4. **[Política] Mascotas/animales con nombre.** El extractor saca Hedwig, Fluffy,
+   Scabbers, Norberto, los gatos de la Sra. Figg; el gold los excluye (criterio M1).
+   ~10 falsos positivos en HP1. Decidir: filtrar animales en extracción, o anotarlos.
+
+5. **[Umbral] Detección 0.9 para novela completa.** P&P (0.800) y HP1 (0.806) no
+   llegan a 0.9 sobre todo por cola larga de personajes de una mención + política del
+   gold, no por calidad del modelo (recall alto, cero merges silenciosos). El spec
+   permite recalibrar con justificación. Opción: umbral propio para novela completa o
+   tratarlas como diagnóstico no-gating; el gate de CI (crafted) se mantiene en 0.9.
+
+6. **[No determinismo] Cola larga.** Personajes de una sola mención (cromos de ranas:
+   Merlín, Morgana…) aparecen en una corrida y no en otra. Inherente al LLM sobre
+   menciones únicas.
+
+7. **[Riesgo] Fuga de nombres canon del LLM.** El modelo emite nombres que no están en
+   el texto ("Garrick Ollivander", "Arabella Figg" en HP1). Aquí ayudó; con un libro
+   desconocido es riesgo de alucinación. Vigilar / anclar al texto.
+
+8. **[Menor] B³ no medido en P&P ni HP1** — falta anotación de menciones (laboriosa);
+   solo las crafted lo miden hoy. Y splits de coref residuales tipo Maria/Maria Lucas.
+
+**Estado del grafo al cerrar la rama:** contiene `Character/Mention/MergeCandidate`
+huérfanos (sin capa cruda) por el punto 1. Es reconstruible de forma determinista
+(`rebuild_raw.py` + re-extracción), pero no compensa reconstruir hasta arreglar el
+punto 1. El código está en git; el grafo es dato de runtime.

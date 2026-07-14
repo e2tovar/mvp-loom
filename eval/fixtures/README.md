@@ -66,7 +66,7 @@ Las obras del gate de CI llevan además, por personaje, la lista de menciones:
 |---------|------|---------------------|
 | `crafted-three-chapters.txt.characters.gold.json` | *Una Historia Fabricada* | 2 (Elena, Marco) — con anotación de menciones |
 | `crafted-two-chapters.epub.characters.gold.json` | *Una Historia Fabricada* (epub) | 2 (Elena, Marco) — texto regenerado con menciones reales |
-| `pride-and-prejudice.txt.characters.gold.json` | *Pride and Prejudice* | 10 personajes principales (anotación parcial inicial; expandir con primera medición real) |
+| `pride-and-prejudice.txt.characters.gold.json` | *Pride and Prejudice* | 42 personajes (reparto nombrado completo, revisado contra el texto en la primera medición real; sin anotación de menciones → `resolution_b3: null` para P&P) |
 
 > Las dos primeras obras (txt y epub) son las obras del gate de CI
 > (`tests/eval/test_characters_gate.py:EVAL_WORKS`) y llevan anotación de

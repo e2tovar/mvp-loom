@@ -5,34 +5,69 @@
     {
       "gold_id": "elizabeth-bennet",
       "canonical_name": "Elizabeth Bennet",
-      "aliases": ["Lizzy", "Eliza", "Miss Elizabeth", "Miss Bennet", "Miss Elizabeth Bennet"],
+      "aliases": [
+        "Lizzy",
+        "Eliza",
+        "Miss Elizabeth",
+        "Miss Bennet",
+        "Miss Elizabeth Bennet"
+      ],
       "role": "protagonist",
       "is_mentioned_only": false,
-      "appearances": ["c0/s0", "c1/s0", "c2/s0", "c3/s0", "c4/s0"]
+      "appearances": [
+        "c0/s0",
+        "c1/s0",
+        "c2/s0",
+        "c3/s0",
+        "c4/s0"
+      ]
     },
     {
       "gold_id": "fitzwilliam-darcy",
       "canonical_name": "Mr. Darcy",
-      "aliases": ["Darcy", "Mr. Fitzwilliam Darcy", "Fitzwilliam"],
+      "aliases": [
+        "Darcy",
+        "Mr. Fitzwilliam Darcy",
+        "Fitzwilliam"
+      ],
       "role": "protagonist",
       "is_mentioned_only": false,
-      "appearances": ["c2/s0", "c3/s0", "c4/s0"]
+      "appearances": [
+        "c2/s0",
+        "c3/s0",
+        "c4/s0"
+      ]
     },
     {
       "gold_id": "jane-bennet",
       "canonical_name": "Jane Bennet",
-      "aliases": ["Jane", "Miss Bennet", "Miss Jane Bennet"],
+      "aliases": [
+        "Jane",
+        "Miss Bennet",
+        "Miss Jane Bennet"
+      ],
       "role": "secondary",
       "is_mentioned_only": false,
-      "appearances": ["c0/s0", "c1/s0", "c2/s0"]
+      "appearances": [
+        "c0/s0",
+        "c1/s0",
+        "c2/s0"
+      ]
     },
     {
       "gold_id": "charles-bingley",
       "canonical_name": "Mr. Bingley",
-      "aliases": ["Bingley", "Charles Bingley"],
+      "aliases": [
+        "Bingley",
+        "Charles Bingley"
+      ],
       "role": "secondary",
       "is_mentioned_only": false,
-      "appearances": ["c1/s0", "c2/s0", "c3/s0"]
+      "appearances": [
+        "c1/s0",
+        "c2/s0",
+        "c3/s0"
+      ]
     },
     {
       "gold_id": "mrs-bennet",
@@ -40,7 +75,10 @@
       "aliases": [],
       "role": "secondary",
       "is_mentioned_only": false,
-      "appearances": ["c0/s0", "c1/s0"]
+      "appearances": [
+        "c0/s0",
+        "c1/s0"
+      ]
     },
     {
       "gold_id": "mr-bennet",
@@ -48,39 +86,457 @@
       "aliases": [],
       "role": "secondary",
       "is_mentioned_only": false,
-      "appearances": ["c0/s0", "c1/s0"]
+      "appearances": [
+        "c0/s0",
+        "c1/s0"
+      ]
     },
     {
       "gold_id": "george-wickham",
       "canonical_name": "Wickham",
-      "aliases": ["Mr. Wickham", "George Wickham"],
+      "aliases": [
+        "Mr. Wickham",
+        "George Wickham"
+      ],
       "role": "antagonist",
       "is_mentioned_only": false,
-      "appearances": ["c15/s0", "c16/s0"]
+      "appearances": [
+        "c15/s0",
+        "c16/s0"
+      ]
     },
     {
       "gold_id": "mr-collins",
       "canonical_name": "Mr. Collins",
-      "aliases": ["Collins"],
+      "aliases": [
+        "Collins"
+      ],
       "role": "secondary",
       "is_mentioned_only": false,
-      "appearances": ["c12/s0", "c13/s0"]
+      "appearances": [
+        "c12/s0",
+        "c13/s0"
+      ]
     },
     {
       "gold_id": "charlotte-lucas",
       "canonical_name": "Charlotte Lucas",
-      "aliases": ["Charlotte", "Miss Lucas", "Mrs. Collins"],
+      "aliases": [
+        "Charlotte",
+        "Miss Lucas",
+        "Mrs. Collins"
+      ],
       "role": "secondary",
       "is_mentioned_only": false,
-      "appearances": ["c4/s0", "c5/s0"]
+      "appearances": [
+        "c4/s0",
+        "c5/s0"
+      ]
     },
     {
       "gold_id": "lady-catherine",
       "canonical_name": "Lady Catherine de Bourgh",
-      "aliases": ["Lady Catherine", "Lady de Bourgh"],
+      "aliases": [
+        "Lady Catherine",
+        "Lady de Bourgh"
+      ],
       "role": "secondary",
       "is_mentioned_only": false,
-      "appearances": ["c28/s0", "c29/s0"]
+      "appearances": [
+        "c28/s0",
+        "c29/s0"
+      ]
+    },
+    {
+      "gold_id": "lydia-bennet",
+      "canonical_name": "Lydia Bennet",
+      "aliases": [
+        "Lydia",
+        "Miss Lydia"
+      ],
+      "role": "secondary",
+      "is_mentioned_only": false,
+      "appearances": [
+        "c0/s0",
+        "c8/s0",
+        "c44/s0"
+      ]
+    },
+    {
+      "gold_id": "kitty-bennet",
+      "canonical_name": "Kitty Bennet",
+      "aliases": [
+        "Kitty",
+        "Catherine"
+      ],
+      "role": "minor",
+      "is_mentioned_only": false,
+      "appearances": [
+        "c0/s0",
+        "c8/s0"
+      ]
+    },
+    {
+      "gold_id": "mary-bennet",
+      "canonical_name": "Mary Bennet",
+      "aliases": [
+        "Mary"
+      ],
+      "role": "minor",
+      "is_mentioned_only": false,
+      "appearances": [
+        "c0/s0",
+        "c5/s0"
+      ]
+    },
+    {
+      "gold_id": "colonel-fitzwilliam",
+      "canonical_name": "Colonel Fitzwilliam",
+      "aliases": [
+        "the Colonel"
+      ],
+      "role": "secondary",
+      "is_mentioned_only": false,
+      "appearances": [
+        "c29/s0",
+        "c30/s0"
+      ]
+    },
+    {
+      "gold_id": "mr-hurst",
+      "canonical_name": "Mr. Hurst",
+      "aliases": [],
+      "role": "minor",
+      "is_mentioned_only": false,
+      "appearances": [
+        "c7/s0"
+      ]
+    },
+    {
+      "gold_id": "mrs-hurst",
+      "canonical_name": "Mrs. Hurst",
+      "aliases": [
+        "Louisa Hurst",
+        "Louisa"
+      ],
+      "role": "minor",
+      "is_mentioned_only": false,
+      "appearances": [
+        "c7/s0"
+      ]
+    },
+    {
+      "gold_id": "miss-bingley",
+      "canonical_name": "Miss Bingley",
+      "aliases": [
+        "Caroline Bingley",
+        "Caroline"
+      ],
+      "role": "secondary",
+      "is_mentioned_only": false,
+      "appearances": [
+        "c3/s0",
+        "c7/s0"
+      ]
+    },
+    {
+      "gold_id": "mr-gardiner",
+      "canonical_name": "Mr. Gardiner",
+      "aliases": [],
+      "role": "secondary",
+      "is_mentioned_only": false,
+      "appearances": [
+        "c24/s0",
+        "c41/s0"
+      ]
+    },
+    {
+      "gold_id": "mrs-gardiner",
+      "canonical_name": "Mrs. Gardiner",
+      "aliases": [],
+      "role": "secondary",
+      "is_mentioned_only": false,
+      "appearances": [
+        "c24/s0",
+        "c41/s0"
+      ]
+    },
+    {
+      "gold_id": "colonel-forster",
+      "canonical_name": "Colonel Forster",
+      "aliases": [
+        "Colonel F."
+      ],
+      "role": "minor",
+      "is_mentioned_only": false,
+      "appearances": [
+        "c5/s0",
+        "c40/s0"
+      ]
+    },
+    {
+      "gold_id": "mrs-forster",
+      "canonical_name": "Mrs. Forster",
+      "aliases": [
+        "Harriet",
+        "Mrs. F."
+      ],
+      "role": "minor",
+      "is_mentioned_only": false,
+      "appearances": [
+        "c38/s0",
+        "c40/s0"
+      ]
+    },
+    {
+      "gold_id": "mrs-reynolds",
+      "canonical_name": "Mrs. Reynolds",
+      "aliases": [
+        "Reynolds"
+      ],
+      "role": "minor",
+      "is_mentioned_only": false,
+      "appearances": [
+        "c42/s0"
+      ]
+    },
+    {
+      "gold_id": "sir-william-lucas",
+      "canonical_name": "Sir William Lucas",
+      "aliases": [
+        "Sir William"
+      ],
+      "role": "minor",
+      "is_mentioned_only": false,
+      "appearances": [
+        "c4/s0",
+        "c17/s0"
+      ]
+    },
+    {
+      "gold_id": "lady-lucas",
+      "canonical_name": "Lady Lucas",
+      "aliases": [],
+      "role": "minor",
+      "is_mentioned_only": false,
+      "appearances": [
+        "c2/s0",
+        "c17/s0"
+      ]
+    },
+    {
+      "gold_id": "maria-lucas",
+      "canonical_name": "Maria Lucas",
+      "aliases": [
+        "Maria"
+      ],
+      "role": "minor",
+      "is_mentioned_only": false,
+      "appearances": [
+        "c2/s0",
+        "c38/s0"
+      ]
+    },
+    {
+      "gold_id": "georgiana-darcy",
+      "canonical_name": "Miss Darcy",
+      "aliases": [
+        "Georgiana",
+        "Georgiana Darcy"
+      ],
+      "role": "secondary",
+      "is_mentioned_only": false,
+      "appearances": [
+        "c43/s0",
+        "c44/s0"
+      ]
+    },
+    {
+      "gold_id": "anne-debourgh",
+      "canonical_name": "Miss de Bourgh",
+      "aliases": [
+        "Anne de Bourgh",
+        "Anne"
+      ],
+      "role": "minor",
+      "is_mentioned_only": false,
+      "appearances": [
+        "c27/s0",
+        "c28/s0"
+      ]
+    },
+    {
+      "gold_id": "mrs-jenkinson",
+      "canonical_name": "Mrs. Jenkinson",
+      "aliases": [],
+      "role": "minor",
+      "is_mentioned_only": false,
+      "appearances": [
+        "c27/s0",
+        "c28/s0"
+      ]
+    },
+    {
+      "gold_id": "mrs-annesley",
+      "canonical_name": "Mrs. Annesley",
+      "aliases": [],
+      "role": "minor",
+      "is_mentioned_only": false,
+      "appearances": [
+        "c43/s0",
+        "c52/s0"
+      ]
+    },
+    {
+      "gold_id": "mrs-philips",
+      "canonical_name": "Mrs. Philips",
+      "aliases": [],
+      "role": "minor",
+      "is_mentioned_only": false,
+      "appearances": [
+        "c14/s0",
+        "c15/s0"
+      ]
+    },
+    {
+      "gold_id": "mr-denny",
+      "canonical_name": "Mr. Denny",
+      "aliases": [
+        "Denny"
+      ],
+      "role": "minor",
+      "is_mentioned_only": false,
+      "appearances": [
+        "c14/s0",
+        "c38/s0"
+      ]
+    },
+    {
+      "gold_id": "hill",
+      "canonical_name": "Hill",
+      "aliases": [
+        "Mrs. Hill"
+      ],
+      "role": "minor",
+      "is_mentioned_only": false,
+      "appearances": [
+        "c12/s0",
+        "c47/s0"
+      ]
+    },
+    {
+      "gold_id": "sarah",
+      "canonical_name": "Sarah",
+      "aliases": [],
+      "role": "minor",
+      "is_mentioned_only": false,
+      "appearances": [
+        "c53/s0"
+      ]
+    },
+    {
+      "gold_id": "mrs-long",
+      "canonical_name": "Mrs. Long",
+      "aliases": [],
+      "role": "minor",
+      "is_mentioned_only": false,
+      "appearances": [
+        "c1/s0",
+        "c51/s0"
+      ]
+    },
+    {
+      "gold_id": "mary-king",
+      "canonical_name": "Miss King",
+      "aliases": [
+        "Mary King"
+      ],
+      "role": "minor",
+      "is_mentioned_only": true,
+      "appearances": [
+        "c2/s0",
+        "c26/s0",
+        "c38/s0"
+      ]
+    },
+    {
+      "gold_id": "mrs-younge",
+      "canonical_name": "Mrs. Younge",
+      "aliases": [],
+      "role": "minor",
+      "is_mentioned_only": true,
+      "appearances": [
+        "c34/s0",
+        "c50/s0"
+      ]
+    },
+    {
+      "gold_id": "captain-carter",
+      "canonical_name": "Captain Carter",
+      "aliases": [],
+      "role": "minor",
+      "is_mentioned_only": true,
+      "appearances": [
+        "c6/s0"
+      ]
+    },
+    {
+      "gold_id": "mr-philips",
+      "canonical_name": "Mr. Philips",
+      "aliases": [],
+      "role": "minor",
+      "is_mentioned_only": true,
+      "appearances": [
+        "c6/s0",
+        "c15/s0"
+      ]
+    },
+    {
+      "gold_id": "mrs-nicholls",
+      "canonical_name": "Mrs. Nicholls",
+      "aliases": [
+        "Mrs. Nichols"
+      ],
+      "role": "minor",
+      "is_mentioned_only": true,
+      "appearances": [
+        "c10/s0",
+        "c51/s0"
+      ]
+    },
+    {
+      "gold_id": "mr-jones",
+      "canonical_name": "Mr. Jones",
+      "aliases": [],
+      "role": "minor",
+      "is_mentioned_only": true,
+      "appearances": [
+        "c6/s0",
+        "c7/s0"
+      ]
+    },
+    {
+      "gold_id": "lady-anne-darcy",
+      "canonical_name": "Lady Anne Darcy",
+      "aliases": [
+        "Lady Anne"
+      ],
+      "role": "minor",
+      "is_mentioned_only": true,
+      "appearances": [
+        "c15/s0",
+        "c36/s0"
+      ]
+    },
+    {
+      "gold_id": "sir-lewis-debourgh",
+      "canonical_name": "Sir Lewis de Bourgh",
+      "aliases": [],
+      "role": "minor",
+      "is_mentioned_only": true,
+      "appearances": [
+        "c12/s0"
+      ]
     }
   ]
 }

@@ -1,0 +1,24 @@
+{
+  "work": "crafted-three-chapters.txt",
+  "run_at": "2026-07-14T10:46:56.173724+00:00",
+  "git_sha": "ecc31c9",
+  "prompt_version": 2,
+  "model": "openai/kimi-k2.5",
+  "detection": {
+    "precision": 1.0,
+    "recall": 1.0,
+    "f1": 1.0
+  },
+  "resolution_b3": {
+    "precision": 1.0,
+    "recall": 1.0,
+    "f1": 1.0
+  },
+  "silent_bad_merges": 0,
+  "thresholds": {
+    "detection_f1": 0.9,
+    "resolution_b3_f1": 0.85,
+    "silent_bad_merges": 0
+  },
+  "passed": true
+}

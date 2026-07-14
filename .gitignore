@@ -101,3 +101,8 @@ desktop.ini
 .mcp.json
 .sdd-state/
 .worktrees/
+
+# ─────────────────────────────────────────────────────────────
+# Demo books (copyrighted — local only, never committed)
+# ─────────────────────────────────────────────────────────────
+data/demos/

@@ -1,0 +1,861 @@
+{
+  "work": "harry-potter-1.epub",
+  "annotation_criteria": "eval/fixtures/README.md#characters",
+  "_draft_note": "FINAL DRAFT for human review — expands hp1-gold-draft.json (55 entities, canon/wiki-only) with 40 additional named characters that surfaced during real text extraction with verified offsets (sorting-ceremony students, Quidditch match players, chocolate-frog-card famous wizards, ch.1 Muggle-world bit players, Diagon Alley/Hogwarts staff). appearances remain [] for the new entries too: this task only classifies ADD/EXCLUDE and fixes aliases, it does not re-derive scene coordinates. See hp1-gold-final-notes.md for the full add/exclude/flag rationale. Pets remain excluded per project rule.",
+  "characters": [
+    {
+      "gold_id": "harry-potter",
+      "canonical_name": "Harry Potter",
+      "aliases": [
+        "el niño que vivió"
+      ],
+      "role": "protagonist",
+      "is_mentioned_only": false,
+      "appearances": []
+    },
+    {
+      "gold_id": "ron-weasley",
+      "canonical_name": "Ron Weasley",
+      "aliases": [
+        "Ronald Weasley",
+        "Ronald Bilius Weasley"
+      ],
+      "role": "protagonist",
+      "is_mentioned_only": false,
+      "appearances": []
+    },
+    {
+      "gold_id": "hermione-granger",
+      "canonical_name": "Hermione Granger",
+      "aliases": [],
+      "role": "protagonist",
+      "is_mentioned_only": false,
+      "appearances": []
+    },
+    {
+      "gold_id": "albus-dumbledore",
+      "canonical_name": "Albus Dumbledore",
+      "aliases": [
+        "profesor Dumbledore",
+        "director Dumbledore"
+      ],
+      "role": "secondary",
+      "is_mentioned_only": false,
+      "appearances": []
+    },
+    {
+      "gold_id": "severus-snape",
+      "canonical_name": "Severus Snape",
+      "aliases": [
+        "profesor Snape"
+      ],
+      "role": "antagonist",
+      "is_mentioned_only": false,
+      "appearances": []
+    },
+    {
+      "gold_id": "rubeus-hagrid",
+      "canonical_name": "Hagrid",
+      "aliases": [
+        "Rubeus Hagrid"
+      ],
+      "role": "secondary",
+      "is_mentioned_only": false,
+      "appearances": []
+    },
+    {
+      "gold_id": "minerva-mcgonagall",
+      "canonical_name": "profesora McGonagall",
+      "aliases": [
+        "Minerva McGonagall"
+      ],
+      "role": "secondary",
+      "is_mentioned_only": false,
+      "appearances": []
+    },
+    {
+      "gold_id": "quirinus-quirrell",
+      "canonical_name": "profesor Quirrell",
+      "aliases": [
+        "Quirinus Quirrell"
+      ],
+      "role": "antagonist",
+      "is_mentioned_only": false,
+      "appearances": []
+    },
+    {
+      "gold_id": "voldemort",
+      "canonical_name": "Voldemort",
+      "aliases": [
+        "Lord Voldemort",
+        "Quien-tú-sabes",
+        "Quien-usted-sabe",
+        "Ya-Sabes-Quién",
+        "El-Que-No-Debe-Ser-Nombrado"
+      ],
+      "role": "antagonist",
+      "is_mentioned_only": false,
+      "appearances": []
+    },
+    {
+      "gold_id": "draco-malfoy",
+      "canonical_name": "Draco Malfoy",
+      "aliases": [],
+      "role": "antagonist",
+      "is_mentioned_only": false,
+      "appearances": []
+    },
+    {
+      "gold_id": "vernon-dursley",
+      "canonical_name": "tío Vernon",
+      "aliases": [
+        "Vernon Dursley"
+      ],
+      "role": "secondary",
+      "is_mentioned_only": false,
+      "appearances": []
+    },
+    {
+      "gold_id": "petunia-dursley",
+      "canonical_name": "tía Petunia",
+      "aliases": [
+        "Petunia Dursley"
+      ],
+      "role": "secondary",
+      "is_mentioned_only": false,
+      "appearances": []
+    },
+    {
+      "gold_id": "dudley-dursley",
+      "canonical_name": "Dudley Dursley",
+      "aliases": [
+        "Dudley"
+      ],
+      "role": "secondary",
+      "is_mentioned_only": false,
+      "appearances": []
+    },
+    {
+      "gold_id": "neville-longbottom",
+      "canonical_name": "Neville Longbottom",
+      "aliases": [],
+      "role": "secondary",
+      "is_mentioned_only": false,
+      "appearances": []
+    },
+    {
+      "gold_id": "fred-weasley",
+      "canonical_name": "Fred Weasley",
+      "aliases": [],
+      "role": "secondary",
+      "is_mentioned_only": false,
+      "appearances": []
+    },
+    {
+      "gold_id": "george-weasley",
+      "canonical_name": "George Weasley",
+      "aliases": [],
+      "role": "secondary",
+      "is_mentioned_only": false,
+      "appearances": []
+    },
+    {
+      "gold_id": "percy-weasley",
+      "canonical_name": "Percy Weasley",
+      "aliases": [],
+      "role": "minor",
+      "is_mentioned_only": false,
+      "appearances": []
+    },
+    {
+      "gold_id": "ginny-weasley",
+      "canonical_name": "Ginny Weasley",
+      "aliases": [
+        "Ginevra Weasley"
+      ],
+      "role": "minor",
+      "is_mentioned_only": false,
+      "appearances": []
+    },
+    {
+      "gold_id": "molly-weasley",
+      "canonical_name": "señora Weasley",
+      "aliases": [
+        "Molly Weasley"
+      ],
+      "role": "minor",
+      "is_mentioned_only": false,
+      "appearances": []
+    },
+    {
+      "gold_id": "vincent-crabbe",
+      "canonical_name": "Crabbe",
+      "aliases": [
+        "Vincent Crabbe"
+      ],
+      "role": "minor",
+      "is_mentioned_only": false,
+      "appearances": []
+    },
+    {
+      "gold_id": "gregory-goyle",
+      "canonical_name": "Goyle",
+      "aliases": [
+        "Gregory Goyle"
+      ],
+      "role": "minor",
+      "is_mentioned_only": false,
+      "appearances": []
+    },
+    {
+      "gold_id": "lee-jordan",
+      "canonical_name": "Lee Jordan",
+      "aliases": [],
+      "role": "minor",
+      "is_mentioned_only": false,
+      "appearances": []
+    },
+    {
+      "gold_id": "oliver-wood",
+      "canonical_name": "Oliver Wood",
+      "aliases": [],
+      "role": "minor",
+      "is_mentioned_only": false,
+      "appearances": []
+    },
+    {
+      "gold_id": "argus-filch",
+      "canonical_name": "Filch",
+      "aliases": [
+        "Argus Filch"
+      ],
+      "role": "minor",
+      "is_mentioned_only": false,
+      "appearances": []
+    },
+    {
+      "gold_id": "poppy-pomfrey",
+      "canonical_name": "señora Pomfrey",
+      "aliases": [
+        "Madame Pomfrey",
+        "Poppy Pomfrey"
+      ],
+      "role": "minor",
+      "is_mentioned_only": false,
+      "appearances": []
+    },
+    {
+      "gold_id": "rolanda-hooch",
+      "canonical_name": "Madame Hooch",
+      "aliases": [
+        "señora Hooch",
+        "Rolanda Hooch"
+      ],
+      "role": "minor",
+      "is_mentioned_only": false,
+      "appearances": []
+    },
+    {
+      "gold_id": "pomona-sprout",
+      "canonical_name": "profesora Sprout",
+      "aliases": [
+        "Pomona Sprout"
+      ],
+      "role": "minor",
+      "is_mentioned_only": false,
+      "appearances": []
+    },
+    {
+      "gold_id": "filius-flitwick",
+      "canonical_name": "profesor Flitwick",
+      "aliases": [
+        "Filius Flitwick"
+      ],
+      "role": "minor",
+      "is_mentioned_only": false,
+      "appearances": []
+    },
+    {
+      "gold_id": "cuthbert-binns",
+      "canonical_name": "profesor Binns",
+      "aliases": [
+        "Cuthbert Binns"
+      ],
+      "role": "minor",
+      "is_mentioned_only": false,
+      "appearances": []
+    },
+    {
+      "gold_id": "nick-casi-decapitado",
+      "canonical_name": "Nick Casi Decapitado",
+      "aliases": [
+        "Sir Nicholas de Mimsy-Porpington"
+      ],
+      "role": "minor",
+      "is_mentioned_only": false,
+      "appearances": []
+    },
+    {
+      "gold_id": "baron-sanguinario",
+      "canonical_name": "Barón Sanguinario",
+      "aliases": [],
+      "role": "minor",
+      "is_mentioned_only": false,
+      "appearances": []
+    },
+    {
+      "gold_id": "fraile-gordo",
+      "canonical_name": "Fraile Gordo",
+      "aliases": [],
+      "role": "minor",
+      "is_mentioned_only": false,
+      "appearances": []
+    },
+    {
+      "gold_id": "peeves",
+      "canonical_name": "Peeves",
+      "aliases": [],
+      "role": "minor",
+      "is_mentioned_only": false,
+      "appearances": []
+    },
+    {
+      "gold_id": "piers-polkiss",
+      "canonical_name": "Piers Polkiss",
+      "aliases": [],
+      "role": "minor",
+      "is_mentioned_only": false,
+      "appearances": []
+    },
+    {
+      "gold_id": "griphook",
+      "canonical_name": "Griphook",
+      "aliases": [],
+      "role": "minor",
+      "is_mentioned_only": false,
+      "appearances": []
+    },
+    {
+      "gold_id": "ollivander",
+      "canonical_name": "señor Ollivander",
+      "aliases": [
+        "Garrick Ollivander",
+        "Ollivander",
+        "el señor Ollivander"
+      ],
+      "role": "minor",
+      "is_mentioned_only": false,
+      "appearances": []
+    },
+    {
+      "gold_id": "madam-malkin",
+      "canonical_name": "señora Malkin",
+      "aliases": [
+        "Madame Malkin"
+      ],
+      "role": "minor",
+      "is_mentioned_only": false,
+      "appearances": []
+    },
+    {
+      "gold_id": "firenze",
+      "canonical_name": "Firenze",
+      "aliases": [],
+      "role": "minor",
+      "is_mentioned_only": false,
+      "appearances": []
+    },
+    {
+      "gold_id": "ronan",
+      "canonical_name": "Ronan",
+      "aliases": [],
+      "role": "minor",
+      "is_mentioned_only": false,
+      "appearances": []
+    },
+    {
+      "gold_id": "bane",
+      "canonical_name": "Bane",
+      "aliases": [],
+      "role": "minor",
+      "is_mentioned_only": false,
+      "appearances": []
+    },
+    {
+      "gold_id": "seamus-finnigan",
+      "canonical_name": "Seamus Finnigan",
+      "aliases": [],
+      "role": "minor",
+      "is_mentioned_only": false,
+      "appearances": []
+    },
+    {
+      "gold_id": "dean-thomas",
+      "canonical_name": "Dean Thomas",
+      "aliases": [],
+      "role": "minor",
+      "is_mentioned_only": false,
+      "appearances": []
+    },
+    {
+      "gold_id": "parvati-patil",
+      "canonical_name": "Parvati Patil",
+      "aliases": [],
+      "role": "minor",
+      "is_mentioned_only": false,
+      "appearances": []
+    },
+    {
+      "gold_id": "lavender-brown",
+      "canonical_name": "Lavender Brown",
+      "aliases": [
+        "Lavender"
+      ],
+      "role": "minor",
+      "is_mentioned_only": false,
+      "appearances": []
+    },
+    {
+      "gold_id": "nicolas-flamel",
+      "canonical_name": "Nicolas Flamel",
+      "aliases": [
+        "Nicolás Flamel"
+      ],
+      "role": "minor",
+      "is_mentioned_only": true,
+      "appearances": []
+    },
+    {
+      "gold_id": "perenelle-flamel",
+      "canonical_name": "Perenelle Flamel",
+      "aliases": [
+        "Perenela"
+      ],
+      "role": "minor",
+      "is_mentioned_only": true,
+      "appearances": []
+    },
+    {
+      "gold_id": "charlie-weasley",
+      "canonical_name": "Charlie Weasley",
+      "aliases": [
+        "Charles Weasley"
+      ],
+      "role": "minor",
+      "is_mentioned_only": true,
+      "appearances": []
+    },
+    {
+      "gold_id": "bill-weasley",
+      "canonical_name": "Bill Weasley",
+      "aliases": [
+        "William Weasley"
+      ],
+      "role": "minor",
+      "is_mentioned_only": true,
+      "appearances": []
+    },
+    {
+      "gold_id": "arthur-weasley",
+      "canonical_name": "Arthur Weasley",
+      "aliases": [
+        "señor Weasley"
+      ],
+      "role": "minor",
+      "is_mentioned_only": true,
+      "appearances": []
+    },
+    {
+      "gold_id": "mrs-figg",
+      "canonical_name": "señora Figg",
+      "aliases": [
+        "Arabella Figg",
+        "Mrs. Figg"
+      ],
+      "role": "minor",
+      "is_mentioned_only": true,
+      "appearances": []
+    },
+    {
+      "gold_id": "cornelius-fudge",
+      "canonical_name": "Cornelius Fudge",
+      "aliases": [],
+      "role": "minor",
+      "is_mentioned_only": true,
+      "appearances": []
+    },
+    {
+      "gold_id": "sirius-black",
+      "canonical_name": "Sirius Black",
+      "aliases": [],
+      "role": "minor",
+      "is_mentioned_only": true,
+      "appearances": []
+    },
+    {
+      "gold_id": "james-potter",
+      "canonical_name": "James Potter",
+      "aliases": [],
+      "role": "minor",
+      "is_mentioned_only": true,
+      "appearances": []
+    },
+    {
+      "gold_id": "lily-potter",
+      "canonical_name": "Lily Potter",
+      "aliases": [
+        "Lily Evans"
+      ],
+      "role": "minor",
+      "is_mentioned_only": true,
+      "appearances": []
+    },
+    {
+      "gold_id": "marge-dursley",
+      "canonical_name": "tía Marge",
+      "aliases": [
+        "Marjorie Dursley",
+        "Marge Dursley",
+        "Marge"
+      ],
+      "role": "minor",
+      "is_mentioned_only": true,
+      "appearances": []
+    },
+    {
+      "gold_id": "hannah-abbott",
+      "canonical_name": "Hannah Abbott",
+      "aliases": [],
+      "role": "minor",
+      "is_mentioned_only": false,
+      "appearances": []
+    },
+    {
+      "gold_id": "susan-bones",
+      "canonical_name": "Susan Bones",
+      "aliases": [],
+      "role": "minor",
+      "is_mentioned_only": false,
+      "appearances": []
+    },
+    {
+      "gold_id": "terry-boot",
+      "canonical_name": "Terry Boot",
+      "aliases": [],
+      "role": "minor",
+      "is_mentioned_only": false,
+      "appearances": []
+    },
+    {
+      "gold_id": "mandy-brocklehurst",
+      "canonical_name": "Mandy Brocklehurst",
+      "aliases": [],
+      "role": "minor",
+      "is_mentioned_only": false,
+      "appearances": []
+    },
+    {
+      "gold_id": "millicent-bulstrode",
+      "canonical_name": "Millicent Bulstrode",
+      "aliases": [],
+      "role": "minor",
+      "is_mentioned_only": false,
+      "appearances": []
+    },
+    {
+      "gold_id": "morag-macdougal",
+      "canonical_name": "Morag MacDougal",
+      "aliases": [],
+      "role": "minor",
+      "is_mentioned_only": false,
+      "appearances": []
+    },
+    {
+      "gold_id": "lisa-turpin",
+      "canonical_name": "Lisa Turpin",
+      "aliases": [],
+      "role": "minor",
+      "is_mentioned_only": false,
+      "appearances": []
+    },
+    {
+      "gold_id": "blaise-zabini",
+      "canonical_name": "Blaise Zabini",
+      "aliases": [],
+      "role": "minor",
+      "is_mentioned_only": false,
+      "appearances": []
+    },
+    {
+      "gold_id": "justin-finch-fletchley",
+      "canonical_name": "Justin Finch-Fletchley",
+      "aliases": [],
+      "role": "minor",
+      "is_mentioned_only": false,
+      "appearances": []
+    },
+    {
+      "gold_id": "pansy-parkinson",
+      "canonical_name": "Pansy Parkinson",
+      "aliases": [],
+      "role": "minor",
+      "is_mentioned_only": false,
+      "appearances": []
+    },
+    {
+      "gold_id": "marcus-flint",
+      "canonical_name": "Marcus Flint",
+      "aliases": [],
+      "role": "minor",
+      "is_mentioned_only": false,
+      "appearances": []
+    },
+    {
+      "gold_id": "angelina-johnson",
+      "canonical_name": "Angelina Johnson",
+      "aliases": [],
+      "role": "minor",
+      "is_mentioned_only": false,
+      "appearances": []
+    },
+    {
+      "gold_id": "alicia-spinnet",
+      "canonical_name": "Alicia Spinnet",
+      "aliases": [],
+      "role": "minor",
+      "is_mentioned_only": false,
+      "appearances": []
+    },
+    {
+      "gold_id": "katie-bell",
+      "canonical_name": "Katie Bell",
+      "aliases": [],
+      "role": "minor",
+      "is_mentioned_only": false,
+      "appearances": []
+    },
+    {
+      "gold_id": "adrian-pucey",
+      "canonical_name": "Adrian Pucey",
+      "aliases": [],
+      "role": "minor",
+      "is_mentioned_only": false,
+      "appearances": []
+    },
+    {
+      "gold_id": "bletchley",
+      "canonical_name": "Bletchley",
+      "aliases": [],
+      "role": "minor",
+      "is_mentioned_only": false,
+      "appearances": []
+    },
+    {
+      "gold_id": "terence-higgs",
+      "canonical_name": "Terence Higgs",
+      "aliases": [],
+      "role": "minor",
+      "is_mentioned_only": true,
+      "appearances": []
+    },
+    {
+      "gold_id": "ted-newsreader",
+      "canonical_name": "Ted",
+      "aliases": [],
+      "role": "minor",
+      "is_mentioned_only": false,
+      "appearances": []
+    },
+    {
+      "gold_id": "jim-mcguffin",
+      "canonical_name": "Jim McGuffin",
+      "aliases": [],
+      "role": "minor",
+      "is_mentioned_only": false,
+      "appearances": []
+    },
+    {
+      "gold_id": "dennis-dudleys-gang",
+      "canonical_name": "Dennis",
+      "aliases": [],
+      "role": "minor",
+      "is_mentioned_only": false,
+      "appearances": []
+    },
+    {
+      "gold_id": "malcolm-dudleys-gang",
+      "canonical_name": "Malcolm",
+      "aliases": [],
+      "role": "minor",
+      "is_mentioned_only": false,
+      "appearances": []
+    },
+    {
+      "gold_id": "gordon-dudleys-gang",
+      "canonical_name": "Gordon",
+      "aliases": [],
+      "role": "minor",
+      "is_mentioned_only": false,
+      "appearances": []
+    },
+    {
+      "gold_id": "tom-leaky-cauldron",
+      "canonical_name": "Tom",
+      "aliases": [],
+      "role": "minor",
+      "is_mentioned_only": false,
+      "appearances": []
+    },
+    {
+      "gold_id": "doris-crockford",
+      "canonical_name": "Doris Crockford",
+      "aliases": [],
+      "role": "minor",
+      "is_mentioned_only": false,
+      "appearances": []
+    },
+    {
+      "gold_id": "dedalus-diggle",
+      "canonical_name": "Dedalus Diggle",
+      "aliases": [],
+      "role": "minor",
+      "is_mentioned_only": false,
+      "appearances": []
+    },
+    {
+      "gold_id": "irma-pince",
+      "canonical_name": "señora Pince",
+      "aliases": [
+        "Irma Pince"
+      ],
+      "role": "minor",
+      "is_mentioned_only": false,
+      "appearances": []
+    },
+    {
+      "gold_id": "agripa",
+      "canonical_name": "Agripa",
+      "aliases": [],
+      "role": "minor",
+      "is_mentioned_only": true,
+      "appearances": []
+    },
+    {
+      "gold_id": "ptolomeo",
+      "canonical_name": "Ptolomeo",
+      "aliases": [],
+      "role": "minor",
+      "is_mentioned_only": true,
+      "appearances": []
+    },
+    {
+      "gold_id": "grindelwald",
+      "canonical_name": "Grindelwald",
+      "aliases": [],
+      "role": "minor",
+      "is_mentioned_only": true,
+      "appearances": []
+    },
+    {
+      "gold_id": "morgana",
+      "canonical_name": "Morgana",
+      "aliases": [],
+      "role": "minor",
+      "is_mentioned_only": true,
+      "appearances": []
+    },
+    {
+      "gold_id": "ramon-llull",
+      "canonical_name": "Ramón Llull",
+      "aliases": [],
+      "role": "minor",
+      "is_mentioned_only": true,
+      "appearances": []
+    },
+    {
+      "gold_id": "circe",
+      "canonical_name": "Circe",
+      "aliases": [],
+      "role": "minor",
+      "is_mentioned_only": true,
+      "appearances": []
+    },
+    {
+      "gold_id": "paracelso",
+      "canonical_name": "Paracelso",
+      "aliases": [],
+      "role": "minor",
+      "is_mentioned_only": true,
+      "appearances": []
+    },
+    {
+      "gold_id": "merlin",
+      "canonical_name": "Merlín",
+      "aliases": [],
+      "role": "minor",
+      "is_mentioned_only": true,
+      "appearances": []
+    },
+    {
+      "gold_id": "cliodna",
+      "canonical_name": "Cliodna",
+      "aliases": [],
+      "role": "minor",
+      "is_mentioned_only": true,
+      "appearances": []
+    },
+    {
+      "gold_id": "elmerico-el-malvado",
+      "canonical_name": "Elmerico el Malvado",
+      "aliases": [],
+      "role": "minor",
+      "is_mentioned_only": true,
+      "appearances": []
+    },
+    {
+      "gold_id": "ulrico-el-chiflado",
+      "canonical_name": "Ulrico el Chiflado",
+      "aliases": [],
+      "role": "minor",
+      "is_mentioned_only": true,
+      "appearances": []
+    },
+    {
+      "gold_id": "vindictus-viridian",
+      "canonical_name": "Vindictus Viridian",
+      "aliases": [],
+      "role": "minor",
+      "is_mentioned_only": true,
+      "appearances": []
+    },
+    {
+      "gold_id": "gregory-el-pelota",
+      "canonical_name": "Gregory el Pelota",
+      "aliases": [],
+      "role": "minor",
+      "is_mentioned_only": true,
+      "appearances": []
+    },
+    {
+      "gold_id": "yvonne",
+      "canonical_name": "Yvonne",
+      "aliases": [],
+      "role": "minor",
+      "is_mentioned_only": true,
+      "appearances": []
+    },
+    {
+      "gold_id": "dama-gorda",
+      "canonical_name": "Dama Gorda",
+      "aliases": [
+        "Señora Gorda",
+        "el retrato de la Dama Gorda",
+        "la Dama Gorda",
+        "la Señora Gorda"
+      ],
+      "role": "minor",
+      "is_mentioned_only": false,
+      "appearances": []
+    }
+  ]
+}

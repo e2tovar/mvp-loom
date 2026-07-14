@@ -1,0 +1,20 @@
+{
+  "work": "harry-potter-1.epub",
+  "run_at": "2026-07-14T20:36:23.376554+00:00",
+  "git_sha": "33348b6",
+  "prompt_version": 3,
+  "model": "openai/kimi-k2.5",
+  "detection": {
+    "precision": 0.7545454545454545,
+    "recall": 0.8645833333333334,
+    "f1": 0.8058252427184466
+  },
+  "resolution_b3": null,
+  "silent_bad_merges": 0,
+  "thresholds": {
+    "detection_f1": 0.9,
+    "resolution_b3_f1": 0.85,
+    "silent_bad_merges": 0
+  },
+  "passed": false
+}

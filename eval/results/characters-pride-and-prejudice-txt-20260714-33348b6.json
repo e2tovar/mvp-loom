@@ -1,0 +1,20 @@
+{
+  "work": "pride-and-prejudice.txt",
+  "run_at": "2026-07-14T20:34:22.604921+00:00",
+  "git_sha": "33348b6",
+  "prompt_version": 3,
+  "model": "openai/kimi-k2.5",
+  "detection": {
+    "precision": 0.6461538461538462,
+    "recall": 1.0,
+    "f1": 0.7850467289719627
+  },
+  "resolution_b3": null,
+  "silent_bad_merges": 0,
+  "thresholds": {
+    "detection_f1": 0.9,
+    "resolution_b3_f1": 0.85,
+    "silent_bad_merges": 0
+  },
+  "passed": false
+}

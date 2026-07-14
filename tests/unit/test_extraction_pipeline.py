@@ -17,7 +17,7 @@ from backend.extraction.prompts import (
     build_user_prompt,
 )
 from backend.extraction.registry import EntityRegistry, is_valid_alias
-from backend.extraction.schemas import MentionOut
+from backend.extraction.schemas import SCHEMA_VERSION, MentionOut, SceneExtraction
 
 # ── Verificación de surfaces/offsets ─────────────────────────────────────────
 
@@ -58,6 +58,26 @@ def test_unlocatable_mention_discarded(caplog):
         offsets = _find_offset(scene_text, mention.surface)
 
     assert offsets is None
+
+
+# ── Contrato: present_entities (señal de presencia por escena) ──────────────
+
+
+def test_scene_extraction_present_entities_defaults_empty():
+    ext = SceneExtraction(mentions=[], new_characters=[])
+    assert ext.present_entities == []
+
+
+def test_scene_extraction_accepts_present_entities():
+    ext = SceneExtraction(
+        mentions=[], new_characters=[], present_entities=["Elizabeth Bennet", "Mr. Darcy"]
+    )
+    assert ext.present_entities == ["Elizabeth Bennet", "Mr. Darcy"]
+
+
+def test_schema_version_bumped_for_presence_field():
+    # El campo nuevo cambia el contrato de salida -> la cache debe invalidarse.
+    assert SCHEMA_VERSION >= 2
 
 
 # ── Construcción del contexto con registro ───────────────────────────────────

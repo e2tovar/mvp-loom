@@ -200,6 +200,19 @@ def recompute_counters(sess: Session, manuscript_id: str) -> None:
         """,
         mid=manuscript_id,
     )
+    # is_mentioned_only derivado del grafo: un personaje "solo mencionado" es el
+    # que NO tiene ninguna aparición física (APPEARS_IN kind='present'). Esto
+    # corrige el flag para personajes cuya primera extracción fue una mención
+    # (Elizabeth: 273 menciones, presente en muchas escenas, marcada mo=True).
+    sess.run(
+        """
+        MATCH (c:Character {manuscript_id: $mid})
+        OPTIONAL MATCH (c)-[r:APPEARS_IN {kind: 'present'}]->(:Scene)
+        WITH c, count(r) AS present_count
+        SET c.is_mentioned_only = (present_count = 0)
+        """,
+        mid=manuscript_id,
+    )
 
 
 # ── Lectura ───────────────────────────────────────────────────────────────────

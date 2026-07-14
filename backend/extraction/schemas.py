@@ -10,7 +10,7 @@ from typing import Literal
 
 from pydantic import BaseModel
 
-SCHEMA_VERSION: int = 1
+SCHEMA_VERSION: int = 2
 
 
 # ── Entrada (construida por el pipeline, no por el LLM) ───────────────────────
@@ -59,6 +59,7 @@ class SceneExtraction(BaseModel):
 
     mentions: list[MentionOut]
     new_characters: list[CharacterCandidateOut]
+    present_entities: list[str] = []
     notes: str | None = None
 
 

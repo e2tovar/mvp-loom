@@ -49,8 +49,26 @@ class SceneExtraction(BaseModel):
     """Salida completa de la extracción de una escena."""
     mentions: list[MentionOut]
     new_characters: list[CharacterCandidateOut]
+    present_entities: list[str] = []  # nombres/alias de personajes físicamente
+                                       # presentes en la escena, nuevos o conocidos
+                                       # (SCHEMA_VERSION 2)
     notes: str | None = None       # ambigüedades que el modelo quiera señalar
 ```
+
+> **Cambio de contrato (SCHEMA_VERSION 1→2, PROMPT_VERSION 1→2)**: se añadió
+> `present_entities` para poder registrar presencia física on-stage de personajes
+> *ya conocidos* que reaparecen en escenas posteriores sin ser re-emitidos como
+> `new_characters`. Antes de este campo, `is_mentioned_only` solo se fijaba en la
+> primera extracción del personaje (vía `new_characters[].is_present_in_scene`);
+> si esa primera extracción era una mención, el flag quedaba congelado en `true`
+> para siempre aunque el personaje apareciera físicamente después (caso real:
+> Elizabeth, protagonista con 273 menciones, marcada `is_mentioned_only=true`).
+> Con `present_entities`, el pipeline resuelve esos nombres contra el registro y
+> los añade a `present_canonicals`, ganando `APPEARS_IN {kind:'present'}` aunque
+> ya existieran. `is_mentioned_only` pasa a derivarse en `recompute_counters`:
+> `true` sii el personaje no tiene ninguna relación `APPEARS_IN` con
+> `kind='present'`. El bump de versión invalida intencionalmente la cache de
+> escenas (`backend/llm/cache.py`) para forzar re-extracción con el nuevo campo.
 
 ## Confirmación de fusión (resolución, nivel 2 de la cascada)
 

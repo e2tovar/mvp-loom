@@ -419,3 +419,47 @@ def test_wipe_extraction_removes_only_m1_layer(neo4j_session):
     assert set(remaining) == {"Manuscript", "Scene"}  # capa cruda intacta
 
     neo4j_session.run("MATCH (n) WHERE n.manuscript_id = $mid DETACH DELETE n", mid=mid)
+
+
+@pytest.mark.integration
+def test_is_mentioned_only_derived_from_present_appearance(neo4j_session):
+    """recompute_counters marca is_mentioned_only=false si hay APPEARS_IN present,
+    true si todas las apariciones son 'mentioned'."""
+    from backend.graph import characters as char_graph
+
+    mid = "test-mo-derived"
+    neo4j_session.run("MATCH (n) WHERE n.manuscript_id = $mid DETACH DELETE n", mid=mid)
+    neo4j_session.run("MERGE (:Manuscript {manuscript_id: $mid})", mid=mid)
+    for sid in ["md:s1", "md:s2"]:
+        neo4j_session.run(
+            "MERGE (s:Scene {scene_id: $sid}) SET s.manuscript_id = $mid", sid=sid, mid=mid
+        )
+
+    # Personaje presente en s2 pero cuyo nodo se creó con is_mentioned_only=True
+    # (primera extracción fue una mención en s1).
+    cid_p = char_graph.upsert_character(
+        neo4j_session, mid, "Elizabeth", [], "protagonist", True, "md:s1"
+    )
+    char_graph.upsert_appears_in(neo4j_session, cid_p, "md:s1", "mentioned")
+    char_graph.upsert_appears_in(neo4j_session, cid_p, "md:s2", "present")
+
+    # Personaje que solo se menciona, nunca presente.
+    cid_m = char_graph.upsert_character(
+        neo4j_session, mid, "Old Uncle", [], "minor", True, "md:s1"
+    )
+    char_graph.upsert_appears_in(neo4j_session, cid_m, "md:s1", "mentioned")
+
+    char_graph.recompute_counters(neo4j_session, mid)
+    char_graph.recompute_counters(neo4j_session, mid)  # idempotente
+
+    p = neo4j_session.run(
+        "MATCH (c:Character {character_id: $cid}) RETURN c.is_mentioned_only AS m", cid=cid_p
+    ).single()
+    m = neo4j_session.run(
+        "MATCH (c:Character {character_id: $cid}) RETURN c.is_mentioned_only AS m", cid=cid_m
+    ).single()
+    assert p["m"] is False   # tiene aparición present -> NO solo-mencionado
+    assert m["m"] is True    # solo mentioned -> solo-mencionado
+
+    neo4j_session.run("MATCH (n) WHERE n.manuscript_id = $mid DETACH DELETE n", mid=mid)
+    neo4j_session.run("MATCH (s:Scene) WHERE s.scene_id STARTS WITH 'md:' DETACH DELETE s")

@@ -247,6 +247,17 @@ def run_pipeline(
 
             scene_res.characters_seen.append(canonical)
 
+        # Presencia de entidades ya conocidas (o nuevas) declaradas on-stage por el
+        # LLM. Resolver contra el registro; las que existan ganan presencia en la
+        # escena aunque no se hayan re-emitido como new_characters (arregla el flag
+        # is_mentioned_only de personajes cuya primera aparición fue una mención).
+        for name in extraction.present_entities:
+            entry = registry.find(name)
+            if entry is not None:
+                present_canonicals.add(entry.canonical_name)
+            elif name not in filtered_names:
+                log.debug("present_entity sin resolver ('%s') en escena %s", name, scene_id)
+
         # Procesar menciones
         for mention in extraction.mentions:
             offsets = _find_offset(scene_text, mention.surface)

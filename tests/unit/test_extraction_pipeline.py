@@ -243,3 +243,21 @@ def test_merge_prompt_scene_text_delimited():
 def test_merge_system_prompt_biases_against_merging():
     assert "same_entity" in MERGE_SYSTEM_PROMPT
     assert "duda" in MERGE_SYSTEM_PROMPT.lower()
+
+
+def test_merge_prompt_includes_prior_quotes():
+    prompt = build_merge_prompt(
+        "Albus Dumbledore", ["Dumbledore"], "secondary",
+        "señor Ollivander", [], "minor",
+        "Un anciano estaba ante ellos en la tienda de varitas.",
+        quotes_a=["Un anciano apareció en la esquina que el gato vigilaba.",
+                  "Dumbledore guardó el Apagador."],
+    )
+    assert "Apagador" in prompt          # cita previa de A presente
+    assert "tienda de varitas" in prompt  # escena actual de B presente
+
+
+def test_merge_prompt_without_quotes_unchanged():
+    """quotes_a=None mantiene el prompt funcional (retrocompatible)."""
+    prompt = build_merge_prompt("A", [], "unknown", "B", [], "unknown", "texto escena")
+    assert "texto escena" in prompt

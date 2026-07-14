@@ -62,6 +62,7 @@ def resolve_candidate(
     llm_client=None,
     prior_decisions: dict[tuple[str, str], str] | None = None,
     scene_text: str = "",
+    evidence_fn=None,
 ) -> ResolutionResult:
     """Resuelve un candidato de extracción contra el registro.
 
@@ -73,6 +74,10 @@ def resolve_candidate(
                          humanas previas (INV-M1-4).
         scene_text: Texto completo de la escena donde apareció `candidate`, usado
                     como evidencia (fragmento) en el juicio LLM de nivel 2.
+        evidence_fn: Callable[[str], list[str]] opcional — dado el canonical_name
+                     de la entidad A, devuelve hasta N citas de escenas previas
+                     desde el grafo. Se invoca SOLO cuando se va a preguntar al
+                     LLM (los merges deterministas no pagan este coste).
 
     Returns:
         ResolutionResult con el nombre canónico final y posibles candidatos de fusión.
@@ -120,7 +125,14 @@ def resolve_candidate(
             if not similar:
                 continue
 
-            judgement = _ask_llm_merge(candidate, entry, scene_text, llm_client)
+            quotes_a: list[str] = []
+            if evidence_fn is not None:
+                try:
+                    quotes_a = evidence_fn(entry.canonical_name) or []
+                except Exception as exc:  # la evidencia nunca rompe la resolución
+                    log.warning("evidence_fn falló para %s: %s", entry.canonical_name, exc)
+
+            judgement = _ask_llm_merge(candidate, entry, scene_text, llm_client, quotes_a)
             if judgement is None:
                 continue
 
@@ -202,10 +214,12 @@ def _ask_llm_merge(
     entry,
     scene_text: str,
     llm_client,
+    quotes_a: list[str] | None = None,
 ) -> MergeJudgement | None:
     try:
         from backend.extraction.prompts import MERGE_SYSTEM_PROMPT, build_merge_prompt
 
+        truncated_quotes = [q[:300] for q in (quotes_a or [])[:3]]
         user = build_merge_prompt(
             name_a=entry.canonical_name,
             aliases_a=entry.aliases,
@@ -214,6 +228,7 @@ def _ask_llm_merge(
             aliases_b=candidate.aliases,
             role_b=candidate.role,
             scene_excerpt=scene_text[:_SCENE_EXCERPT_CHARS],
+            quotes_a=truncated_quotes,
         )
         return llm_client.complete_structured(MERGE_SYSTEM_PROMPT, user, MergeJudgement)
     except Exception as exc:

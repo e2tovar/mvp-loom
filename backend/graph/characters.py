@@ -353,6 +353,28 @@ def count_pending_merge_candidates(sess: Session, manuscript_id: str) -> int:
     return row["n"] if row else 0
 
 
+def get_character_quotes(
+    sess: Session,
+    manuscript_id: str,
+    canonical_name: str,
+    limit: int = 3,
+) -> list[str]:
+    """Citas de las primeras menciones de un personaje (evidencia para juicios de fusión)."""
+    cid = character_id(manuscript_id, canonical_name)
+    result = sess.run(
+        """
+        MATCH (c:Character {character_id: $cid})-[:HAS_MENTION]->(mn:Mention)
+        WHERE mn.quote IS NOT NULL AND mn.quote <> ''
+        RETURN mn.quote AS quote
+        ORDER BY mn.scene_id, mn.start_offset
+        LIMIT $limit
+        """,
+        cid=cid,
+        limit=limit,
+    )
+    return [r["quote"] for r in result]
+
+
 def has_extraction(sess: Session, manuscript_id: str) -> bool:
     result = sess.run(
         """

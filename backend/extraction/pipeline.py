@@ -161,6 +161,10 @@ def run_pipeline(
     filtered_names: set[str] = set()
     result = PipelineResult(manuscript_id=manuscript_id)
 
+    def _evidence_fn(canonical: str) -> list[str]:
+        with db_session() as sess:
+            return char_graph.get_character_quotes(sess, manuscript_id, canonical)
+
     for scene_row in scenes:
         scene_id: str = scene_row["scene_id"]
         scene_text: str = scene_row["text"] or ""
@@ -206,6 +210,7 @@ def run_pipeline(
                 llm_client=llm_client,
                 prior_decisions=prior,
                 scene_text=scene_text,
+                evidence_fn=_evidence_fn,
             )
 
             if res.filtered:

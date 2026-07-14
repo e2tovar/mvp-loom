@@ -248,6 +248,40 @@ def test_rejected_decision_not_re_proposed():
     assert result.merge_candidate is None
 
 
+# ── Evidencia bajo demanda (citas previas de A) ──────────────────────────────
+
+
+def test_evidence_fn_called_only_for_llm_judgement():
+    """evidence_fn se invoca solo cuando hay pregunta al LLM, con el canonical de A."""
+    calls = []
+
+    def fake_evidence(canonical):
+        calls.append(canonical)
+        return ["Cita previa de la entidad A."]
+
+    reg = EntityRegistry()
+    reg.add("Fitzwilliam Darcy", [], "protagonist")
+    client = _fake_llm(False, 0.2)
+    resolve_candidate(
+        _candidate("Georgiana Darcy"), reg,
+        llm_client=client, scene_text="escena", evidence_fn=fake_evidence,
+    )
+    assert calls == ["Fitzwilliam Darcy"]
+    user_arg = client.complete_structured.call_args[0][1]
+    assert "Cita previa de la entidad A." in user_arg
+
+
+def test_evidence_fn_not_called_on_deterministic_merge():
+    """Match exacto (nivel 1) no paga el coste de evidencia."""
+    calls = []
+    reg = _registry("Elizabeth Bennet")
+    resolve_candidate(
+        _candidate("Elizabeth Bennet"), reg,
+        llm_client=_fake_llm(True, 0.9), evidence_fn=lambda c: calls.append(c) or [],
+    )
+    assert calls == []
+
+
 # ── Nivel 2 honorific-aware (cierra el agujero que b05b1f5 dejó abierto) ─────
 
 

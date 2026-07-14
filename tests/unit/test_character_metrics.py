@@ -4,7 +4,12 @@ from __future__ import annotations
 
 import pytest
 
-from eval.characters.metrics import bcubed_f1, count_silent_bad_merges, detection_f1, _entities_match
+from eval.characters.metrics import (
+    _entities_match,
+    bcubed_f1,
+    count_silent_bad_merges,
+    detection_f1,
+)
 
 
 def _entity(name: str, aliases=None) -> dict:

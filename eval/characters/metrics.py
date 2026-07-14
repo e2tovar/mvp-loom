@@ -7,6 +7,7 @@
 
 from __future__ import annotations
 
+import unicodedata
 from dataclasses import dataclass
 
 
@@ -20,11 +21,17 @@ class F1Scores:
 # ── Detection: F1 de entidades ────────────────────────────────────────────────
 
 
+def _fold(text: str) -> str:
+    """casefold + eliminación de acentos (NFKD) — 'Nicolás' == 'nicolas'."""
+    nfkd = unicodedata.normalize("NFKD", text)
+    return nfkd.encode("ascii", "ignore").decode("ascii").casefold().strip()
+
+
 def _aliases_set(entity: dict) -> set[str]:
-    """Conjunto normalizado de names + aliases de una entidad."""
-    names = {entity["canonical_name"].casefold().strip()}
+    """Conjunto normalizado (case+accent-fold) de names + aliases de una entidad."""
+    names = {_fold(entity["canonical_name"])}
     for a in entity.get("aliases", []):
-        names.add(a.casefold().strip())
+        names.add(_fold(a))
     return names
 
 

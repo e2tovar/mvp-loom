@@ -261,3 +261,14 @@ def test_merge_prompt_without_quotes_unchanged():
     """quotes_a=None mantiene el prompt funcional (retrocompatible)."""
     prompt = build_merge_prompt("A", [], "unknown", "B", [], "unknown", "texto escena")
     assert "texto escena" in prompt
+
+
+def test_merge_prompt_quotes_delimited():
+    """Las citas (texto no confiable) van dentro de <prior_quotes>...</prior_quotes>."""
+    prompt = build_merge_prompt(
+        "A", [], "unknown", "B", [], "unknown", "escena",
+        quotes_a=["EVIL quote"],
+    )
+    i_open = prompt.index("<prior_quotes>")
+    i_close = prompt.index("</prior_quotes>")
+    assert i_open < prompt.index("EVIL") < i_close

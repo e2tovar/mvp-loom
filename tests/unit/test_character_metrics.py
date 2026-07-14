@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import pytest
 
-from eval.characters.metrics import bcubed_f1, count_silent_bad_merges, detection_f1
+from eval.characters.metrics import bcubed_f1, count_silent_bad_merges, detection_f1, _entities_match
 
 
 def _entity(name: str, aliases=None) -> dict:
@@ -126,3 +126,26 @@ def test_bad_merge_with_unrelated_candidate_still_counted():
     pred = [_entity("Ana", aliases=["María"])]
     pairs = [(_entity("Pedro"), _entity("Juan"))]
     assert count_silent_bad_merges(gold, pred, pairs) == 1
+
+
+# ── Entity matching con acentos ───────────────────────────────────────────────
+
+
+def test_entities_match_ignores_accents():
+    """'Nicolás Flamel' (sistema) debe matchear 'Nicolas Flamel' (gold) — falso miss real de HP1."""
+    gold = {"canonical_name": "Nicolas Flamel", "aliases": []}
+    pred = {"canonical_name": "Nicolás Flamel", "aliases": []}
+    assert _entities_match(gold, pred) is True
+
+
+def test_entities_match_accents_in_aliases():
+    gold = {"canonical_name": "Perenelle Flamel", "aliases": ["Perenela"]}
+    pred = {"canonical_name": "Perenela", "aliases": []}
+    assert _entities_match(gold, pred) is True
+
+
+def test_entities_no_match_still_distinct():
+    """El fold de acentos no debe crear matches espurios."""
+    gold = {"canonical_name": "Ana", "aliases": []}
+    pred = {"canonical_name": "Anna", "aliases": []}
+    assert _entities_match(gold, pred) is False

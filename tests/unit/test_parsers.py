@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import pytest
+from ebooklib import epub
 
 from backend.core.errors import InvalidFileError
 from backend.ingest.parsers.base import is_separator_line
@@ -78,3 +79,35 @@ def test_docx_parser_uses_styles_and_separators(fixtures_dir):
     headings = [b.text for b in doc.blocks if b.kind == "heading"]
     assert headings == ["Capítulo 1", "Capítulo 2"]
     assert any(b.kind == "separator" for b in doc.blocks)
+
+
+def test_epub_parser_tags_guide_paratext_with_source_role(tmp_path):
+    book = epub.EpubBook()
+    book.set_identifier("id-test")
+    book.set_title("Libro de prueba")
+    book.set_language("es")
+
+    cover = epub.EpubHtml(title="Cover", file_name="cover.xhtml", lang="es")
+    cover.content = "<html><body><h1>Libro de prueba</h1><p>J. K. Rowling</p></body></html>"
+    chap = epub.EpubHtml(title="Cap 1", file_name="chap1.xhtml", lang="es")
+    chap.content = "<html><body><h1>Capítulo 1</h1><p>Elena abrió la puerta.</p></body></html>"
+
+    # Create NCX (table of contents)
+    c1 = epub.EpubNcx()
+
+    book.add_item(cover)
+    book.add_item(chap)
+    book.add_item(c1)
+    book.spine = [cover, chap]
+    book.toc = (chap,)
+    book.guide = [{"type": "cover", "href": "cover.xhtml", "title": "Cover"}]
+
+    path = tmp_path / "with-guide.epub"
+    epub.write_epub(str(path), book)
+
+    doc = EpubParser().parse(path)
+    cover_blocks = [b for b in doc.blocks if b.text in ("Libro de prueba", "J. K. Rowling")]
+    chap_blocks = [b for b in doc.blocks if b.text in ("Capítulo 1", "Elena abrió la puerta.")]
+
+    assert cover_blocks and all(b.source_role == "cover" for b in cover_blocks)
+    assert chap_blocks and all(b.source_role is None for b in chap_blocks)

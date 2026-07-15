@@ -33,24 +33,32 @@ class EpubParser:
             raise InvalidFileError(f"No se pudo leer el EPUB: {exc}") from exc
 
         blocks: list[Block] = []
+        guide_roles = {
+            str(g.get("href", "")).split("#")[0]: str(g.get("type", "")).strip()
+            for g in getattr(book, "guide", []) or []
+            if g.get("href")
+        }
         for idref, _linear in book.spine:
             item = book.get_item_with_id(idref)
             if item is None or item.get_type() != ebooklib.ITEM_DOCUMENT:
                 continue
+            role = guide_roles.get(item.get_name()) or None
             soup = BeautifulSoup(item.get_content(), "lxml")
             for el in soup.find_all(_BLOCK_TAGS):
                 if el.name == "hr":
-                    blocks.append(Block(kind="separator", text="***"))
+                    blocks.append(Block(kind="separator", text="***", source_role=role))
                     continue
                 text = el.get_text(" ", strip=True)
                 if not text:
                     continue
                 if el.name in _HEADING_TAGS:
-                    blocks.append(Block(kind="heading", text=text, level=_HEADING_TAGS[el.name]))
+                    blocks.append(
+                        Block(kind="heading", text=text, level=_HEADING_TAGS[el.name], source_role=role)
+                    )
                 elif is_separator_line(text):
-                    blocks.append(Block(kind="separator", text=text))
+                    blocks.append(Block(kind="separator", text=text, source_role=role))
                 else:
-                    blocks.append(Block(kind="paragraph", text=text))
+                    blocks.append(Block(kind="paragraph", text=text, source_role=role))
 
         if not blocks:
             raise InvalidFileError("El EPUB no contiene texto extraíble.")

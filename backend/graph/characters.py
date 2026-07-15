@@ -50,6 +50,7 @@ def upsert_character(
     role: str,
     is_mentioned_only: bool,
     first_scene_id: str,
+    entity_kind: str = "person",
 ) -> str:
     """MERGE idempotente de un nodo Character; devuelve su character_id."""
     cid = character_id(manuscript_id, canonical_name)
@@ -64,7 +65,8 @@ def upsert_character(
             c.is_mentioned_only  = $is_mentioned_only,
             c.first_scene_id     = $first_scene_id,
             c.appearance_count   = 0,
-            c.mention_count      = 0
+            c.mention_count      = 0,
+            c.entity_kind        = $entity_kind
         ON MATCH SET
             c.aliases            = $aliases,
             c.role               = CASE WHEN c.role = 'unknown' THEN $role ELSE c.role END,
@@ -80,6 +82,7 @@ def upsert_character(
         role=role,
         is_mentioned_only=is_mentioned_only,
         first_scene_id=first_scene_id,
+        entity_kind=entity_kind,
     )
     return cid
 
@@ -259,7 +262,8 @@ def get_characters_list(
         RETURN c {{
             .character_id, .canonical_name, .aliases, .role,
             .is_mentioned_only, .appearance_count, .mention_count,
-            .first_scene_id
+            .first_scene_id,
+            entity_kind: coalesce(c.entity_kind, 'person')
         }}, fs.scene_id AS first_scene_id_actual,
            first_order AS chapter_order,
            coalesce(primary_mn.quote, fallback_first.quote) AS first_quote
@@ -289,7 +293,8 @@ def get_character_detail(
         """
         MATCH (c:Character {character_id: $cid, manuscript_id: $mid})
         RETURN c {.character_id, .canonical_name, .aliases, .role,
-                  .is_mentioned_only, .appearance_count, .mention_count}
+                  .is_mentioned_only, .appearance_count, .mention_count,
+                  entity_kind: coalesce(c.entity_kind, 'person')}
         """,
         cid=character_id_val,
         mid=manuscript_id,

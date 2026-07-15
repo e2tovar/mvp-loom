@@ -463,3 +463,18 @@ def test_is_mentioned_only_derived_from_present_appearance(neo4j_session):
 
     neo4j_session.run("MATCH (n) WHERE n.manuscript_id = $mid DETACH DELETE n", mid=mid)
     neo4j_session.run("MATCH (s:Scene) WHERE s.scene_id STARTS WITH 'md:' DETACH DELETE s")
+
+
+@pytest.mark.integration
+def test_entity_kind_persisted_and_defaulted(neo4j_session, manuscript_in_graph):
+    """entity_kind se persiste en Character y se devuelve (default 'person' para nodos antiguos)."""
+    cid_person = char_graph.upsert_character(
+        neo4j_session, MANUSCRIPT_ID, "Elena", [], "protagonist", False, "sc-1"
+    )
+    cid_animal = char_graph.upsert_character(
+        neo4j_session, MANUSCRIPT_ID, "Hedwig", [], "minor", False, "sc-1", entity_kind="animal"
+    )
+    chars = {c["character_id"]: c for c in char_graph.get_characters_list(neo4j_session, MANUSCRIPT_ID)}
+
+    assert chars[cid_person]["entity_kind"] == "person"
+    assert chars[cid_animal]["entity_kind"] == "animal"

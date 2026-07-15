@@ -72,6 +72,7 @@ def _load_system_output(
 
     with db_session() as sess:
         char_list = char_graph.get_characters_list(sess, manuscript_id)
+        char_list = [c for c in char_list if c.get("entity_kind", "person") != "animal"]
         scene_coords = char_graph.get_scene_coordinates(sess, manuscript_id)
         _validate_system_output(char_list, scene_coords, manuscript_id)
         per_char_mentions = []

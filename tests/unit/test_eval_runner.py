@@ -117,6 +117,64 @@ def test_run_eval_exits_when_system_output_missing(monkeypatch):
     assert exc_info.value.code == 1
 
 
+def test_animals_excluded_from_detection(monkeypatch):
+    """entity_kind='animal' no debe contarse como falso positivo de detección.
+
+    El gold nunca anota animales (mascotas como Hedwig): si se cuelan en la
+    comparación, penalizan la precisión de forma injusta. El filtro real vive
+    dentro de `_load_system_output`, así que este test parchea las
+    dependencias que esa función consume (`get_characters_list` et al.) en vez
+    de reemplazar `_load_system_output` entera — de lo contrario el test no
+    ejercitaría el filtro de producción y pasaría sin implementarlo.
+    """
+    from contextlib import contextmanager
+
+    import backend.graph.characters as char_graph_module
+    import backend.graph.client as client_module
+    import backend.graph.merge_candidates as merge_module
+
+    gold = {
+        "work": "obra-test",
+        "characters": [
+            {
+                "gold_id": "elena",
+                "canonical_name": "Elena",
+                "aliases": [],
+                "role": "protagonist",
+                "is_mentioned_only": False,
+                "appearances": ["c1/s0"],
+            }
+        ],
+    }
+    pred_with_animal = [
+        {"character_id": "m:ch:1", "canonical_name": "Elena", "aliases": [], "entity_kind": "person"},
+        {"character_id": "m:ch:2", "canonical_name": "Hedwig", "aliases": [], "entity_kind": "animal"},
+    ]
+
+    @contextmanager
+    def fake_session():
+        yield object()
+
+    monkeypatch.setattr(runner, "_load_gold", lambda work: gold)
+    monkeypatch.setattr(client_module, "session", fake_session)
+    monkeypatch.setattr(
+        char_graph_module, "get_characters_list", lambda sess, mid: pred_with_animal
+    )
+    monkeypatch.setattr(
+        char_graph_module, "get_scene_coordinates", lambda sess, mid: {"m:s:1": "c1/s0"}
+    )
+    monkeypatch.setattr(
+        char_graph_module, "get_character_detail", lambda sess, mid, cid: {"mentions": []}
+    )
+    monkeypatch.setattr(
+        merge_module, "get_merge_candidates", lambda sess, mid, status="all": []
+    )
+
+    result = runner.run_eval("obra-test")
+    # Sin el animal: 1 pred vs 1 gold → detección perfecta.
+    assert result["detection"]["f1"] == pytest.approx(1.0)
+
+
 def test_b3_null_does_not_block_when_detection_ok(monkeypatch):
     gold = {
         "work": "obra-test",

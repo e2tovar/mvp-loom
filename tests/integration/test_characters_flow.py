@@ -466,6 +466,37 @@ def test_is_mentioned_only_derived_from_present_appearance(neo4j_session):
 
 
 @pytest.mark.integration
+def test_pipeline_persists_animal_entity_kind(neo4j_session, manuscript_in_graph):
+    """El pipeline propaga entity_kind del candidato ('animal') al Character persistido."""
+    from backend.extraction.pipeline import run_pipeline
+
+    fake = MagicMock()
+    fake.complete_structured.return_value = SceneExtraction(
+        mentions=[
+            MentionOut(
+                surface="Hedwig",
+                kind="name",
+                links_to=None,
+                quote="Hedwig voló por la ventana.",
+            )
+        ],
+        new_characters=[
+            CharacterCandidateOut(
+                canonical_name="Hedwig",
+                is_present_in_scene=True,
+                entity_kind="animal",
+            )
+        ],
+    )
+
+    run_pipeline(MANUSCRIPT_ID, llm_client=fake)
+
+    with db_session() as sess:
+        chars = {c["canonical_name"]: c for c in char_graph.get_characters_list(sess, MANUSCRIPT_ID)}
+    assert chars["Hedwig"]["entity_kind"] == "animal"
+
+
+@pytest.mark.integration
 def test_entity_kind_persisted_and_defaulted(neo4j_session, manuscript_in_graph):
     """entity_kind se persiste en Character y se devuelve (default 'person' para nodos antiguos)."""
     cid_person = char_graph.upsert_character(

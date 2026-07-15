@@ -244,6 +244,7 @@ def run_pipeline(
                     role=candidate.role,
                     is_mentioned_only=not candidate.is_present_in_scene,
                     first_scene_id=scene_id,
+                    entity_kind=candidate.entity_kind,
                 )
 
             if res.merge_candidate:

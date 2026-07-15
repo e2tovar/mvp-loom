@@ -174,6 +174,31 @@ def test_named_character_not_unnamed(name):
     assert is_unnamed(name) is False
 
 
+@pytest.mark.parametrize(
+    "name",
+    [
+        "Abuelo de Harry Potter",
+        "Mr. Darcy's father",
+        "la madre de Elena",
+        "the father of Harry",
+        "Abuela de Ron",
+    ],
+)
+def test_relational_descriptor_is_unnamed(name):
+    """Un descriptor por parentesco con nombre propio de OTRO personaje embebido
+    sigue siendo un descriptor sin nombre propio (no es entidad propia)."""
+    assert is_unnamed(name) is True
+
+
+@pytest.mark.parametrize(
+    "name",
+    ["Juan de Dios", "Harry Potter", "Elena", "Fitzwilliam Darcy"],
+)
+def test_names_with_embedded_preposition_not_unnamed(name):
+    """Nombres propios legítimos que contienen 'de' no se filtran."""
+    assert is_unnamed(name) is False
+
+
 def test_collective_result_is_filtered():
     """Colectivo → filtered=True para que el pipeline NO lo escriba."""
     reg = _registry("Ana")

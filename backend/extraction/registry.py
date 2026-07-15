@@ -29,9 +29,11 @@ _GENERIC_HEAD = frozenset({
     "sister", "brother", "aunt", "uncle", "cousin", "niece", "nephew",
     "wife", "husband", "son", "daughter", "child", "children", "family",
     "friend", "friends", "neighbour", "neighbor",
+    "grandfather", "grandmother", "grandson", "granddaughter", "grandparent",
     "madre", "padre", "mama", "papa", "hermana", "hermano", "tia", "tio",
     "prima", "primo", "esposa", "esposo", "marido", "mujer", "hija", "hijo",
     "amiga", "amigo", "vecina", "vecino", "familia", "nina", "nino",
+    "abuelo", "abuela", "nieto", "nieta",
 })
 
 _ALIAS_PREFIX = re.compile(
@@ -44,6 +46,20 @@ _LEADING_ARTICLE = re.compile(
     r"^(the|a|an|el|la|los|las|un|una|unos|unas|one of the|one of|some of the)\s+",
     re.IGNORECASE,
 )
+
+# Descriptor relacional: "<parentesco> de/of <Nombre>" o "<Nombre>'s <parentesco>".
+# El nombre propio embebido pertenece a OTRO personaje, no al descrito.
+_RELATIONAL_GENITIVE = re.compile(r"^(?P<head>\S+)\s+(?:de|of)\s+\S+", re.IGNORECASE)
+_RELATIONAL_POSSESSIVE = re.compile(r"^.+['']s\s+(?P<head>\S+)\s*$", re.IGNORECASE)
+
+
+def _is_relational_descriptor(stripped: str) -> bool:
+    """True si es un descriptor por parentesco con nombre propio ajeno embebido."""
+    for pattern in (_RELATIONAL_GENITIVE, _RELATIONAL_POSSESSIVE):
+        match = pattern.match(stripped)
+        if match and _ascii_fold(match.group("head")) in _GENERIC_HEAD:
+            return True
+    return False
 
 
 def is_unnamed(name: str) -> bool:
@@ -58,6 +74,8 @@ def is_unnamed(name: str) -> bool:
     """
     stripped = _LEADING_ARTICLE.sub("", name.strip())
     if not stripped:
+        return True
+    if _is_relational_descriptor(stripped):
         return True
     return not any(tok[:1].isupper() for tok in stripped.split())
 

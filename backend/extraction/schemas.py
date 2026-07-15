@@ -10,7 +10,7 @@ from typing import Literal
 
 from pydantic import BaseModel
 
-SCHEMA_VERSION: int = 2
+SCHEMA_VERSION: int = 3
 
 
 # ── Entrada (construida por el pipeline, no por el LLM) ───────────────────────
@@ -51,6 +51,7 @@ class CharacterCandidateOut(BaseModel):
     canonical_name: str
     aliases: list[str] = []
     role: Literal["protagonist", "antagonist", "secondary", "minor", "unknown"] = "unknown"
+    entity_kind: Literal["person", "animal"] = "person"
     is_present_in_scene: bool
 
 

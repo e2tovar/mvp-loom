@@ -80,6 +80,40 @@ def test_schema_version_bumped_for_presence_field():
     assert SCHEMA_VERSION >= 2
 
 
+def test_character_candidate_entity_kind_defaults_person():
+    from backend.extraction.schemas import CharacterCandidateOut
+
+    cand = CharacterCandidateOut(canonical_name="Elena", is_present_in_scene=True)
+    assert cand.entity_kind == "person"
+
+
+def test_character_candidate_accepts_animal():
+    from backend.extraction.schemas import CharacterCandidateOut
+
+    cand = CharacterCandidateOut(
+        canonical_name="Hedwig", is_present_in_scene=True, entity_kind="animal"
+    )
+    assert cand.entity_kind == "animal"
+
+
+def test_character_candidate_rejects_unknown_entity_kind():
+    import pytest as _pytest
+    from pydantic import ValidationError
+
+    from backend.extraction.schemas import CharacterCandidateOut
+
+    with _pytest.raises(ValidationError):
+        CharacterCandidateOut(
+            canonical_name="X", is_present_in_scene=True, entity_kind="plant"
+        )
+
+
+def test_schema_version_bumped_for_entity_kind():
+    from backend.extraction.schemas import SCHEMA_VERSION
+
+    assert SCHEMA_VERSION == 3
+
+
 # ── Construcción del contexto con registro ───────────────────────────────────
 
 

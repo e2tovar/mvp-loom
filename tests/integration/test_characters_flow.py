@@ -492,7 +492,8 @@ def test_pipeline_persists_animal_entity_kind(neo4j_session, manuscript_in_graph
     run_pipeline(MANUSCRIPT_ID, llm_client=fake)
 
     with db_session() as sess:
-        chars = {c["canonical_name"]: c for c in char_graph.get_characters_list(sess, MANUSCRIPT_ID)}
+        char_list = char_graph.get_characters_list(sess, MANUSCRIPT_ID)
+        chars = {c["canonical_name"]: c for c in char_list}
     assert chars["Hedwig"]["entity_kind"] == "animal"
 
 
@@ -505,7 +506,8 @@ def test_entity_kind_persisted_and_defaulted(neo4j_session, manuscript_in_graph)
     cid_animal = char_graph.upsert_character(
         neo4j_session, MANUSCRIPT_ID, "Hedwig", [], "minor", False, "sc-1", entity_kind="animal"
     )
-    chars = {c["character_id"]: c for c in char_graph.get_characters_list(neo4j_session, MANUSCRIPT_ID)}
+    char_list = char_graph.get_characters_list(neo4j_session, MANUSCRIPT_ID)
+    chars = {c["character_id"]: c for c in char_list}
 
     assert chars[cid_person]["entity_kind"] == "person"
     assert chars[cid_animal]["entity_kind"] == "animal"

@@ -53,7 +53,12 @@ class EpubParser:
                     continue
                 if el.name in _HEADING_TAGS:
                     blocks.append(
-                        Block(kind="heading", text=text, level=_HEADING_TAGS[el.name], source_role=role)
+                        Block(
+                            kind="heading",
+                            text=text,
+                            level=_HEADING_TAGS[el.name],
+                            source_role=role,
+                        )
                     )
                 elif is_separator_line(text):
                     blocks.append(Block(kind="separator", text=text, source_role=role))

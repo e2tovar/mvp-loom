@@ -147,8 +147,18 @@ def test_animals_excluded_from_detection(monkeypatch):
         ],
     }
     pred_with_animal = [
-        {"character_id": "m:ch:1", "canonical_name": "Elena", "aliases": [], "entity_kind": "person"},
-        {"character_id": "m:ch:2", "canonical_name": "Hedwig", "aliases": [], "entity_kind": "animal"},
+        {
+            "character_id": "m:ch:1",
+            "canonical_name": "Elena",
+            "aliases": [],
+            "entity_kind": "person",
+        },
+        {
+            "character_id": "m:ch:2",
+            "canonical_name": "Hedwig",
+            "aliases": [],
+            "entity_kind": "animal",
+        },
     ]
 
     @contextmanager

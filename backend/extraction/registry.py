@@ -30,7 +30,7 @@ _GENERIC_HEAD = frozenset({
     "wife", "husband", "son", "daughter", "child", "children", "family",
     "friend", "friends", "neighbour", "neighbor",
     "grandfather", "grandmother", "grandson", "granddaughter", "grandparent",
-    "madre", "padre", "mama", "papa", "hermana", "hermano", "tia", "tio",
+    "madre", "padre", "hermana", "hermano", "tia", "tio",
     "prima", "primo", "esposa", "esposo", "marido", "mujer", "hija", "hijo",
     "amiga", "amigo", "vecina", "vecino", "familia", "nina", "nino",
     "abuelo", "abuela", "nieto", "nieta",

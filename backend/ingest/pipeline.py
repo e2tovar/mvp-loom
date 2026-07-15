@@ -25,6 +25,7 @@ from backend.ingest.parsers.docx_parser import DocxParser
 from backend.ingest.parsers.epub_parser import EpubParser
 from backend.ingest.parsers.txt_parser import TxtParser
 from backend.ingest.segmentation.chapters import ChapterDraft, segment_chapters
+from backend.ingest.segmentation.paratext import partition_paratext
 from backend.ingest.segmentation.scenes import segment_scenes
 
 _SEP = "\n\n"
@@ -61,8 +62,9 @@ def parse_manuscript(
     parser = get_parser(source_format)
     doc = parser.parse(path)
 
-    chapter_drafts, frontmatter = segment_chapters(doc.blocks)
-    nn_drafts = non_narrative.classify(frontmatter)
+    narrative_blocks, paratext_blocks = partition_paratext(doc.blocks)
+    chapter_drafts, frontmatter = segment_chapters(narrative_blocks)
+    nn_drafts = non_narrative.classify(paratext_blocks + frontmatter)
 
     # Pass 1: escenas normalizadas por capítulo (descarta capítulos sin narrativa).
     built: list[tuple[ChapterDraft, list[tuple[str, str]]]] = []

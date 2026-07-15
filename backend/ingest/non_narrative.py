@@ -38,13 +38,42 @@ def _detect(text: str) -> tuple[NonNarrativeKind, str]:
     return "frontmatter", "frontmatter_position"
 
 
+_ROLE_TO_KIND: dict[str, NonNarrativeKind] = {
+    "cover": "cover",
+    "title-page": "cover",
+    "titlepage": "cover",
+    "copyright-page": "license",
+    "copyright": "license",
+    "toc": "toc",
+    "loi": "toc",
+    "lot": "toc",
+    "dedication": "frontmatter",
+    "acknowledgements": "frontmatter",
+    "notes": "backmatter",
+    "colophon": "backmatter",
+    "index": "backmatter",
+    "bibliography": "backmatter",
+    "glossary": "backmatter",
+}
+
+
+def _kind_from_role(role: str | None) -> NonNarrativeKind | None:
+    if not role:
+        return None
+    return _ROLE_TO_KIND.get(role.lower())
+
+
 def classify(frontmatter_blocks: list[Block]) -> list[NonNarrativeDraft]:
     """Clasifica el frontmatter y fusiona bloques contiguos del mismo tipo."""
     drafts: list[NonNarrativeDraft] = []
     for block in frontmatter_blocks:
         if block.kind == "separator":
             continue
-        kind, detected_by = _detect(block.text)
+        role_kind = _kind_from_role(block.source_role)
+        if role_kind is not None:
+            kind, detected_by = role_kind, "source_role"
+        else:
+            kind, detected_by = _detect(block.text)
         if drafts and drafts[-1].kind == kind and drafts[-1].detected_by == detected_by:
             drafts[-1].text += "\n\n" + block.text
         else:

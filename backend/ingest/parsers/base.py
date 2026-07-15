@@ -54,6 +54,7 @@ class Block:
     text: str
     level: int | None = None
     style: str | None = None
+    source_role: str | None = None
 
 
 @dataclass

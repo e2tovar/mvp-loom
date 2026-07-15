@@ -306,3 +306,27 @@ def test_merge_prompt_quotes_delimited():
     i_open = prompt.index("<prior_quotes>")
     i_close = prompt.index("</prior_quotes>")
     assert i_open < prompt.index("EVIL") < i_close
+
+
+# ── Versión del prompt y reglas nuevas (Task 10) ────────────────────────────
+
+
+def test_prompt_version_bumped():
+    from backend.extraction.prompts import PROMPT_VERSION
+
+    assert PROMPT_VERSION == 4
+
+
+def test_system_prompt_mentions_animals():
+    from backend.extraction.prompts import SYSTEM_PROMPT
+
+    low = SYSTEM_PROMPT.lower()
+    assert "animal" in low and "entity_kind" in low
+
+
+def test_system_prompt_mentions_paratext_and_relational():
+    from backend.extraction.prompts import SYSTEM_PROMPT
+
+    low = SYSTEM_PROMPT.lower()
+    assert "paratexto" in low or "créditos" in low or "portada" in low
+    assert "parentesco" in low or "abuelo de" in low

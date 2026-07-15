@@ -165,54 +165,92 @@ Primera corrida real end-to-end sobre `pride-and-prejudice.txt` (2026-07-12, git
 
 ## M1 · Follow-ups tras bugfixes + demo HP1 (rama `m1-extraction-bugfixes`, 2026-07-14/15)
 
-**Estado:** ⏳ abiertos · registrados 2026-07-15
+**Estado:** parcialmente resuelto · registrados 2026-07-15 · puntos 1-4 resueltos 2026-07-15
 
 Los 8+ bugs originales quedaron resueltos y verificados (ver commits de la rama;
 crafted PASS 1.0/1.0/0, P&P F1 0.800, HP1 F1 0.806, cero merges silenciosos, cola
 humana resuelta). Lo siguiente son follow-ups descubiertos durante la re-medición y
 la demo de Harry Potter 1 (español), en orden de prioridad:
 
-1. **[CRÍTICO] Aislamiento de la base de test.** `tests/conftest.py:42-43` (fixture
-   `neo4j_session`) hace `MATCH (n:{label}) DETACH DELETE n` sobre
-   `Manuscript/Chapter/Scene/NonNarrativeBlock` **sin filtrar por manuscript_id**,
-   contra la misma base `neo4j` que guarda los datos reales. Cada corrida de
-   integración **destruye la capa cruda de todos los libros** (ocurrió 3 veces en
-   una sola sesión). Fix: instancia/base Neo4j separada para tests (contenedor
-   desechable), o como mínimo wipes scoped por manuscript_id. Es la causa de que el
-   grafo quede con `Character/Mention` huérfanos sin `Scene`.
+1. **[CRÍTICO] Aislamiento de la base de test. ✅ resuelto 2026-07-15.**
+   `tests/conftest.py` (fixture `neo4j_session`) hacía `MATCH (n:{label}) DETACH
+   DELETE n` sobre `Manuscript/Chapter/Scene/NonNarrativeBlock` **sin filtrar por
+   manuscript_id**, contra la misma base `neo4j` que guarda los datos reales. Cada
+   corrida de integración **destruía la capa cruda de todos los libros** (ocurrió 3
+   veces en una sola sesión). **Resolución:** Neo4j Community solo expone una base, así
+   que el fix acota el borrado a manuscritos de test (`test-*`) más las fixtures
+   crafted que los tests ingieren (derivadas del mismo pipeline productivo, sin
+   hardcodear el hash). Nunca toca otro `manuscript_id`. Cubierto por
+   `tests/integration/test_harness_isolation.py`.
 
-2. **[M0] Front-matter del epub extraído como personajes.** En HP1 el extractor sacó
-   como personajes a la autora (J. K. Rowling), traductores e ilustradores y nombres
-   de la dedicatoria. El troceado M0 no excluye las páginas de créditos/portada del
-   epub. Fix: marcar front-matter como no-narrativo en el parser epub.
+2. **[M0] Front-matter del epub extraído como personajes. ✅ resuelto 2026-07-15.**
+   En HP1 el extractor sacó como personajes a la autora (J. K. Rowling), traductores e
+   ilustradores y nombres de la dedicatoria. **Resolución:** `Block` gana
+   `source_role`, rellenado por `EpubParser` desde el `guide` que el propio epub
+   declara (cover/toc/copyright/dedication/…); `partition_paratext` aparta ese
+   contenido a `NonNarrativeBlock` antes de la segmentación de capítulos, aunque
+   tenga su propio heading — sin tocar prólogo/prefacio, que sigue tratándose como
+   narrativa (ambigüedad resuelta por el LLM, no por esta capa determinista). Además,
+   el prompt (regla 9, `PROMPT_VERSION` 3→4) instruye al modelo a devolver listas
+   vacías ante paratexto que se le haya escapado a la capa estructural. Verificado en
+   el reproceso real de HP1 (ver abajo): ningún nombre de autora/traductor/dedicatoria
+   aparece entre los 95 personajes extraídos.
 
-3. **[Filtro] Descriptores relacionales que capitalizan la primera palabra.**
-   `is_unnamed` deja pasar "Abuelo de Harry Potter", "Mr. Darcy's father" (mayúscula
-   inicial engaña al heurístico). Afinar para descriptores relacionales con nombre
-   propio embebido.
+3. **[Filtro] Descriptores relacionales que capitalizan la primera palabra. ✅
+   resuelto 2026-07-15.** `is_unnamed` dejaba pasar "Abuelo de Harry Potter", "Mr.
+   Darcy's father" (mayúscula inicial engañaba al heurístico). **Resolución:**
+   `is_unnamed` detecta construcciones genitivas/posesivas ("\<parentesco\> de/of
+   \<Nombre\>", "\<Nombre\>'s \<parentesco\>") reutilizando la lista de parentescos ya
+   existente; más la regla 10 del prompt, que instruye al modelo a anotar esos
+   descriptores como mención (`kind="description"`), no como personaje nuevo. Verificado
+   en el reproceso de HP1: ningún descriptor relacional aparece en la lista de 95
+   personajes.
 
-4. **[Política] Mascotas/animales con nombre.** El extractor saca Hedwig, Fluffy,
-   Scabbers, Norberto, los gatos de la Sra. Figg; el gold los excluye (criterio M1).
-   ~10 falsos positivos en HP1. Decidir: filtrar animales en extracción, o anotarlos.
+4. **[Política] Mascotas/animales con nombre. ✅ resuelto 2026-07-15.** El extractor
+   sacaba a Hedwig, Fluffy, Scabbers, Norberto, los gatos de la Sra. Figg como
+   personajes; el gold los excluye (criterio M1). **Decisión (usuario, brainstorming):**
+   no crear un tipo de nodo separado (obligaría a definir ya la ontología completa de
+   entidades) ni descartarlos en extracción (se pierde información irrecuperable). En
+   su lugar, `Character.entity_kind` ("person" | "animal") lo marca el propio LLM
+   (regla 8 del prompt) — juicio semántico que escala a libros no vistos, a diferencia
+   de una lista de nombres. El eval excluye `entity_kind="animal"` del cómputo de
+   detección (ni acierto ni falso positivo). Verificado: los 11 animales de HP1
+   (Hedwig, Fluffy, Norberto, Scabbers, Fang, Trevor, Señora Norris, Tibbles, Snowy,
+   Señor Paws, Tufty) quedaron correctamente marcados.
 
-5. **[Umbral] Detección 0.9 para novela completa.** P&P (0.800) y HP1 (0.806) no
-   llegan a 0.9 sobre todo por cola larga de personajes de una mención + política del
-   gold, no por calidad del modelo (recall alto, cero merges silenciosos). El spec
-   permite recalibrar con justificación. Opción: umbral propio para novela completa o
-   tratarlas como diagnóstico no-gating; el gate de CI (crafted) se mantiene en 0.9.
+   **Resultado de la verificación E2E (reproceso completo, 2026-07-15, prompt v4):**
+   - Gate CI (crafted): PASS 1.0/1.0/0 en ambas obras — sin regresión.
+   - HP1: Detection F1 **0.806 → 0.844** (mejora; menos paratexto/descriptores/animales
+     contaminando la precisión). B³ sigue sin medir (gold sin anotación de menciones).
+   - P&P: Detection F1 **0.800 → 0.757**. Investigado antes de reportar (systematic-
+     debugging): las 4 corridas del mismo día previas a este cambio (mismo código,
+     mismo prompt v3) ya oscilaban entre F1 0.233 y 0.800 según la corrida —
+     `eval/results/characters-pride-and-prejudice-txt-20260714-*.json` — con recall
+     perfecto (1.0) y `silent_bad_merges=0` en todas. El resultado de hoy (precision
+     0.609, recall 1.0, F1 0.757) cae dentro de ese mismo rango de varianza ya
+     documentado en el punto 6 (cola larga no determinista), no es atribuible a los
+     fixes de este follow-up. No se ajustó nada para forzar un número mejor.
+
+5. **[Umbral] Detección 0.9 para novela completa.** P&P (0.757–0.800 según corrida) y
+   HP1 (0.844) no llegan a 0.9 sobre todo por cola larga de personajes de una mención +
+   política del gold, no por calidad del modelo (recall alto, cero merges silenciosos).
+   El spec permite recalibrar con justificación. Opción: umbral propio para novela
+   completa o tratarlas como diagnóstico no-gating; el gate de CI (crafted) se mantiene
+   en 0.9. **Sigue abierto** — decisión de política pendiente, fuera del scope de este
+   follow-up.
 
 6. **[No determinismo] Cola larga.** Personajes de una sola mención (cromos de ranas:
    Merlín, Morgana…) aparecen en una corrida y no en otra. Inherente al LLM sobre
-   menciones únicas.
+   menciones únicas. **Sigue abierto** — confirmado de nuevo por la varianza de P&P
+   documentada en el punto 4.
 
 7. **[Riesgo] Fuga de nombres canon del LLM.** El modelo emite nombres que no están en
    el texto ("Garrick Ollivander", "Arabella Figg" en HP1). Aquí ayudó; con un libro
-   desconocido es riesgo de alucinación. Vigilar / anclar al texto.
+   desconocido es riesgo de alucinación. Vigilar / anclar al texto. **Sigue abierto.**
 
 8. **[Menor] B³ no medido en P&P ni HP1** — falta anotación de menciones (laboriosa);
    solo las crafted lo miden hoy. Y splits de coref residuales tipo Maria/Maria Lucas.
+   **Sigue abierto.**
 
-**Estado del grafo al cerrar la rama:** contiene `Character/Mention/MergeCandidate`
-huérfanos (sin capa cruda) por el punto 1. Es reconstruible de forma determinista
-(`rebuild_raw.py` + re-extracción), pero no compensa reconstruir hasta arreglar el
-punto 1. El código está en git; el grafo es dato de runtime.
+**Estado del grafo tras el punto 1:** ya no hay riesgo de que una corrida de tests
+destruya datos reales; el fix acota el borrado a manuscritos de test/crafted.

@@ -1,0 +1,24 @@
+{
+  "work": "crafted-two-chapters.epub",
+  "run_at": "2026-07-15T17:57:09.366208+00:00",
+  "git_sha": "e864f1e",
+  "prompt_version": 4,
+  "model": "openai/kimi-k2.5",
+  "detection": {
+    "precision": 1.0,
+    "recall": 1.0,
+    "f1": 1.0
+  },
+  "resolution_b3": {
+    "precision": 1.0,
+    "recall": 1.0,
+    "f1": 1.0
+  },
+  "silent_bad_merges": 0,
+  "thresholds": {
+    "detection_f1": 0.9,
+    "resolution_b3_f1": 0.85,
+    "silent_bad_merges": 0
+  },
+  "passed": true
+}

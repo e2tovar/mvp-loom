@@ -218,18 +218,39 @@ la demo de Harry Potter 1 (español), en orden de prioridad:
    (Hedwig, Fluffy, Norberto, Scabbers, Fang, Trevor, Señora Norris, Tibbles, Snowy,
    Señor Paws, Tufty) quedaron correctamente marcados.
 
+   **Caveat de reproducibilidad:** `entity_kind` se fija solo en `ON CREATE` del
+   `MERGE` (idempotencia: una corrida repetida no debe pisar un valor ya asignado).
+   Efecto práctico: reproducir estos 11 animales requiere una extracción **desde
+   grafo limpio** (como en esta verificación); sobre un grafo que ya tuviera esos
+   personajes como `"person"` de una corrida anterior, una re-extracción NO los
+   reclasificaría — el `MERGE` haría match y `ON MATCH` no toca `entity_kind`. Hoy no
+   existe una vía no destructiva para corregir una entidad mal clasificada; solo
+   borrar y re-extraer.
+
    **Resultado de la verificación E2E (reproceso completo, 2026-07-15, prompt v4):**
    - Gate CI (crafted): PASS 1.0/1.0/0 en ambas obras — sin regresión.
    - HP1: Detection F1 **0.806 → 0.844** (mejora; menos paratexto/descriptores/animales
      contaminando la precisión). B³ sigue sin medir (gold sin anotación de menciones).
-   - P&P: Detection F1 **0.800 → 0.757**. Investigado antes de reportar (systematic-
-     debugging): las 4 corridas del mismo día previas a este cambio (mismo código,
-     mismo prompt v3) ya oscilaban entre F1 0.233 y 0.800 según la corrida —
-     `eval/results/characters-pride-and-prejudice-txt-20260714-*.json` — con recall
-     perfecto (1.0) y `silent_bad_merges=0` en todas. El resultado de hoy (precision
-     0.609, recall 1.0, F1 0.757) cae dentro de ese mismo rango de varianza ya
-     documentado en el punto 6 (cola larga no determinista), no es atribuible a los
-     fixes de este follow-up. No se ajustó nada para forzar un número mejor.
+   - P&P: Detection F1 **0.800 → 0.757**. **Corrección (2026-07-15, tras revisión de
+     rama):** una primera versión de esta entrada afirmaba que las 4 corridas previas
+     del mismo día eran "mismo código, mismo prompt v3" oscilando 0.233–0.800, y que
+     por tanto el 0.757 caía dentro de esa varianza — **esa lectura era incorrecta**.
+     Verificado directamente contra `eval/results/characters-pride-and-prejudice-txt-
+     20260714-*.json`: las 4 corridas usan **tres prompts distintos** (683528b →
+     prompt v1, F1 0.233; ecc31c9 → prompt v2, F1 0.750; c918204 → prompt v3, F1
+     0.800; 33348b6 → prompt v3, F1 0.785), no una sola versión de código. El único
+     par comparable de verdad con hoy (mismo prompt v3, antes de este follow-up) es
+     0.785 y 0.800. El resultado de hoy con prompt v4 (precision 0.609, recall 1.0,
+     F1 0.757) queda **ligeramente por debajo** de ambos — una caída pequeña, no una
+     mejora ni un no-cambio.
+     No hay evidencia suficiente para afirmar que sea una regresión causada por los
+     fixes de este follow-up (recall se mantiene perfecto, `silent_bad_merges=0`, y
+     solo hay una muestra con prompt v4 frente a dos con v3 — el punto 6, cola larga
+     no determinista, sigue siendo un factor real y no descartable), pero tampoco hay
+     evidencia para descartarlo. **Queda abierto, sin explicación validada** — no se
+     cierra como "dentro de varianza conocida" hasta tener más corridas con prompt v4
+     que permitan comparar de verdad contra el mismo baseline (v3). No se ajustó nada
+     para forzar un número mejor ni para minimizar este resultado.
 
 5. **[Umbral] Detección 0.9 para novela completa.** P&P (0.757–0.800 según corrida) y
    HP1 (0.844) no llegan a 0.9 sobre todo por cola larga de personajes de una mención +

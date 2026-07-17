@@ -10,9 +10,8 @@ import json
 from datetime import UTC, datetime
 from typing import Any, Literal
 
-from neo4j import Session
-
 from backend.core.errors import AlreadyResolvedError, ManuscriptNotFoundError
+from neo4j import Session
 
 
 def get_merge_candidates(

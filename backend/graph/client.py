@@ -14,6 +14,7 @@ from contextlib import contextmanager
 from functools import lru_cache
 
 from dotenv import load_dotenv
+
 from neo4j import Driver, GraphDatabase, Session
 
 load_dotenv()

@@ -103,6 +103,10 @@ def replace_relates_to(
         mid=manuscript_id,
     )
     for rel in relations:
+        cid_a, cid_b = canonical_pair(rel["character_a_id"], rel["character_b_id"])
+        role_a, role_b = rel.get("role_a"), rel.get("role_b")
+        if cid_a != rel["character_a_id"]:
+            role_a, role_b = role_b, role_a
         sess.run(
             """
             MATCH (a:Character {character_id: $cid_a})
@@ -117,12 +121,12 @@ def replace_relates_to(
                 r.evidence_count    = $evidence_count,
                 r.first_evidence_id = $first_evidence_id
             """,
-            cid_a=rel["character_a_id"],
-            cid_b=rel["character_b_id"],
+            cid_a=cid_a,
+            cid_b=cid_b,
             rel_type=rel["rel_type"],
             descriptor=rel["descriptor"],
-            role_a=rel.get("role_a"),
-            role_b=rel.get("role_b"),
+            role_a=role_a,
+            role_b=role_b,
             provenance=rel["provenance"],
             confidence=rel["confidence"],
             evidence_count=rel["evidence_count"],

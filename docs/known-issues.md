@@ -5,6 +5,56 @@ resolverse antes de dar una métrica por válida. Cada entrada cita su ubicació
 
 ---
 
+## M2 · Follow-ups tras la implementación de relaciones (rama `feature/m2-relations`, 2026-07-17)
+
+**Estado:** ⏳ abiertos · registrados 2026-07-17
+
+M2 (relaciones entre personajes) quedó completo y verificado: gate en verde sobre
+`crafted-relations.txt` (pares extracted F1 = 1.0, type accuracy = 1.0 con
+`openai/kimi-k2.5`), suite unit + integración (36) en verde, re-ejecución idempotente
+(2ª corrida 4/4 cache hits). Follow-ups no bloqueantes detectados en el review final
+de rama, en orden de prioridad:
+
+1. **[Constitución] `_load_scenes` con Cypher fuera de `backend/graph/`.**
+   `backend/extraction/relations/pipeline.py` incrusta la query de carga de escenas
+   (copia literal de `backend/extraction/pipeline.py` de M1). Extraer a un
+   `get_scenes_in_order(sess, mid)` en `backend/graph/` y llamarlo desde ambos
+   pipelines: corrige la desviación y elimina la query duplicada.
+
+2. **[API] `has_relations` → 409 ambiguo.** Un manuscrito donde M2 corrió pero todas
+   las relaciones quedaron bajo `WRITE_THRESHOLD` (cero aristas) devuelve
+   `409 not_extracted`, indistinguible de "M2 nunca corrió"
+   (`backend/api/routes_relations.py`, `backend/graph/relations.py::has_relations`).
+   Considerar un marcador de "procesado" separado de "tiene aristas".
+
+3. **[Limpieza] `SceneRelations.notes` es un campo de salida muerto.** Declarado en
+   `backend/extraction/relations/schemas.py` pero nunca leído en pipeline, agregación,
+   cache ni eval. Eliminar o cablear a un log de diagnóstico.
+
+4. **[M3] Evidencia de relación obsoleta ante re-resolución de M1.**
+   `get_evidences_by_pair` lee toda la `RelationEvidence` histórica del manuscrito. Si
+   una futura re-resolución de M1 cambia/fusiona `character_id`s, la evidencia con ids
+   muertos sobrevive (nunca se purga) y sigue contando en `evidence_count`/votos de
+   tipo. `replace_relates_to` protege contra aristas fantasma, no contra evidencia
+   fantasma. Fuera de alcance de M2; abordar cuando M3 toque re-resolución.
+
+5. **[Tests/docs] Cobertura y precisión menores.** (a) `test_relation_aggregation`:
+   falta caso de conflicto asimétrico de roles (un solo slot discrepa → ambos None) y
+   caso de frontera `WRITE_THRESHOLD` (conf == 0.5 no es None) — comportamiento
+   verificado correcto, solo falta el test. (b)
+   `test_inferred_pred_does_not_hit_extracted_precision` afirma recall, no precision
+   (el nombre engaña; comportamiento correcto). (c) `quickstart.md` usa
+   `crafted-three-chapters.txt` (diagnóstico, sin relaciones extracted) como ejemplo
+   del runner en vez de la obra del gate `crafted-relations.txt`.
+
+6. **[Umbrales] Umbral de escritura y de gate sin recalibración real.**
+   `WRITE_THRESHOLD = 0.5` y los umbrales del gate (F1 ≥ 0.90, type ≥ 0.90) son
+   objetivos iniciales; la única medición real es la obra sintética del gate (que da
+   1.0/1.0 por diseño). Falta una corrida diagnóstica sobre novela real (P&P/HP1) para
+   confirmar/recalibrar, con la anotación de gold de relaciones ampliada.
+
+---
+
 ## M1 · La cascada de resolución sobre-fusiona personajes por apellido
 
 **Estado:** ✅ resuelto 2026-07-13 · detectado 2026-07-13

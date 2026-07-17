@@ -124,7 +124,7 @@ sin coste adicional.
 | Milestone | Aporte al grafo | Estado |
 |-----------|-----------------|--------|
 | M0 — Ingesta | `Manuscript` / `Chapter` / `Scene` | ✅ Completo |
-| M1 — Personajes | `Character` / `Mention` / `MergeCandidate` + eval | 🔚 Cierre en curso |
+| M1 — Personajes | `Character` / `Mention` / `MergeCandidate` + eval | ✅ Completo |
 | M2 — Relaciones | `RELATES_TO` entre personajes, atributos, continuidad | 🔜 Planificado |
 | M3 — Eventos | Nodos de evento y orden cronológico real | 🔜 Planificado |
 | M4 — Retrieval | `Passage` y búsqueda híbrida (GraphRAG) | 🔜 Planificado |

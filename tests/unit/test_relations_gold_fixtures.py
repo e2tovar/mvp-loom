@@ -12,6 +12,7 @@ pytestmark = pytest.mark.unit
 
 FIXTURES = Path(__file__).resolve().parent.parent.parent / "eval" / "fixtures"
 WORKS = [
+    "crafted-relations.txt",
     "crafted-three-chapters.txt",
     "crafted-two-chapters.epub",
     "pride-and-prejudice.txt",

@@ -92,6 +92,12 @@ entre personajes del gold de esa misma obra (`a`/`b` referencian `gold_id` del
 
 | Archivo | Obra | Relaciones anotadas |
 |---------|------|----------------------|
-| `crafted-three-chapters.txt.relations.gold.json` | *Una Historia Fabricada* | 1 (Elena–Marco, inferred) |
+| `crafted-relations.txt.relations.gold.json` | *Lazos de Sangre y Rencor* | 4 extracted (family, romantic, antagonism, professional) — **obra del gate** |
+| `crafted-three-chapters.txt.relations.gold.json` | *Una Historia Fabricada* | 1 (Elena–Marco, inferred) — diagnóstico |
 | `crafted-two-chapters.epub.relations.gold.json` | *Una Historia Fabricada* (epub) | 0 — el texto no conecta a Elena y Marco en ninguna escena compartida |
 | `pride-and-prejudice.txt.relations.gold.json` | *Pride and Prejudice* | 13 (diagnóstico parcial, `partial: true`) |
+
+`crafted-relations.txt` es la obra **del gate de CI**: sintética, con relaciones
+explícitas de cuatro tipos para dar señal bloqueante real. Las obras *Una Historia
+Fabricada* fueron diseñadas para M0/M1 (ingesta y personajes) y casi no contienen
+relaciones, por lo que quedan como diagnóstico no bloqueante.

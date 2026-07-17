@@ -1,0 +1,34 @@
+{
+  "work": "crafted-relations.txt",
+  "annotation_criteria": "eval/fixtures/README.md#relations",
+  "relations": [
+    {
+      "a": "ana",
+      "b": "beatriz",
+      "rel_type": "family",
+      "descriptor": "hermanas",
+      "provenance": "extracted"
+    },
+    {
+      "a": "ana",
+      "b": "carlos",
+      "rel_type": "romantic",
+      "descriptor": "matrimonio",
+      "provenance": "extracted"
+    },
+    {
+      "a": "carlos",
+      "b": "daniel",
+      "rel_type": "antagonism",
+      "descriptor": "viejos rivales del duelo",
+      "provenance": "extracted"
+    },
+    {
+      "a": "beatriz",
+      "b": "daniel",
+      "rel_type": "professional",
+      "descriptor": "socios de la fábrica",
+      "provenance": "extracted"
+    }
+  ]
+}

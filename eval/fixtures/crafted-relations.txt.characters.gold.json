@@ -1,0 +1,54 @@
+{
+  "work": "crafted-relations.txt",
+  "annotation_criteria": "eval/fixtures/README.md#characters",
+  "characters": [
+    {
+      "gold_id": "ana",
+      "canonical_name": "Ana",
+      "aliases": [],
+      "role": "protagonist",
+      "is_mentioned_only": false,
+      "appearances": ["c0/s0", "c0/s1"],
+      "mentions": [
+        {"scene": "c0/s0", "surface": "Ana"},
+        {"scene": "c0/s1", "surface": "Ana"}
+      ]
+    },
+    {
+      "gold_id": "beatriz",
+      "canonical_name": "Beatriz",
+      "aliases": [],
+      "role": "secondary",
+      "is_mentioned_only": false,
+      "appearances": ["c0/s0", "c1/s1"],
+      "mentions": [
+        {"scene": "c0/s0", "surface": "Beatriz"},
+        {"scene": "c1/s1", "surface": "Beatriz"}
+      ]
+    },
+    {
+      "gold_id": "carlos",
+      "canonical_name": "Carlos",
+      "aliases": [],
+      "role": "secondary",
+      "is_mentioned_only": false,
+      "appearances": ["c0/s1", "c1/s0"],
+      "mentions": [
+        {"scene": "c0/s1", "surface": "Carlos"},
+        {"scene": "c1/s0", "surface": "Carlos"}
+      ]
+    },
+    {
+      "gold_id": "daniel",
+      "canonical_name": "Daniel",
+      "aliases": [],
+      "role": "secondary",
+      "is_mentioned_only": false,
+      "appearances": ["c1/s0", "c1/s1"],
+      "mentions": [
+        {"scene": "c1/s0", "surface": "Daniel"},
+        {"scene": "c1/s1", "surface": "Daniel"}
+      ]
+    }
+  ]
+}

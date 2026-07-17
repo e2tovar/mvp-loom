@@ -1,0 +1,20 @@
+{
+  "work": "pride-and-prejudice",
+  "annotation_criteria": "eval/fixtures/README.md#relations",
+  "partial": true,
+  "relations": [
+    {"a": "elizabeth-bennet", "b": "fitzwilliam-darcy", "rel_type": "romantic", "descriptor": "de desprecio a matrimonio", "provenance": "extracted"},
+    {"a": "elizabeth-bennet", "b": "jane-bennet", "rel_type": "family", "descriptor": "hermanas y confidentes", "provenance": "extracted"},
+    {"a": "elizabeth-bennet", "b": "mr-bennet", "rel_type": "family", "descriptor": "padre e hija favorita", "provenance": "extracted"},
+    {"a": "elizabeth-bennet", "b": "mrs-bennet", "rel_type": "family", "descriptor": "madre e hija", "provenance": "extracted"},
+    {"a": "mr-bennet", "b": "mrs-bennet", "rel_type": "family", "descriptor": "matrimonio", "provenance": "extracted"},
+    {"a": "charles-bingley", "b": "jane-bennet", "rel_type": "romantic", "descriptor": "cortejo y matrimonio", "provenance": "extracted"},
+    {"a": "charles-bingley", "b": "fitzwilliam-darcy", "rel_type": "friendship", "descriptor": "amigos íntimos", "provenance": "extracted"},
+    {"a": "george-wickham", "b": "lydia-bennet", "rel_type": "romantic", "descriptor": "fuga y matrimonio forzado", "provenance": "extracted"},
+    {"a": "fitzwilliam-darcy", "b": "george-wickham", "rel_type": "antagonism", "descriptor": "agravio del pasado", "provenance": "extracted"},
+    {"a": "charlotte-lucas", "b": "elizabeth-bennet", "rel_type": "friendship", "descriptor": "amigas íntimas", "provenance": "extracted"},
+    {"a": "charlotte-lucas", "b": "mr-collins", "rel_type": "romantic", "descriptor": "matrimonio pragmático", "provenance": "extracted"},
+    {"a": "fitzwilliam-darcy", "b": "georgiana-darcy", "rel_type": "family", "descriptor": "hermano y tutora", "provenance": "extracted"},
+    {"a": "fitzwilliam-darcy", "b": "lady-catherine", "rel_type": "family", "descriptor": "tía y sobrino", "provenance": "extracted"}
+  ]
+}

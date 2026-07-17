@@ -86,6 +86,9 @@ entre personajes del gold de esa misma obra (`a`/`b` referencian `gold_id` del
   localizable); `"inferred"` si solo se deduce del contexto.
 - `rel_type` = categoría dominante al cierre de la obra; empate → la más
   específica (family > romantic > friendship > professional > social).
+  Matrimonio ya establecido sin cortejo narrado → `family` (vínculo de
+  parentesco por matrimonio); arco de cortejo/enamoramiento mostrado en la
+  prosa → `romantic`.
 - Sin duplicados (a,b) ≡ (b,a): anotar una sola vez, orden alfabético de
   `gold_id`.
 - Animales (`entity_kind=animal` en el gold de personajes) NO participan.

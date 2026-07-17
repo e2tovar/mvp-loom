@@ -84,6 +84,28 @@ def test_requires_m1_extraction() -> None:
             pipe.run_relations_pipeline(MID, llm_client=MagicMock())
 
 
+def test_requires_m1_extraction_before_llm_client_construction() -> None:
+    """FR-016: sin cliente LLM explícito, el check de M1 debe correr ANTES de
+    construir el LiteLLMClient por defecto. Si el orden estuviera invertido,
+    un entorno sin LOOM_LLM_MODEL configurado levantaría LLMUnavailableError
+    en vez de NotExtractedError. `LiteLLMClient` se mockea para probar la
+    aserción de forma determinista sin depender de si el .env local trae la
+    variable configurada: la construcción no debe ocurrir en absoluto cuando
+    M1 no está extraído."""
+    from backend.extraction.relations import pipeline as pipe
+
+    with (
+        patch.object(pipe, "_load_scenes", return_value=_SCENES),
+        patch.object(pipe.char_graph, "has_extraction", return_value=False),
+        patch.object(pipe, "db_session", MagicMock()),
+        patch("backend.llm.litellm_client.LiteLLMClient") as mock_client_cls,
+    ):
+        with pytest.raises(NotExtractedError):
+            pipe.run_relations_pipeline(MID)
+
+    mock_client_cls.assert_not_called()
+
+
 def test_scene_with_small_cast_skips_llm() -> None:
     result, written, _, llm = _run([SceneRelations(evidences=[_evidence()])])
     # solo s0 tiene cast >= 2 → 1 llamada LLM, s1 skipped

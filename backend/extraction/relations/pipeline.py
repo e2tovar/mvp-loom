@@ -90,11 +90,6 @@ def run_relations_pipeline(
     force: bool = False,
 ) -> RelationsPipelineResult:
     """Ejecuta la extracción de relaciones para un manuscrito con capa M1."""
-    if llm_client is None:
-        from backend.llm.litellm_client import LiteLLMClient
-
-        llm_client = LiteLLMClient()
-
     scenes = _load_scenes(manuscript_id)
     if not scenes:
         from backend.core.errors import ManuscriptNotFoundError
@@ -110,6 +105,11 @@ def run_relations_pipeline(
                 "Ejecuta: python -m backend.extraction.run"
             )
         casts = rel_graph.get_scene_casts(sess, manuscript_id)
+
+    if llm_client is None:
+        from backend.llm.litellm_client import LiteLLMClient
+
+        llm_client = LiteLLMClient()
 
     result = RelationsPipelineResult(manuscript_id=manuscript_id)
 
@@ -156,17 +156,19 @@ def run_relations_pipeline(
                 cache.set(ctx, out)
 
         cast_ids = {c["character_id"] for c in cast}
+        scene_evidences_written = 0
         for ev in _validate_evidences(out, cast_ids, scene_id):
             with db_session() as sess:
                 rel_graph.upsert_relation_evidence(sess, manuscript_id, scene_id, ev)
             result.evidences_written += 1
+            scene_evidences_written += 1
 
         result.scenes_processed += 1
         log.info(
             "Escena %s: cast=%d, evidencias=%d",
             scene_id,
             len(cast),
-            result.evidences_written,
+            scene_evidences_written,
         )
 
     # Agregación sobre TODAS las evidencias persistidas (no solo esta corrida).

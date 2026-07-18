@@ -99,8 +99,18 @@ entre personajes del gold de esa misma obra (`a`/`b` referencian `gold_id` del
 | `crafted-three-chapters.txt.relations.gold.json` | *Una Historia Fabricada* | 1 (Elena–Marco, inferred) — diagnóstico |
 | `crafted-two-chapters.epub.relations.gold.json` | *Una Historia Fabricada* (epub) | 0 — el texto no conecta a Elena y Marco en ninguna escena compartida |
 | `pride-and-prejudice.txt.relations.gold.json` | *Pride and Prejudice* | 13 (diagnóstico parcial, `partial: true`) |
+| `harry-potter-1.epub.relations.gold.json` | *Harry Potter and the Philosopher's Stone* | 50 (diagnóstico parcial, `partial: true`): 25 family, 10 friendship, 9 professional, 5 antagonism, 1 social |
 
 `crafted-relations.txt` es la obra **del gate de CI**: sintética, con relaciones
 explícitas de cuatro tipos para dar señal bloqueante real. Las obras *Una Historia
 Fabricada* fueron diseñadas para M0/M1 (ingesta y personajes) y casi no contienen
 relaciones, por lo que quedan como diagnóstico no bloqueante.
+
+`harry-potter-1.epub` tampoco corre en el gate (el `.epub` no está versionado por
+derechos de autor, igual que su `characters.gold.json`): el gold de relaciones se
+investigó y corroboró contra Harry Potter Wiki (Fandom) y fuentes de referencia,
+restringido a lo que el libro 1 establece por sí mismo — sin usar información
+revelada solo en libros posteriores. Al no tener el texto fuente, `extracted` se
+asigna por conocimiento canónico verificado en wiki en vez de por cita con offset
+localizable; ver `_draft_note` dentro del propio archivo para el detalle de alcance
+y las exclusiones deliberadas.

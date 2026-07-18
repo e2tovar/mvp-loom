@@ -1,14 +1,13 @@
 <!-- SPECKIT START -->
-Active feature: **M1 — Extracción y resolución de personajes + eval harness**
-(`002-char-extraction-eval`).
+Active feature: **M2 — Extracción de relaciones entre personajes + eval harness**
+(`003-m2-relations`).
 
 For technologies, project structure, shell commands, and other important
 information, read the current plan:
-`specs/002-char-extraction-eval/plan.md`
+`docs/superpowers/plans/2026-07-17-m2-relations.md`
 
-Related artifacts (all under `specs/002-char-extraction-eval/`): `spec.md`,
-`research.md`, `data-model.md`, `contracts/api.md`,
-`contracts/extraction-schema.md`, `contracts/graph-schema.cypher`,
-`quickstart.md`. Project principles live in `.specify/memory/constitution.md`.
-Previous milestone (raw layer): `specs/001-m0-ingest-segmentation/`.
+Related artifacts (all under `specs/003-m2-relations/`): `spec.md`,
+`data-model.md`, `contracts/graph-schema.cypher`, `quickstart.md`.
+Previous milestone (characters): `specs/002-char-extraction-eval/`.
+Raw layer: `specs/001-m0-ingest-segmentation/`.
 <!-- SPECKIT END -->

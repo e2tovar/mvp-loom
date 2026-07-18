@@ -47,11 +47,25 @@ de rama, en orden de prioridad:
    `crafted-three-chapters.txt` (diagnóstico, sin relaciones extracted) como ejemplo
    del runner en vez de la obra del gate `crafted-relations.txt`.
 
-6. **[Umbrales] Umbral de escritura y de gate sin recalibración real.**
-   `WRITE_THRESHOLD = 0.5` y los umbrales del gate (F1 ≥ 0.90, type ≥ 0.90) son
-   objetivos iniciales; la única medición real es la obra sintética del gate (que da
-   1.0/1.0 por diseño). Falta una corrida diagnóstica sobre novela real (P&P/HP1) para
-   confirmar/recalibrar, con la anotación de gold de relaciones ampliada.
+6. **[Diagnóstico real — hecho 2026-07-18] Corrida diagnóstica de M2 sobre P&P y HP1.**
+   Ejecutada con `openai/kimi-k2.5` sobre las novelas completas (P&P 61/61 escenas,
+   1062 evidencias, 216 aristas; HP1 65/65 escenas, 716 evidencias, 219 aristas). Cada
+   novela tarda ~30 min (el modelo va a ~29s/escena; la cache la hace reanudable).
+   Resultados (`eval/results/relations-{pride-and-prejudice-txt,harry-potter-1-epub}-20260718-*.json`):
+   - **P&P**: recall extracted = **1.000**, type accuracy = **1.000**, precision =
+     0.068 → F1 = 0.127.
+   - **HP1**: recall extracted = **0.936**, type accuracy = **0.864**, precision =
+     0.289 → F1 = 0.442.
+   Lectura: el extractor **recupera casi todas las relaciones anotadas y acierta el
+   tipo**; el F1 bajo es **artefacto de gold parcial** (13 y 50 relaciones anotadas vs
+   ~216-219 reales halladas), el mismo efecto que hundió la precision de P&P en M1. NO
+   es fallo del modelo, y por eso estas obras son diagnóstico no bloqueante.
+   **Pendiente real**: para que la precision (y por tanto el F1) sea interpretable en
+   novela real hace falta **ampliar la anotación del gold** hasta cobertura ~completa,
+   no recalibrar umbrales. El gate bloqueante sigue en la obra sintética
+   `crafted-relations.txt` (1.0/1.0). Nota sobre HP1: su gold marca `extracted` por
+   conocimiento canónico de wiki, no por cita en el texto; aun así el recall fue 0.936,
+   lo que indica que esas relaciones sí están enunciadas en la prosa del libro 1.
 
 ---
 

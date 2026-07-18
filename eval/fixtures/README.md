@@ -72,3 +72,35 @@ Las obras del gate de CI llevan además, por personaje, la lista de menciones:
 > (`tests/eval/test_characters_gate.py:EVAL_WORKS`) y llevan anotación de
 > menciones completa (ver sección anterior). El gold de Pride and Prejudice
 > aún no la lleva.
+
+## Relations gold {#relations}
+
+Cada obra tiene un archivo `<nombre>.relations.gold.json` con las relaciones
+entre personajes del gold de esa misma obra (`a`/`b` referencian `gold_id` del
+`<nombre>.characters.gold.json`).
+
+### Criterios de anotación
+
+- Solo pares cuyos DOS personajes existen en el characters gold de la obra.
+- `provenance: "extracted"` si la relación se enuncia en la prosa (cita
+  localizable); `"inferred"` si solo se deduce del contexto.
+- `rel_type` = categoría dominante al cierre de la obra; empate → la más
+  específica (family > romantic > friendship > professional > social).
+  Matrimonio ya establecido sin cortejo narrado → `family` (vínculo de
+  parentesco por matrimonio); arco de cortejo/enamoramiento mostrado en la
+  prosa → `romantic`.
+- Sin duplicados (a,b) ≡ (b,a): anotar una sola vez, orden alfabético de
+  `gold_id`.
+- Animales (`entity_kind=animal` en el gold de personajes) NO participan.
+
+| Archivo | Obra | Relaciones anotadas |
+|---------|------|----------------------|
+| `crafted-relations.txt.relations.gold.json` | *Lazos de Sangre y Rencor* | 4 extracted (family, romantic, antagonism, professional) — **obra del gate** |
+| `crafted-three-chapters.txt.relations.gold.json` | *Una Historia Fabricada* | 1 (Elena–Marco, inferred) — diagnóstico |
+| `crafted-two-chapters.epub.relations.gold.json` | *Una Historia Fabricada* (epub) | 0 — el texto no conecta a Elena y Marco en ninguna escena compartida |
+| `pride-and-prejudice.txt.relations.gold.json` | *Pride and Prejudice* | 13 (diagnóstico parcial, `partial: true`) |
+
+`crafted-relations.txt` es la obra **del gate de CI**: sintética, con relaciones
+explícitas de cuatro tipos para dar señal bloqueante real. Las obras *Una Historia
+Fabricada* fueron diseñadas para M0/M1 (ingesta y personajes) y casi no contienen
+relaciones, por lo que quedan como diagnóstico no bloqueante.

@@ -5,6 +5,70 @@ resolverse antes de dar una métrica por válida. Cada entrada cita su ubicació
 
 ---
 
+## M2 · Follow-ups tras la implementación de relaciones (rama `feature/m2-relations`, 2026-07-17)
+
+**Estado:** ⏳ abiertos · registrados 2026-07-17
+
+M2 (relaciones entre personajes) quedó completo y verificado: gate en verde sobre
+`crafted-relations.txt` (pares extracted F1 = 1.0, type accuracy = 1.0 con
+`openai/kimi-k2.5`), suite unit + integración (36) en verde, re-ejecución idempotente
+(2ª corrida 4/4 cache hits). Follow-ups no bloqueantes detectados en el review final
+de rama, en orden de prioridad:
+
+1. **[Constitución] `_load_scenes` con Cypher fuera de `backend/graph/`.**
+   `backend/extraction/relations/pipeline.py` incrusta la query de carga de escenas
+   (copia literal de `backend/extraction/pipeline.py` de M1). Extraer a un
+   `get_scenes_in_order(sess, mid)` en `backend/graph/` y llamarlo desde ambos
+   pipelines: corrige la desviación y elimina la query duplicada.
+
+2. **[API] `has_relations` → 409 ambiguo.** Un manuscrito donde M2 corrió pero todas
+   las relaciones quedaron bajo `WRITE_THRESHOLD` (cero aristas) devuelve
+   `409 not_extracted`, indistinguible de "M2 nunca corrió"
+   (`backend/api/routes_relations.py`, `backend/graph/relations.py::has_relations`).
+   Considerar un marcador de "procesado" separado de "tiene aristas".
+
+3. **[Limpieza] `SceneRelations.notes` es un campo de salida muerto.** Declarado en
+   `backend/extraction/relations/schemas.py` pero nunca leído en pipeline, agregación,
+   cache ni eval. Eliminar o cablear a un log de diagnóstico.
+
+4. **[M3] Evidencia de relación obsoleta ante re-resolución de M1.**
+   `get_evidences_by_pair` lee toda la `RelationEvidence` histórica del manuscrito. Si
+   una futura re-resolución de M1 cambia/fusiona `character_id`s, la evidencia con ids
+   muertos sobrevive (nunca se purga) y sigue contando en `evidence_count`/votos de
+   tipo. `replace_relates_to` protege contra aristas fantasma, no contra evidencia
+   fantasma. Fuera de alcance de M2; abordar cuando M3 toque re-resolución.
+
+5. **[Tests/docs] Cobertura y precisión menores.** (a) `test_relation_aggregation`:
+   falta caso de conflicto asimétrico de roles (un solo slot discrepa → ambos None) y
+   caso de frontera `WRITE_THRESHOLD` (conf == 0.5 no es None) — comportamiento
+   verificado correcto, solo falta el test. (b)
+   `test_inferred_pred_does_not_hit_extracted_precision` afirma recall, no precision
+   (el nombre engaña; comportamiento correcto). (c) `quickstart.md` usa
+   `crafted-three-chapters.txt` (diagnóstico, sin relaciones extracted) como ejemplo
+   del runner en vez de la obra del gate `crafted-relations.txt`.
+
+6. **[Diagnóstico real — hecho 2026-07-18] Corrida diagnóstica de M2 sobre P&P y HP1.**
+   Ejecutada con `openai/kimi-k2.5` sobre las novelas completas (P&P 61/61 escenas,
+   1062 evidencias, 216 aristas; HP1 65/65 escenas, 716 evidencias, 219 aristas). Cada
+   novela tarda ~30 min (el modelo va a ~29s/escena; la cache la hace reanudable).
+   Resultados (`eval/results/relations-{pride-and-prejudice-txt,harry-potter-1-epub}-20260718-*.json`):
+   - **P&P**: recall extracted = **1.000**, type accuracy = **1.000**, precision =
+     0.068 → F1 = 0.127.
+   - **HP1**: recall extracted = **0.936**, type accuracy = **0.864**, precision =
+     0.289 → F1 = 0.442.
+   Lectura: el extractor **recupera casi todas las relaciones anotadas y acierta el
+   tipo**; el F1 bajo es **artefacto de gold parcial** (13 y 50 relaciones anotadas vs
+   ~216-219 reales halladas), el mismo efecto que hundió la precision de P&P en M1. NO
+   es fallo del modelo, y por eso estas obras son diagnóstico no bloqueante.
+   **Pendiente real**: para que la precision (y por tanto el F1) sea interpretable en
+   novela real hace falta **ampliar la anotación del gold** hasta cobertura ~completa,
+   no recalibrar umbrales. El gate bloqueante sigue en la obra sintética
+   `crafted-relations.txt` (1.0/1.0). Nota sobre HP1: su gold marca `extracted` por
+   conocimiento canónico de wiki, no por cita en el texto; aun así el recall fue 0.936,
+   lo que indica que esas relaciones sí están enunciadas en la prosa del libro 1.
+
+---
+
 ## M1 · La cascada de resolución sobre-fusiona personajes por apellido
 
 **Estado:** ✅ resuelto 2026-07-13 · detectado 2026-07-13

@@ -37,6 +37,13 @@ SCHEMA_STATEMENTS: tuple[str, ...] = (
     "FOR (m:Mention) ON (m.scene_id)",
     "CREATE INDEX merge_candidate_by_status IF NOT EXISTS "
     "FOR (mc:MergeCandidate) ON (mc.status)",
+    # ── M2: evidencias de relación ────────────────────────────────────────────
+    "CREATE CONSTRAINT relation_evidence_id_unique IF NOT EXISTS "
+    "FOR (re:RelationEvidence) REQUIRE re.evidence_id IS UNIQUE",
+    "CREATE INDEX relation_evidence_by_manuscript IF NOT EXISTS "
+    "FOR (re:RelationEvidence) ON (re.manuscript_id)",
+    "CREATE INDEX relation_evidence_by_scene IF NOT EXISTS "
+    "FOR (re:RelationEvidence) ON (re.scene_id)",
 )
 
 

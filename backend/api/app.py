@@ -15,6 +15,7 @@ from fastapi import FastAPI
 
 from backend.api.routes_characters import router as characters_router
 from backend.api.routes_manuscripts import router as manuscripts_router
+from backend.api.routes_relations import router as relations_router
 from backend.graph import client, schema
 
 logging.basicConfig(
@@ -42,6 +43,7 @@ app = FastAPI(
 )
 app.include_router(manuscripts_router)
 app.include_router(characters_router)
+app.include_router(relations_router)
 
 
 @app.get("/health")

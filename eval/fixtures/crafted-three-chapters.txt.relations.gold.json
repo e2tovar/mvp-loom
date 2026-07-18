@@ -1,0 +1,13 @@
+{
+  "work": "crafted-three-chapters.txt",
+  "annotation_criteria": "eval/fixtures/README.md#relations",
+  "relations": [
+    {
+      "a": "elena",
+      "b": "marco",
+      "rel_type": "romantic",
+      "descriptor": "reencuentro en la estación; el abrigo que ella le regaló años atrás y la despedida silenciosa final sugieren un vínculo romántico previo no resuelto",
+      "provenance": "inferred"
+    }
+  ]
+}

@@ -90,6 +90,27 @@ Cuando el sistema no puede decidir con certeza si dos menciones corresponden al 
 
 ---
 
+### Capa de relaciones: quién es qué de quién
+
+Sobre el reparto se añade el mapa de vínculos:
+
+```
+(a:Character)-[:RELATES_TO {rel_type, descriptor, provenance, confidence}]->(b:Character)
+(RelationEvidence)-[:ABOUT]->(Character)      // ×2
+(RelationEvidence)-[:IN_SCENE]->(Scene)
+```
+
+- **`RELATES_TO`** — la relación consolidada de un par: tipo (`family`, `romantic`,
+  `friendship`, `antagonism`, `professional`, `social`, `other`), un descriptor corto
+  ("tío y tutor") y si está **enunciada en la prosa** (`extracted`) o **deducida de la
+  interacción** (`inferred`). Las deducciones nunca se presentan como hechos sin marca.
+- **`RelationEvidence`** — la prueba: una señal por par y escena, con la cita textual
+  que la sustenta. Es a la relación lo que `Mention` es al personaje.
+- Las relaciones con confianza baja no se asertan: sus evidencias quedan guardadas,
+  la arista no se escribe.
+
+---
+
 ## Identificadores deterministas
 
 Cada nodo recibe un identificador derivado de su contenido, no un autoincremental. Un
@@ -125,7 +146,7 @@ sin coste adicional.
 |-----------|-----------------|--------|
 | M0 — Ingesta | `Manuscript` / `Chapter` / `Scene` | ✅ Completo |
 | M1 — Personajes | `Character` / `Mention` / `MergeCandidate` + eval | ✅ Completo |
-| M2 — Relaciones | `RELATES_TO` entre personajes, atributos, continuidad | 🔜 Planificado |
+| M2 — Relaciones | `RELATES_TO` entre personajes, atributos, continuidad | ✅ Completo |
 | M3 — Eventos | Nodos de evento y orden cronológico real | 🔜 Planificado |
 | M4 — Retrieval | `Passage` y búsqueda híbrida (GraphRAG) | 🔜 Planificado |
 | M5 — Wiki | Páginas markdown generadas desde el grafo | 🔜 Planificado |

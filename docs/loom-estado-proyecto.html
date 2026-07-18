@@ -1,0 +1,424 @@
+<!DOCTYPE html>
+<!--
+  Loom — Estado del proyecto (deck autocontenido, sin dependencias).
+  Controles: →/Espacio siguiente · ← anterior · Home/End · F pantalla completa · swipe en táctil.
+-->
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Loom — Qué es, cómo va y qué falta</title>
+<style>
+  :root {
+    --bg: #e9e2d3;
+    --slide-bg: #f8f4ea;
+    --fg: #2a251d;
+    --muted: #837a68;
+    --accent: #9c3f2e;
+    --ok: #46704f;
+    --warn: #a97c1f;
+    --code-bg: #efe9da;
+    --line: #d8cfba;
+    --font: "Iowan Old Style", "Palatino Linotype", Palatino, Georgia, serif;
+    --sans: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+    --mono: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, monospace;
+    --w: 1280px;
+    --h: 720px;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { height: 100%; background: var(--bg); overflow: hidden; font-family: var(--font); }
+
+  #stage {
+    position: absolute; top: 50%; left: 50%;
+    width: var(--w); height: var(--h);
+    transform: translate(-50%, -50%) scale(var(--scale, 1));
+    transform-origin: center center;
+  }
+  .slide {
+    position: absolute; inset: 0;
+    width: var(--w); height: var(--h);
+    background: var(--slide-bg); color: var(--fg);
+    padding: 72px 88px;
+    display: none; flex-direction: column; justify-content: center; gap: 24px;
+  }
+  .slide.active { display: flex; }
+  .slide::after {
+    content: ""; position: absolute; left: 0; right: 0; top: 0; height: 6px;
+    background: linear-gradient(90deg, var(--accent) 0 33%, #c9a84c 33% 66%, #3e5f6e 66% 100%);
+    opacity: .85;
+  }
+
+  h1 { font-size: 62px; line-height: 1.12; letter-spacing: -1px; font-weight: 700; }
+  h2 { font-size: 44px; line-height: 1.15; color: var(--accent); letter-spacing: -0.5px; margin-bottom: 6px; }
+  p, li { font-size: 28px; line-height: 1.5; }
+  .muted { color: var(--muted); }
+  .accent { color: var(--accent); }
+  .ok { color: var(--ok); }
+  .warn { color: var(--warn); }
+  strong { font-weight: 700; }
+  em { font-style: italic; }
+  ul, ol { padding-left: 1.1em; display: flex; flex-direction: column; gap: 16px; }
+  code { font-family: var(--mono); font-size: 0.82em; background: var(--code-bg); padding: 2px 8px; border-radius: 4px; }
+  pre { font-family: var(--mono); font-size: 22px; line-height: 1.45; background: var(--code-bg);
+        padding: 24px 28px; border-radius: 10px; overflow: auto; border: 1px solid var(--line); }
+  a { color: var(--accent); }
+
+  .center { text-align: center; align-items: center; }
+  .cols { display: grid; grid-template-columns: 1fr 1fr; gap: 44px; align-items: start; }
+  .kicker { font-family: var(--sans); font-size: 19px; text-transform: uppercase; letter-spacing: 4px;
+            color: var(--accent); font-weight: 600; }
+
+  .fragment { opacity: 0.1; transition: opacity 0.3s ease; }
+  .fragment.revealed { opacity: 1; }
+
+  /* Tarjetas y badges */
+  .card { background: var(--code-bg); border: 1px solid var(--line); border-radius: 12px; padding: 26px 30px; }
+  .badge { display: inline-block; font-family: var(--sans); font-size: 19px; font-weight: 700;
+           letter-spacing: 1px; padding: 4px 16px; border-radius: 999px; vertical-align: middle; }
+  .badge.done { background: #dde8de; color: var(--ok); }
+  .badge.wip  { background: #f0e6cd; color: var(--warn); }
+  .badge.next { background: #e6e0d2; color: var(--muted); }
+
+  /* Roadmap */
+  .road { display: flex; flex-direction: column; gap: 13px; }
+  .road-row { display: grid; grid-template-columns: 96px 1fr 168px; align-items: center; gap: 22px;
+              padding: 12px 22px; border-radius: 10px; background: var(--code-bg); border: 1px solid var(--line); }
+  .road-row .mnum { font-family: var(--sans); font-weight: 800; font-size: 25px; }
+  .road-row .mdesc { font-size: 25px; line-height: 1.35; }
+  .road-row.dim { opacity: .68; }
+
+  /* Métricas */
+  .metric { text-align: center; }
+  .metric .num { font-family: var(--sans); font-size: 84px; font-weight: 800; line-height: 1; letter-spacing: -2px; }
+  .metric .lbl { font-size: 24px; color: var(--muted); margin-top: 10px; line-height: 1.35; }
+
+  #progress { position: fixed; bottom: 0; left: 0; height: 3px; background: var(--accent);
+              width: 0; transition: width 0.25s ease; z-index: 1; }
+  #counter { position: absolute; bottom: 12px; right: 20px; color: var(--muted);
+             font-family: var(--mono); font-size: 16px; }
+
+  @page { size: 1280px 720px; margin: 0; }
+  @media print {
+    html, body { overflow: visible; background: #fff; }
+    #stage { position: static; transform: none; }
+    #progress, #counter { display: none; }
+    .slide { position: static; inset: auto; display: flex !important;
+             page-break-after: always; break-after: page; }
+    .fragment { opacity: 1 !important; }
+  }
+</style>
+</head>
+<body>
+  <div id="stage">
+
+    <!-- 1 · Portada -->
+    <section class="slide active center">
+      <div class="kicker">Estado del proyecto · 12 de julio de 2026</div>
+      <h1>Loom</h1>
+      <p style="font-size:34px; max-width:900px;">Una IA que lee tu novela entera y te devuelve
+      un <strong>mapa vivo de tu propia historia</strong>: personajes, escenas, hechos y sus conexiones.</p>
+      <p class="muted">Qué es · qué hemos construido · qué falta</p>
+    </section>
+
+    <!-- 2 · El problema -->
+    <section class="slide">
+      <h2>El problema que resolvemos</h2>
+      <p>Un autor termina una novela de 300 páginas. A esas alturas, <strong>nadie — ni él mismo —
+      tiene toda la historia en la cabeza</strong>.</p>
+      <ul>
+        <li class="fragment">¿En qué capítulo aparece por última vez este personaje secundario?</li>
+        <li class="fragment">¿Dije que tenía los ojos azules… o verdes?</li>
+        <li class="fragment">¿Cerré todas las tramas que abrí?</li>
+      </ul>
+      <p class="fragment">Hoy eso lo revisa un editor profesional, a mano y caro.
+      <span class="accent"><strong>Loom lo hace con IA — y de forma comprobable.</strong></span></p>
+    </section>
+
+    <!-- 3 · Qué es Loom (la metáfora) -->
+    <section class="slide">
+      <h2>Qué es Loom, en una imagen</h2>
+      <div class="cols">
+        <div>
+          <p>Imagina una <strong>lectora meticulosa</strong> que lee el libro tomando fichas —
+          una por personaje, una por escena — y las clava en un corcho, uniéndolas con hilos.</p>
+          <p style="margin-top:22px;">Ese corcho con fichas e hilos es lo que los ingenieros llaman
+          un <strong>grafo de conocimiento</strong>. Loom lo construye automáticamente al leer el manuscrito.</p>
+        </div>
+        <div class="card">
+          <p class="accent" style="font-family:var(--sans); font-size:22px; font-weight:700; letter-spacing:1px;">EL CORCHO DE LOOM</p>
+          <p style="font-size:25px; margin-top:14px;">📖 El libro entra una vez.</p>
+          <p style="font-size:25px; margin-top:12px;">🧵 Cada personaje, escena y hecho queda fichado y conectado.</p>
+          <p style="font-size:25px; margin-top:12px;">🔍 Después, cualquier pregunta se responde mirando el corcho — sin releer el libro.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- 4 · La visión final -->
+    <section class="slide">
+      <h2>Lo que el autor recibirá al final</h2>
+      <ul>
+        <li class="fragment"><strong>Mapa de personajes</strong> que evoluciona capítulo a capítulo.</li>
+        <li class="fragment"><strong>Línea temporal</strong> de los hechos, aunque el libro los cuente desordenados.</li>
+        <li class="fragment"><strong>Alertas de continuidad</strong>: contradicciones detectadas antes de publicar.</li>
+        <li class="fragment"><strong>Una wiki de su historia</strong>: una página por personaje, lugar y trama, siempre al día.</li>
+        <li class="fragment"><strong>Informe de lectura profesional</strong>, donde cada afirmación cita el pasaje exacto del libro.</li>
+      </ul>
+      <p class="muted fragment">Todo se deriva del mismo corcho. Por eso es un producto coherente y no herramientas sueltas.</p>
+    </section>
+
+    <!-- 5 · Las tres ideas -->
+    <section class="slide">
+      <h2>Las tres ideas que sostienen el proyecto</h2>
+      <div class="card fragment">
+        <p><strong>1 · Un único corcho.</strong> Todo — mapa, timeline, alertas, wiki, informe — se lee del mismo
+        grafo. Nada se calcula dos veces ni por caminos distintos.</p>
+      </div>
+      <div class="card fragment">
+        <p><strong>2 · Leer una vez, consultar mil.</strong> La mayoría de IAs releen el texto en cada pregunta:
+        caro, lento y propenso a inventos. Loom compila el conocimiento una sola vez.</p>
+      </div>
+      <div class="card fragment">
+        <p><strong>3 · No confiar: medir.</strong> Cualquiera enchufa una IA y saca un mapa que <em>parece</em>
+        correcto. Aquí cada pieza pasa un examen con respuestas anotadas a mano antes de darse por buena.</p>
+      </div>
+    </section>
+
+    <!-- 6 · Roadmap general -->
+    <section class="slide">
+      <h2>El plan: construir por capas, con examen en cada una</h2>
+      <div class="road">
+        <div class="road-row">
+          <span class="mnum ok">M0</span>
+          <span class="mdesc">El libro entra y queda ordenado en capítulos y escenas</span>
+          <span class="badge done">✓ Completo</span>
+        </div>
+        <div class="road-row">
+          <span class="mnum warn">M1</span>
+          <span class="mdesc">El reparto: quién aparece, con qué nombres, y su examen de calidad</span>
+          <span class="badge wip">En cierre</span>
+        </div>
+        <div class="road-row">
+          <span class="mnum">M2</span>
+          <span class="mdesc">Relaciones entre personajes y detector de contradicciones</span>
+          <span class="badge next">Diseñado</span>
+        </div>
+        <div class="road-row dim">
+          <span class="mnum">M3–M5</span>
+          <span class="mdesc">Línea temporal · preguntas con citas · la wiki de la historia</span>
+          <span class="badge next">Futuro</span>
+        </div>
+        <div class="road-row dim">
+          <span class="mnum">M6–M8</span>
+          <span class="mdesc">Informe de lectura · la aplicación visual · robustez y costes</span>
+          <span class="badge next">Futuro</span>
+        </div>
+      </div>
+      <p class="muted" style="font-size:25px;">Regla del proyecto: no se avanza a la siguiente capa
+      hasta que la actual aprueba su examen. Profundidad antes que amplitud.</p>
+    </section>
+
+    <!-- 7 · M0 hecho -->
+    <section class="slide">
+      <h2>Hecho — M0 · El libro entra <span class="badge done">✓ Completo</span></h2>
+      <ul>
+        <li>Loom acepta manuscritos en <strong>Word, EPUB y texto plano</strong>.</li>
+        <li>Descompone el libro en <strong>capítulos y escenas</strong>, conservando el orden de lectura
+        y la posición exacta de cada fragmento.</li>
+        <li>Esa base es <strong>inmutable</strong>: nada de lo que se construya después puede alterar el texto original.
+        Es el cimiento de todo lo demás.</li>
+        <li>Garantía verificada: <strong>ni una palabra se pierde ni se altera</strong> al ingerir el libro.</li>
+      </ul>
+    </section>
+
+    <!-- 8 · M1 casi hecho -->
+    <section class="slide">
+      <h2>Casi hecho — M1 · El reparto <span class="badge wip">En cierre</span></h2>
+      <ul>
+        <li class="fragment"><strong>Detecta a los personajes</strong> escena a escena mientras la IA lee el libro.</li>
+        <li class="fragment"><strong>Unifica identidades</strong>: "Elizabeth Bennet", "Lizzy" y "Miss Bennet"
+        acaban siendo una sola ficha, con todos sus alias.</li>
+        <li class="fragment"><strong>Cuando duda, no adivina</strong>: si no está segura de que "Elena" y
+        "la doctora" sean la misma persona, deja el caso en una <strong>cola de revisión</strong> para que decida un humano
+        — y esa decisión humana es definitiva.</li>
+        <li class="fragment">Repetir el proceso es <strong>barato y seguro</strong>: lo ya analizado se recuerda,
+        y re-ejecutar nunca duplica fichas ni deshace decisiones.</li>
+      </ul>
+    </section>
+
+    <!-- 9 · La regla de oro -->
+    <section class="slide center">
+      <div class="kicker">La regla de oro</div>
+      <h1 style="font-size:52px; max-width:1000px;">Nada se inventa.</h1>
+      <p style="font-size:30px; max-width:980px;">Un personaje solo existe en el corcho si lo respaldan
+      <strong>menciones literales del texto</strong>: la palabra exacta, en la escena exacta, en la posición exacta.</p>
+      <p style="font-size:30px; max-width:980px;" class="muted">Cada dato es rastreable hasta las palabras del autor.
+      Así se eliminan las "alucinaciones" de la IA <em>por diseño</em>, no por suerte.</p>
+    </section>
+
+    <!-- 10 · El examen -->
+    <section class="slide">
+      <h2>¿Cómo sabemos que funciona? Con exámenes</h2>
+      <p style="font-size:26px;">Anotamos a mano las respuestas correctas de varios libros — el reparto real,
+      sus alias, dónde aparece cada uno — y el sistema se corrige contra esa referencia.
+      <strong>Nota mínima para aprobar: 90%.</strong></p>
+      <div class="cols" style="align-items:stretch;">
+        <div class="card metric">
+          <div class="num ok">100%</div>
+          <div class="lbl"><strong>Obras de prueba controladas</strong><br>Detección e identidades perfectas.
+          Aprueba el examen completo.</div>
+        </div>
+        <div class="card metric">
+          <div class="num warn">38%</div>
+          <div class="lbl"><strong>Novela real larga</strong> (Orgullo y Prejuicio)<br>Última medición, de junio.
+          Suspende: es el frente de trabajo abierto.</div>
+        </div>
+      </div>
+      <p class="muted" style="font-size:25px;">Honestidad del sistema: lo que no se puede medir se reporta como
+      "no medido" — nunca se rellena con un número inventado.</p>
+    </section>
+
+    <!-- 11 · Qué falta para cerrar M1 -->
+    <section class="slide">
+      <h2>Qué falta para cerrar M1</h2>
+      <div class="cols">
+        <div>
+          <ul>
+            <li class="fragment"><strong>El ensayo general</strong>: ejecutar el recorrido completo — subir una obra real,
+            extraer el reparto, revisar las dudas y pasar el examen — y pulir las fricciones que aparezcan.
+            Es la única tarea del plan aún abierta.</li>
+            <li class="fragment"><strong>Subir la nota en novela larga</strong>: la IA ya aprueba en obras cortas;
+            en un libro de 700 páginas todavía no. Ajustar cómo se le presenta el texto es el siguiente paso.</li>
+          </ul>
+        </div>
+        <div class="card">
+          <p class="accent" style="font-family:var(--sans); font-size:22px; font-weight:700; letter-spacing:1px;">DÓNDE ESTAMOS</p>
+          <p style="font-size:26px; margin-top:14px;"><strong>38 de 39</strong> tareas del plan completadas.</p>
+          <p style="font-size:26px; margin-top:12px;"><strong>81 pruebas automáticas</strong> en verde.</p>
+          <p style="font-size:26px; margin-top:12px;">La deuda técnica del examen de identidades quedó
+          <strong>saldada el 11 de julio</strong>: ahora mide de verdad, no un simulacro.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- 12 · Lo que viene: M2 -->
+    <section class="slide">
+      <h2>Lo que viene — M2 · Relaciones y continuidad</h2>
+      <p class="muted" style="font-size:25px;">El diseño ya está escrito; arranca al cerrar M1.</p>
+      <ul>
+        <li class="fragment"><strong>Relaciones entre personajes</strong>: quién es aliado, rival, familia o amor de quién
+        — y cómo cambia eso a lo largo del libro.</li>
+        <li class="fragment"><strong>Atributos con memoria</strong>: cada dato ("ojos azules") queda anclado a la escena
+        donde se afirma.</li>
+        <li class="fragment"><strong>El detector de contradicciones</strong>: si el capítulo 2 dice "ojos azules"
+        y el 18 dice "ojos verdes", Loom lo señala — con las dos citas en la mano.</li>
+      </ul>
+      <p class="fragment">Es la primera funcionalidad que un autor <strong>pagaría por sí sola</strong>.</p>
+    </section>
+
+    <!-- 13 · El horizonte -->
+    <section class="slide">
+      <h2>Y después — el horizonte M3 a M8</h2>
+      <ul>
+        <li><strong>M3 · Línea temporal</strong>: ordenar los hechos como ocurrieron, aunque el libro use flashbacks.</li>
+        <li><strong>M4 · Preguntas con citas</strong>: "¿cuándo se conocieron Elena y Marco?" — respuesta anclada
+        a los pasajes exactos. Sin cita, no hay respuesta.</li>
+        <li><strong>M5 · La wiki de la historia</strong>: la "biblia" de la saga en páginas navegables,
+        que se actualiza sola cuando el autor edita.</li>
+        <li><strong>M6–M8</strong>: informe de lectura profesional, la aplicación visual (mapa, timeline, panel)
+        y el endurecimiento final: costes, trazas, escala.</li>
+      </ul>
+    </section>
+
+    <!-- 14 · Para el dev que llega nuevo -->
+    <section class="slide">
+      <h2>Si llegas nuevo al proyecto</h2>
+      <div class="cols">
+        <div>
+          <p style="font-size:26px;"><strong>Lee en este orden:</strong></p>
+          <ul style="margin-top:14px;">
+            <li style="font-size:25px;"><code>docs/ABOUT.md</code> — el modelo mental (este deck, en prosa).</li>
+            <li style="font-size:25px;"><code>README.md</code> — la visión completa y el roadmap.</li>
+            <li style="font-size:25px;"><code>specs/</code> — cada milestone con su qué, su modelo de datos y su guía ejecutable.</li>
+          </ul>
+        </div>
+        <div>
+          <p style="font-size:26px;"><strong>Para verlo funcionar:</strong></p>
+          <p style="font-size:25px; margin-top:14px;">Levanta la base de datos, ejecuta el <em>quickstart</em> de M1
+          contra una obra de prueba y mira el grafo poblarse en el navegador de Neo4j.
+          Es la forma más rápida de entenderlo todo.</p>
+          <p class="muted" style="font-size:23px; margin-top:16px;">Stack: Python 3.12 · FastAPI · Neo4j · LiteLLM · pytest</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- 15 · Cierre -->
+    <section class="slide center">
+      <h1 style="font-size:48px; max-width:1040px;">Una cosa difícil, hecha con rigor.</h1>
+      <p style="font-size:29px; max-width:960px;">Loom apuesta por dominar la parte dura — leer una novela
+      y no equivocarse — antes de construir nada encima. Cada capa aprueba su examen o no se avanza.</p>
+      <p class="muted">Loom · estado a 12 de julio de 2026 · milestone activo: M1 en cierre</p>
+    </section>
+
+    <div id="counter"></div>
+  </div>
+  <div id="progress"></div>
+
+<script>
+  const slides = [...document.querySelectorAll(".slide")];
+  const stage = document.getElementById("stage");
+  const progress = document.getElementById("progress");
+  const counter = document.getElementById("counter");
+  let i = 0;
+
+  const frags = (n) => [...slides[n].querySelectorAll(".fragment")];
+
+  function render() {
+    slides.forEach((s, n) => s.classList.toggle("active", n === i));
+    frags(i).forEach((f) => f.classList.remove("revealed"));
+    progress.style.width = ((i + 1) / slides.length) * 100 + "%";
+    counter.textContent = (i + 1) + " / " + slides.length;
+    if (location.hash !== "#" + (i + 1)) history.replaceState(null, "", "#" + (i + 1));
+  }
+
+  function next() {
+    const f = frags(i).find((el) => !el.classList.contains("revealed"));
+    if (f) { f.classList.add("revealed"); return; }
+    if (i < slides.length - 1) { i++; render(); }
+  }
+  function prev() {
+    const shown = frags(i).filter((el) => el.classList.contains("revealed"));
+    if (shown.length) { shown[shown.length - 1].classList.remove("revealed"); return; }
+    if (i > 0) { i--; render(); frags(i).forEach((el) => el.classList.add("revealed")); }
+  }
+
+  function fit() {
+    const st = getComputedStyle(document.documentElement);
+    const W = parseFloat(st.getPropertyValue("--w"));
+    const H = parseFloat(st.getPropertyValue("--h"));
+    const k = Math.min(window.innerWidth / W, window.innerHeight / H);
+    stage.style.setProperty("--scale", k);
+  }
+
+  addEventListener("keydown", (e) => {
+    switch (e.key) {
+      case "ArrowRight": case " ": case "PageDown": e.preventDefault(); next(); break;
+      case "ArrowLeft": case "PageUp": e.preventDefault(); prev(); break;
+      case "Home": i = 0; render(); break;
+      case "End": i = slides.length - 1; render(); break;
+      case "f": case "F": document.fullscreenElement ? document.exitFullscreen() : document.documentElement.requestFullscreen(); break;
+    }
+  });
+  addEventListener("resize", fit);
+
+  let tx = 0;
+  addEventListener("touchstart", (e) => { tx = e.changedTouches[0].clientX; }, { passive: true });
+  addEventListener("touchend", (e) => {
+    const dx = e.changedTouches[0].clientX - tx;
+    if (Math.abs(dx) > 50) dx < 0 ? next() : prev();
+  });
+
+  i = Math.min(Math.max((parseInt(location.hash.slice(1)) || 1) - 1, 0), slides.length - 1);
+  fit(); render();
+</script>
+</body>
+</html>

@@ -1,0 +1,402 @@
+<title>Loom — Estado del grafo</title>
+<div class="viz-root">
+<style>
+  .viz-root {
+    color-scheme: light;
+    --surface-1:      #fcfcfb;
+    --surface-page:   #f9f9f7;
+    --text-primary:   #0b0b0b;
+    --text-secondary: #52514e;
+    --text-muted:     #898781;
+    --gridline:       #e1e0d9;
+    --baseline:       #c3c2b7;
+    --border:         rgba(11,11,11,0.10);
+    --role-protagonist: #2a78d6;
+    --role-antagonist:  #e34948;
+    --role-secondary:   #1baf7a;
+    --role-minor:       #4a3aa7;
+    --role-unknown:     #898781;
+    --status-warning:   #fab219;
+    --status-good:      #0ca30c;
+    --bar-fill:         #2a78d6;
+    --bar-fill-2:       #86b6ef;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:where(:not([data-theme="light"])) .viz-root {
+      color-scheme: dark;
+      --surface-1:      #1a1a19;
+      --surface-page:   #0d0d0d;
+      --text-primary:   #ffffff;
+      --text-secondary: #c3c2b7;
+      --text-muted:     #898781;
+      --gridline:       #2c2c2a;
+      --baseline:       #383835;
+      --border:         rgba(255,255,255,0.10);
+      --role-protagonist: #3987e5;
+      --role-antagonist:  #e66767;
+      --role-secondary:   #199e70;
+      --role-minor:       #9085e9;
+      --role-unknown:     #898781;
+      --status-warning:   #fab219;
+      --status-good:      #0ca30c;
+      --bar-fill:         #3987e5;
+      --bar-fill-2:       #184f95;
+    }
+  }
+  :root[data-theme="dark"] .viz-root {
+    color-scheme: dark;
+    --surface-1:      #1a1a19;
+    --surface-page:   #0d0d0d;
+    --text-primary:   #ffffff;
+    --text-secondary: #c3c2b7;
+    --text-muted:     #898781;
+    --gridline:       #2c2c2a;
+    --baseline:       #383835;
+    --border:         rgba(255,255,255,0.10);
+    --role-protagonist: #3987e5;
+    --role-antagonist:  #e66767;
+    --role-secondary:   #199e70;
+    --role-minor:       #9085e9;
+    --role-unknown:     #898781;
+    --status-warning:   #fab219;
+    --status-good:      #0ca30c;
+    --bar-fill:         #3987e5;
+    --bar-fill-2:       #184f95;
+  }
+
+  * { box-sizing: border-box; }
+  .viz-root {
+    background: var(--surface-page);
+    color: var(--text-primary);
+    font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
+    padding: 40px 24px 80px;
+    min-height: 100vh;
+  }
+  .wrap { max-width: 1080px; margin: 0 auto; display: flex; flex-direction: column; gap: 28px; }
+
+  header h1 { font-size: 30px; font-weight: 700; letter-spacing: -0.3px; }
+  header .meta { color: var(--text-secondary); font-size: 14px; margin-top: 4px; }
+  .note {
+    font-size: 13px; color: var(--text-secondary); background: var(--surface-1);
+    border: 1px solid var(--border); border-radius: 8px; padding: 10px 14px; margin-top: 12px;
+  }
+
+  .kpis { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; }
+  .kpi {
+    background: var(--surface-1); border: 1px solid var(--border); border-radius: 10px;
+    padding: 16px 18px;
+  }
+  .kpi .n { font-size: 28px; font-weight: 700; font-variant-numeric: tabular-nums; }
+  .kpi .l { font-size: 12.5px; color: var(--text-secondary); margin-top: 2px; }
+
+  section { display: flex; flex-direction: column; gap: 14px; }
+  section > h2 { font-size: 17px; font-weight: 700; }
+  section > .sub { font-size: 13px; color: var(--text-secondary); margin-top: -10px; }
+
+  .panel { background: var(--surface-1); border: 1px solid var(--border); border-radius: 10px; padding: 18px 20px; }
+
+
+  /* --- accuracy tables (detection / resolution) --- */
+  .acc-group { display: flex; flex-direction: column; gap: 8px; }
+  .acc-group .group-label { font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: .4px; color: var(--text-muted); }
+  table.acc { width: 100%; border-collapse: collapse; font-size: 13px; }
+  table.acc th { text-align: left; font-size: 11px; text-transform: uppercase; letter-spacing: .4px; color: var(--text-muted); padding: 6px 10px; border-bottom: 1px solid var(--gridline); }
+  table.acc th.num, table.acc td.num { text-align: left; width: 160px; }
+  table.acc td { padding: 10px 10px; border-bottom: 1px solid var(--gridline); vertical-align: middle; }
+  table.acc tr:last-child td { border-bottom: none; }
+  .work-name { font-weight: 600; }
+  .work-name .sub { display: block; font-weight: 400; font-size: 11px; color: var(--text-muted); margin-top: 1px; }
+  .metric-cell { display: flex; align-items: center; gap: 8px; }
+  .metric-track { position: relative; flex: 1; height: 8px; background: var(--gridline); border-radius: 3px; }
+  .metric-fill { position: absolute; top: 0; left: 0; height: 100%; border-radius: 3px; background: var(--bar-fill); }
+  .metric-tick { position: absolute; top: -3px; bottom: -3px; width: 2px; background: var(--text-primary); opacity: .55; }
+  .metric-pct { width: 40px; text-align: right; font-variant-numeric: tabular-nums; font-size: 12.5px; }
+  .metric-pct.f1 { font-weight: 700; }
+  .muted-val { color: var(--text-muted); font-size: 12.5px; }
+  .status-pill.good .dot { background: var(--status-good); }
+  .status-pill.crit .dot { background: var(--role-antagonist); }
+  .run-meta { font-size: 11.5px; color: var(--text-muted); }
+  .run-meta code { background: var(--surface-page); border: 1px solid var(--border); border-radius: 4px; padding: 1px 5px; }
+
+  /* --- manuscript cards --- */
+  .cards { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; }
+  .card { background: var(--surface-1); border: 1px solid var(--border); border-radius: 10px; padding: 16px 18px; display: flex; flex-direction: column; gap: 12px; }
+  .card h3 { font-size: 15px; font-weight: 700; }
+  .card .badges { display: flex; gap: 6px; flex-wrap: wrap; }
+  .badge { font-size: 10.5px; font-weight: 600; letter-spacing: .3px; text-transform: uppercase; padding: 2px 7px; border-radius: 999px; background: var(--gridline); color: var(--text-secondary); }
+  .stat-line { display: flex; gap: 16px; font-size: 12.5px; color: var(--text-secondary); }
+  .stat-line b { color: var(--text-primary); font-variant-numeric: tabular-nums; }
+
+  .role-bar { display: flex; height: 14px; border-radius: 4px; overflow: hidden; gap: 2px; }
+  .role-bar .seg { height: 100%; }
+  .role-legend { display: flex; flex-wrap: wrap; gap: 10px; font-size: 11px; color: var(--text-secondary); }
+  .role-legend span { display: inline-flex; align-items: center; gap: 5px; }
+  .role-legend .sw { width: 8px; height: 8px; border-radius: 2px; }
+
+  .top-chars { display: flex; flex-direction: column; gap: 5px; }
+  .tc-row { display: grid; grid-template-columns: 96px 1fr 30px; align-items: center; gap: 8px; }
+  .tc-row .name { font-size: 12px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .tc-track { height: 10px; background: var(--gridline); border-radius: 3px; position: relative; }
+  .tc-fill { position: absolute; top: 0; left: 0; height: 100%; border-radius: 3px; background: var(--bar-fill); cursor: default; }
+  .tc-n { font-size: 11px; text-align: right; color: var(--text-secondary); font-variant-numeric: tabular-nums; }
+
+  .callout { border-left: 3px solid var(--status-warning); background: var(--surface-1); border-radius: 0 8px 8px 0; padding: 12px 16px; font-size: 13px; color: var(--text-secondary); display:flex; gap:10px; align-items: flex-start; }
+  .callout .icon { font-size: 15px; line-height: 1.4; }
+  .callout strong { color: var(--text-primary); }
+
+  /* --- merge table --- */
+  table.mc { width: 100%; border-collapse: collapse; font-size: 13px; }
+  table.mc th { text-align: left; font-size: 11px; text-transform: uppercase; letter-spacing: .4px; color: var(--text-muted); padding: 6px 10px; border-bottom: 1px solid var(--gridline); }
+  table.mc td { padding: 9px 10px; border-bottom: 1px solid var(--gridline); vertical-align: top; }
+  table.mc tr:last-child td { border-bottom: none; }
+  .pair { font-weight: 600; }
+  .pair .vs { color: var(--text-muted); font-weight: 400; margin: 0 4px; }
+  .conf-track { width: 60px; height: 8px; background: var(--gridline); border-radius: 3px; position: relative; display:inline-block; vertical-align: middle; margin-right: 6px;}
+  .conf-fill { position: absolute; left:0; top:0; height: 100%; border-radius: 3px; background: var(--role-secondary); }
+  .status-pill { display: inline-flex; align-items: center; gap: 5px; font-size: 11.5px; font-weight: 600; color: var(--text-primary); }
+  .status-pill .dot { width: 7px; height: 7px; border-radius: 50%; background: var(--status-warning); }
+  .book-tag { font-size: 11px; color: var(--text-muted); }
+
+  footer { font-size: 12px; color: var(--text-muted); border-top: 1px solid var(--gridline); padding-top: 14px; line-height: 1.6; }
+  footer code { background: var(--surface-1); border: 1px solid var(--border); border-radius: 4px; padding: 1px 5px; font-size: 11px; }
+
+  [data-tooltip] { position: relative; }
+
+  @media (max-width: 760px) {
+    .kpis { grid-template-columns: repeat(2, 1fr); }
+    .cards { grid-template-columns: 1fr; }
+    .prow { grid-template-columns: 1fr; }
+  }
+</style>
+
+<div class="wrap">
+
+  <header>
+    <h1>Loom — Estado del grafo</h1>
+    <div class="meta">Snapshot leído directamente de Neo4j el 2026-07-15, 18:00 UTC · milestone M1 (extracción y resolución de personajes)</div>
+    <div class="note">
+      El grafo tiene <b>6</b> nodos <code>Manuscript</code> en este momento; <b>3</b> son fixtures de test
+      (<code>word_count</code> &lt; 1000: "Test Book", un libro sin título de 133 palabras, "Crafted Two Chapters")
+      sembrados y limpiados en vivo por el test harness — quedan excluidos de este snapshot. Es una foto fija, no una vista en vivo: para actualizarla, vuelve a correr las queries y regenera el archivo.
+    </div>
+  </header>
+
+  <section class="kpis">
+    <div class="kpi"><div class="n">3</div><div class="l">Manuscritos reales</div></div>
+    <div class="kpi"><div class="n">270</div><div class="l">Personajes extraídos</div></div>
+    <div class="kpi"><div class="n">3 442</div><div class="l">Menciones registradas</div></div>
+    <div class="kpi"><div class="n">4</div><div class="l">MergeCandidate pendientes</div></div>
+  </section>
+
+  <section>
+    <h2>Precisión de extracción (harness de eval)</h2>
+    <div class="sub">
+      Porcentaje de acierto real, no conteo de personajes: <b>detection F1</b> empareja entidades por solapamiento de
+      alias contra <code>eval/fixtures/*.characters.gold.json</code> (<code>eval/characters/metrics.py</code>); <b>resolution B³ F1</b>
+      mide la fusión correcta a nivel de mención. Últimas corridas commiteadas en <code>eval/results/</code> — no hay una corrida de hoy 07-15.
+    </div>
+
+    <div class="acc-group">
+      <div class="group-label">Libros reales — señal de precisión</div>
+      <div class="panel" style="padding: 4px 4px;">
+        <table class="acc">
+          <thead><tr><th>Obra</th><th class="num">Precision</th><th class="num">Recall</th><th class="num">Detection F1</th><th class="num">Resolution B³ F1</th><th>Umbral</th></tr></thead>
+          <tbody>
+            <tr>
+              <td class="work-name">Harry Potter y la piedra filosofal<span class="sub">gold: 96 personajes</span></td>
+              <td class="num"><div class="metric-cell"><div class="metric-track"><div class="metric-fill" style="width:75.5%"></div></div><span class="metric-pct">75%</span></div></td>
+              <td class="num"><div class="metric-cell"><div class="metric-track"><div class="metric-fill" style="width:86.5%"></div></div><span class="metric-pct">86%</span></div></td>
+              <td class="num"><div class="metric-cell"><div class="metric-track"><div class="metric-fill" style="width:80.6%"></div><div class="metric-tick" style="left:90%"></div></div><span class="metric-pct f1">81%</span></div></td>
+              <td class="num"><span class="muted-val">no medido</span></td>
+              <td><span class="status-pill crit"><i class="dot"></i>bajo umbral (0.90)</span></td>
+            </tr>
+            <tr>
+              <td class="work-name">Orgullo y Prejuicio<span class="sub">gold: 42 personajes (parcial, ver known-issues.md)</span></td>
+              <td class="num"><div class="metric-cell"><div class="metric-track"><div class="metric-fill" style="width:66.7%"></div></div><span class="metric-pct">67%</span></div></td>
+              <td class="num"><div class="metric-cell"><div class="metric-track"><div class="metric-fill" style="width:100%"></div></div><span class="metric-pct">100%</span></div></td>
+              <td class="num"><div class="metric-cell"><div class="metric-track"><div class="metric-fill" style="width:80%"></div><div class="metric-tick" style="left:90%"></div></div><span class="metric-pct f1">80%</span></div></td>
+              <td class="num"><span class="muted-val">no medido</span></td>
+              <td><span class="status-pill crit"><i class="dot"></i>bajo umbral (0.90)</span></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="run-meta">HP1: <code>c918204</code> · 2026-07-14 22:18 UTC · <code>openai/kimi-k2.5</code> · prompt v3 &nbsp;·&nbsp; P&amp;P: mismo commit/run.</div>
+    </div>
+
+    <div class="acc-group">
+      <div class="group-label">Fixtures sintéticos — health check del harness, no señal de precisión de libros reales</div>
+      <div class="panel" style="padding: 4px 4px;">
+        <table class="acc">
+          <thead><tr><th>Fixture</th><th class="num">Precision</th><th class="num">Recall</th><th class="num">Detection F1</th><th class="num">Resolution B³ F1</th><th>Umbral</th></tr></thead>
+          <tbody>
+            <tr>
+              <td class="work-name">crafted-two-chapters.epub<span class="sub">anotado exacto por construcción</span></td>
+              <td class="num"><div class="metric-cell"><div class="metric-track"><div class="metric-fill" style="width:100%"></div></div><span class="metric-pct">100%</span></div></td>
+              <td class="num"><div class="metric-cell"><div class="metric-track"><div class="metric-fill" style="width:100%"></div></div><span class="metric-pct">100%</span></div></td>
+              <td class="num"><div class="metric-cell"><div class="metric-track"><div class="metric-fill" style="width:100%"></div><div class="metric-tick" style="left:90%"></div></div><span class="metric-pct f1">100%</span></div></td>
+              <td class="num"><div class="metric-cell"><div class="metric-track"><div class="metric-fill" style="width:100%"></div><div class="metric-tick" style="left:85%"></div></div><span class="metric-pct">100%</span></div></td>
+              <td><span class="status-pill good"><i class="dot"></i>pasa</span></td>
+            </tr>
+            <tr>
+              <td class="work-name">crafted-three-chapters.txt<span class="sub">anotado exacto por construcción</span></td>
+              <td class="num"><div class="metric-cell"><div class="metric-track"><div class="metric-fill" style="width:100%"></div></div><span class="metric-pct">100%</span></div></td>
+              <td class="num"><div class="metric-cell"><div class="metric-track"><div class="metric-fill" style="width:100%"></div></div><span class="metric-pct">100%</span></div></td>
+              <td class="num"><div class="metric-cell"><div class="metric-track"><div class="metric-fill" style="width:100%"></div><div class="metric-tick" style="left:90%"></div></div><span class="metric-pct f1">100%</span></div></td>
+              <td class="num"><div class="metric-cell"><div class="metric-track"><div class="metric-fill" style="width:100%"></div><div class="metric-tick" style="left:85%"></div></div><span class="metric-pct">100%</span></div></td>
+              <td><span class="status-pill good"><i class="dot"></i>pasa</span></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="run-meta">Ambos: <code>33348b6</code> · 2026-07-14 20:34 UTC · <code>openai/kimi-k2.5</code> · prompt v3. La marca en la barra F1 es el umbral de gate (0.90 detection, 0.85 resolution).</div>
+    </div>
+
+    <div class="callout">
+      <span class="icon">→</span>
+      <div>
+        <strong>Ningún libro real pasa el gate todavía</strong> (detection F1 ≥ 0.90): HP1 en 0.81, P&amp;P en 0.80 — ambos por
+        precision baja, no por recall (86% y 100% respectivamente). <code>resolution_b3</code> es <code>null</code> para los dos
+        porque el gold de libros reales aún no tiene anotación a nivel de mención (<code>docs/known-issues.md</code>) — solo se mide
+        en los fixtures sintéticos, donde es 100% por construcción y no dice nada sobre precisión real. Estas corridas son de
+        <b>2026-07-14</b>; los conteos de personajes que se ven en la sección "Por manuscrito" son de ingestas de <b>hoy 07-15</b>
+        y no tienen una corrida de eval equivalente todavía — son dos vistas del sistema, no comparables entre sí número a número.
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <h2>Por manuscrito</h2>
+    <div class="role-legend" style="margin-top:-4px;">
+      <span><i class="sw" style="background:var(--role-protagonist)"></i>protagonist</span>
+      <span><i class="sw" style="background:var(--role-secondary)"></i>secondary</span>
+      <span><i class="sw" style="background:var(--role-antagonist)"></i>antagonist</span>
+      <span><i class="sw" style="background:var(--role-minor)"></i>minor</span>
+      <span><i class="sw" style="background:var(--role-unknown)"></i>unknown</span>
+    </div>
+    <div class="cards">
+
+      <div class="card">
+        <div>
+          <h3>Harry Potter y la piedra filosofal</h3>
+          <div class="badges"><span class="badge">epub</span><span class="badge">run 08:49</span></div>
+        </div>
+        <div class="stat-line"><span><b>110</b> personajes</span><span><b>884</b> menciones</span><span><b>1</b> merge</span></div>
+        <div class="role-bar" title="protagonist 3 · secondary 16 · antagonist 1 · minor 69 · unknown 21">
+          <div class="seg" style="width:2.7%; background:var(--role-protagonist)"></div>
+          <div class="seg" style="width:14.5%; background:var(--role-secondary)"></div>
+          <div class="seg" style="width:0.9%; background:var(--role-antagonist)"></div>
+          <div class="seg" style="width:62.7%; background:var(--role-minor)"></div>
+          <div class="seg" style="width:19.1%; background:var(--role-unknown)"></div>
+        </div>
+        <div class="top-chars">
+          <div class="tc-row"><span class="name">Harry Potter</span><div class="tc-track"><div class="tc-fill" style="width:100%" title="106 menciones"></div></div><span class="tc-n">106</span></div>
+          <div class="tc-row"><span class="name">Hermione Granger</span><div class="tc-track"><div class="tc-fill" style="width:49%" title="52 menciones"></div></div><span class="tc-n">52</span></div>
+          <div class="tc-row"><span class="name">Vernon Dursley</span><div class="tc-track"><div class="tc-fill" style="width:47%" title="50 menciones"></div></div><span class="tc-n">50</span></div>
+          <div class="tc-row"><span class="name">Ron Weasley</span><div class="tc-track"><div class="tc-fill" style="width:44%" title="47 menciones"></div></div><span class="tc-n">47</span></div>
+          <div class="tc-row"><span class="name">Rubeus Hagrid</span><div class="tc-track"><div class="tc-fill" style="width:37%" title="39 menciones"></div></div><span class="tc-n">39</span></div>
+          <div class="tc-row"><span class="name">Albus Dumbledore</span><div class="tc-track"><div class="tc-fill" style="width:34%" title="36 menciones"></div></div><span class="tc-n">36</span></div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div>
+          <h3>Harry Potter y la piedra filosofal</h3>
+          <div class="badges"><span class="badge">epub</span><span class="badge">run 17:14</span></div>
+        </div>
+        <div class="stat-line"><span><b>95</b> personajes</span><span><b>862</b> menciones</span><span><b>1</b> merge</span></div>
+        <div class="role-bar" title="protagonist 3 · secondary 15 · antagonist 1 · minor 75 · unknown 1">
+          <div class="seg" style="width:3.2%; background:var(--role-protagonist)"></div>
+          <div class="seg" style="width:15.8%; background:var(--role-secondary)"></div>
+          <div class="seg" style="width:1.0%; background:var(--role-antagonist)"></div>
+          <div class="seg" style="width:78.9%; background:var(--role-minor)"></div>
+          <div class="seg" style="width:1.1%; background:var(--role-unknown)"></div>
+        </div>
+        <div class="top-chars">
+          <div class="tc-row"><span class="name">Harry Potter</span><div class="tc-track"><div class="tc-fill" style="width:100%" title="108 menciones"></div></div><span class="tc-n">108</span></div>
+          <div class="tc-row"><span class="name">Hermione Granger</span><div class="tc-track"><div class="tc-fill" style="width:52%" title="56 menciones"></div></div><span class="tc-n">56</span></div>
+          <div class="tc-row"><span class="name">Ron Weasley</span><div class="tc-track"><div class="tc-fill" style="width:48%" title="52 menciones"></div></div><span class="tc-n">52</span></div>
+          <div class="tc-row"><span class="name">El señor Dursley</span><div class="tc-track"><div class="tc-fill" style="width:40%" title="43 menciones"></div></div><span class="tc-n">43</span></div>
+          <div class="tc-row"><span class="name">Hagrid</span><div class="tc-track"><div class="tc-fill" style="width:35%" title="38 menciones"></div></div><span class="tc-n">38</span></div>
+          <div class="tc-row"><span class="name">Albus Dumbledore</span><div class="tc-track"><div class="tc-fill" style="width:33%" title="36 menciones"></div></div><span class="tc-n">36</span></div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div>
+          <h3>Sin título <span style="color:var(--text-muted); font-weight:400;">(≈ Orgullo y Prejuicio)</span></h3>
+          <div class="badges"><span class="badge">txt</span><span class="badge">run 17:14</span></div>
+        </div>
+        <div class="stat-line"><span><b>65</b> personajes</span><span><b>1 696</b> menciones</span><span><b>2</b> merge</span></div>
+        <div class="role-bar" title="protagonist 9 · secondary 11 · minor 45">
+          <div class="seg" style="width:13.8%; background:var(--role-protagonist)"></div>
+          <div class="seg" style="width:16.9%; background:var(--role-secondary)"></div>
+          <div class="seg" style="width:69.3%; background:var(--role-minor)"></div>
+        </div>
+        <div class="top-chars">
+          <div class="tc-row"><span class="name">Elizabeth Bennet</span><div class="tc-track"><div class="tc-fill" style="width:100%" title="238 menciones"></div></div><span class="tc-n">238</span></div>
+          <div class="tc-row"><span class="name">Mr. Darcy</span><div class="tc-track"><div class="tc-fill" style="width:66%" title="156 menciones"></div></div><span class="tc-n">156</span></div>
+          <div class="tc-row"><span class="name">Jane Bennet</span><div class="tc-track"><div class="tc-fill" style="width:56%" title="134 menciones"></div></div><span class="tc-n">134</span></div>
+          <div class="tc-row"><span class="name">Charles Bingley</span><div class="tc-track"><div class="tc-fill" style="width:46%" title="110 menciones"></div></div><span class="tc-n">110</span></div>
+          <div class="tc-row"><span class="name">Mrs. Bennet</span><div class="tc-track"><div class="tc-fill" style="width:42%" title="99 menciones"></div></div><span class="tc-n">99</span></div>
+          <div class="tc-row"><span class="name">Mr. Bennet</span><div class="tc-track"><div class="tc-fill" style="width:39%" title="92 menciones"></div></div><span class="tc-n">92</span></div>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <section>
+    <h2>MergeCandidate pendientes</h2>
+    <div class="sub">Las 4 propuestas de fusión que la resolución generó — ninguna revisada aún (<code>status = pending</code>).</div>
+    <div class="panel" style="padding: 4px 4px;">
+      <table class="mc">
+        <thead><tr><th>Libro</th><th>Par propuesto</th><th>Confianza</th><th>Estado</th></tr></thead>
+        <tbody>
+          <tr>
+            <td class="book-tag">Orgullo y Prejuicio</td>
+            <td class="pair">Miss Lucas<span class="vs">↔</span>Charlotte Lucas</td>
+            <td><span class="conf-track"><span class="conf-fill" style="width:95%"></span></span>0.95</td>
+            <td><span class="status-pill"><i class="dot"></i>pendiente</span></td>
+          </tr>
+          <tr>
+            <td class="book-tag">Orgullo y Prejuicio</td>
+            <td class="pair">Miss Darcy<span class="vs">↔</span>Georgiana Darcy</td>
+            <td><span class="conf-track"><span class="conf-fill" style="width:95%"></span></span>0.95</td>
+            <td><span class="status-pill"><i class="dot"></i>pendiente</span></td>
+          </tr>
+          <tr>
+            <td class="book-tag">HP1 · run 17:14</td>
+            <td class="pair">la Dama Gorda<span class="vs">↔</span>la Señora Gorda</td>
+            <td><span class="conf-track"><span class="conf-fill" style="width:95%"></span></span>0.95</td>
+            <td><span class="status-pill"><i class="dot"></i>pendiente</span></td>
+          </tr>
+          <tr>
+            <td class="book-tag">HP1 · run 08:49</td>
+            <td class="pair">James Potter<span class="vs">↔</span>Abuelo de Harry Potter</td>
+            <td><span class="conf-track"><span class="conf-fill" style="width:85%"></span></span>0.85</td>
+            <td><span class="status-pill"><i class="dot"></i>pendiente</span></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="callout">
+      <span class="icon">⚠</span>
+      <div>
+        <strong>Revisar antes de aprobar por lote:</strong> el candidato "James Potter ↔ Abuelo de Harry Potter" tiene confianza 0.85,
+        pero el <code>rationale</code> que el propio LLM generó concluye explícitamente que son personas distintas
+        ("James Potter (Entidad A) y 'Abuelo de Harry Potter' (Entidad B) son personas DISTINTAS") — la confianza numérica no refleja
+        la conclusión del razonamiento. Las otras tres propuestas sí son consistentes (variantes de alias/traducción del mismo personaje).
+      </div>
+    </div>
+  </section>
+
+  <footer>
+    Snapshot generado a mano el 2026-07-15 vía MCP <code>neo4j</code> (solo lectura) sobre el grafo del proyecto —
+    no es una vista en vivo ni se regenera sola. Manuscritos de test excluidos por <code>word_count &lt; 1000</code>.
+    Nombres de personajes en tablas de merge resueltos vía <code>character_id</code>; el título "Orgullo y Prejuicio" para el
+    manuscrito sin título es una inferencia por contenido (rationale de sus <code>MergeCandidate</code>), no un dato del grafo.
+  </footer>
+
+</div>
+</div>

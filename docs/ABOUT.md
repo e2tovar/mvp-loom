@@ -111,6 +111,33 @@ Sobre el reparto se añade el mapa de vínculos:
 
 ---
 
+### Capa de atributos: quién es cada quién
+
+Sobre el reparto se añade también la ficha física y de identidad de cada personaje:
+
+```
+(c:Character)-[:HAS_ATTRIBUTE]->(a:Attribute)
+(AttributeEvidence)-[:ABOUT]->(Character)      // ×1
+(AttributeEvidence)-[:IN_SCENE]->(Scene)
+```
+
+- **`Attribute`** — un valor afirmado de un personaje para una `key` del catálogo
+  cerrado (`eye_color`, `hair`, `height`, `scar`, `age`, `gender`, `status`), con su
+  clase: **estático** (`static`, comparable por igualdad) o **con estado**
+  (`stateful`, el caso de `status`, comparable por transición vivo→muerto). La
+  lógica de comparación no vive aquí: la aplica un futuro detector de continuidad.
+- **`AttributeEvidence`** — la prueba: un valor afirmado de un personaje en una
+  escena concreta, con la cita textual que lo sustenta. Es al atributo lo que
+  `Mention` es al personaje y `RelationEvidence` a `RELATES_TO`.
+- **Regla de no colapso**: si un mismo (personaje, `key`) tiene valores distintos
+  en escenas distintas ("ojos azules" en el capítulo 2, "ojos verdes" en el 18),
+  el grafo conserva **ambos** como nodos `Attribute` separados, cada uno con sus
+  propias evidencias — nunca se elige un valor "ganador" que descarte al otro.
+  Esa multiplicidad conservada es, en sí misma, la señal de continuidad: el
+  futuro detector la consumirá directamente en vez de tener que reconstruirla.
+
+---
+
 ## Identificadores deterministas
 
 Cada nodo recibe un identificador derivado de su contenido, no un autoincremental. Un
@@ -146,10 +173,11 @@ sin coste adicional.
 |-----------|-----------------|--------|
 | M0 — Ingesta | `Manuscript` / `Chapter` / `Scene` | ✅ Completo |
 | M1 — Personajes | `Character` / `Mention` / `MergeCandidate` + eval | ✅ Completo |
-| M2 — Relaciones | `RELATES_TO` entre personajes, atributos, continuidad | ✅ Completo |
-| M3 — Eventos | Nodos de evento y orden cronológico real | 🔜 Planificado |
-| M4 — Retrieval | `Passage` y búsqueda híbrida (GraphRAG) | 🔜 Planificado |
-| M5 — Wiki | Páginas markdown generadas desde el grafo | 🔜 Planificado |
+| M2 — Relaciones | `RELATES_TO` entre personajes + eval | ✅ Completo |
+| M3 — Atributos | `Attribute` / `AttributeEvidence` + eval | ✅ Completo |
+| M4 — Eventos | Nodos de evento y orden cronológico real | 🔜 Planificado |
+| M5 — Retrieval | `Passage` y búsqueda híbrida (GraphRAG) | 🔜 Planificado |
+| M6 — Wiki | Páginas markdown generadas desde el grafo | 🔜 Planificado |
 
 Cada milestone solo añade nodos y relaciones; nunca altera las capas previas.
 

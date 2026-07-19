@@ -45,7 +45,7 @@ def _seed(sess):
                 c.entity_kind='person'
         MERGE (c)-[:APPEARS_IN]->(s0)
         MERGE (c)-[:APPEARS_IN]->(s1)
-    """)
+    """).consume()  # fuerza el flush del seed antes de que el pipeline lea en otra sesión
 
 
 def test_e2e_no_collapse_and_provenance(neo4j_session):

@@ -1,0 +1,9 @@
+{
+  "work": "crafted-attributes.txt",
+  "annotation_criteria": "eval/fixtures/README.md#characters",
+  "characters": [
+    {"gold_id": "ana", "canonical_name": "Ana", "aliases": []},
+    {"gold_id": "beatriz", "canonical_name": "Beatriz", "aliases": []},
+    {"gold_id": "daniel", "canonical_name": "Daniel", "aliases": ["el viejo Daniel"]}
+  ]
+}

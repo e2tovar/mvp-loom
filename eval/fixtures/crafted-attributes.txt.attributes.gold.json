@@ -1,0 +1,15 @@
+{
+  "work": "crafted-attributes.txt",
+  "annotation_criteria": "eval/fixtures/README.md#attributes",
+  "attributes": [
+    {"character": "ana", "key": "eye_color", "value_norm": "green", "class": "static"},
+    {"character": "ana", "key": "eye_color", "value_norm": "blue", "class": "static"},
+    {"character": "ana", "key": "hair", "value_norm": "blonde", "class": "static"},
+    {"character": "ana", "key": "height", "value_norm": "tall", "class": "static"},
+    {"character": "beatriz", "key": "eye_color", "value_norm": "brown", "class": "static"},
+    {"character": "beatriz", "key": "height", "value_norm": "short", "class": "static"},
+    {"character": "beatriz", "key": "scar", "value_norm": "eyebrow", "class": "static"},
+    {"character": "beatriz", "key": "age", "value_norm": "forty", "class": "static"},
+    {"character": "daniel", "key": "status", "value_norm": "dead", "class": "stateful"}
+  ]
+}

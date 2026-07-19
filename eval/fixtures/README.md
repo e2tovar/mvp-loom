@@ -114,3 +114,31 @@ revelada solo en libros posteriores. Al no tener el texto fuente, `extracted` se
 asigna por conocimiento canónico verificado en wiki en vez de por cita con offset
 localizable; ver `_draft_note` dentro del propio archivo para el detalle de alcance
 y las exclusiones deliberadas.
+
+## Attributes gold {#attributes}
+
+Cada obra tiene un archivo `<nombre>.attributes.gold.json` con los atributos
+estáticos y estatefuls de personajes (p. ej. apariencia, rol, estado).
+
+### Criterios de anotación
+
+- **Valores normalizados en inglés, minúsculas**: `green`, `blonde`, `tall`, etc.
+- **Un registro por valor distinto**: si Ana se describe con ojos verdes en cap.1
+  y ojos azules en cap.2, se anotan dos triples (`character: ana`, `key: eye_color`,
+  `value_norm: green` | `value_norm: blue`) — la capa de extracción NO colapsa
+  contradicciones (SC-004).
+- **Solo pares cuyos personajes existen** en el characters gold de la obra.
+- **Clases de atributo**:
+  - `static`: propiedades inherentes que no varían lógicamente en la narración
+    (apariencia, parentesco, nombre).
+  - `stateful`: propiedades que cambian con la trama (vivo/muerto, casado/soltero,
+    cargo actual).
+
+| Archivo | Obra | Atributos anotados |
+|---------|------|---------------------|
+| `crafted-attributes.txt.attributes.gold.json` | *Atributos Fabricados* | 9 (Ana: eye_color×2, hair, height; Beatriz: eye_color, height, scar, age; Daniel: status) — **obra del gate** |
+
+`crafted-attributes.txt` es la obra **del gate de atributos**: sintética, con
+atributos estáticos claros y **un valor contradictorio deliberado** (ojos de Ana:
+verdes en cap.1, azules en cap.2) para verificar que el pipeline no colapsa
+ambigüedades multi-valor.

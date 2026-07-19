@@ -13,6 +13,7 @@ from contextlib import asynccontextmanager
 
 from fastapi import FastAPI
 
+from backend.api.routes_attributes import router as attributes_router
 from backend.api.routes_characters import router as characters_router
 from backend.api.routes_manuscripts import router as manuscripts_router
 from backend.api.routes_relations import router as relations_router
@@ -44,6 +45,7 @@ app = FastAPI(
 app.include_router(manuscripts_router)
 app.include_router(characters_router)
 app.include_router(relations_router)
+app.include_router(attributes_router)
 
 
 @app.get("/health")

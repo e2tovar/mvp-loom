@@ -277,7 +277,7 @@ afectado y la agregación se rehace de forma determinista.
 | 6 | Arquitectura: tercera pasada por escena sobre el cast resuelto | Consistente con M1/M2 (patrón triple contrato, universo cerrado, cache por hash, MERGE idempotente, aditivo). No toca capas previas. Se acepta el coste de una pasada LLM adicional. |
 | 7 | Eval: gate en crafted, diagnóstico en novela real; métrica = F1 de tripletas | Mismo patrón que M1/M2. Gate barato y determinista; señal real sin bloquear por anotación laboriosa. |
 | 8 | Sin cola de revisión humana para atributos | El modo de fallo es blando (nodo aditivo y reversible), al contrario que las fusiones de M1. Control por métrica + procedencia. |
-| 9 | La wiki (M5) que consumirá estos atributos será **híbrida** (grafo + prosa) | Decisión respaldada por deep-research (`docs/graph-north.md` §4b): la wiki no se deriva solo del grafo. No afecta el alcance de M3, pero fija que `value_quote` (la cita) es dato de primera clase, no accesorio: es el re-ancla de la wiki. |
+| 9 | La wiki (M6) que consumirá estos atributos será **híbrida** (grafo + prosa) | Decisión respaldada por deep-research (`docs/graph-north.md` §4b): la wiki no se deriva solo del grafo. No afecta el alcance de M3, pero fija que `value_quote` (la cita) es dato de primera clase, no accesorio: es el re-ancla de la wiki. |
 
 ## Alternatives Considered
 

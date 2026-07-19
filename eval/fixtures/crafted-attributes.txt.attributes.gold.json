@@ -10,6 +10,9 @@
     {"character": "beatriz", "key": "height", "value_norm": "short", "class": "static"},
     {"character": "beatriz", "key": "scar", "value_norm": "eyebrow", "class": "static"},
     {"character": "beatriz", "key": "age", "value_norm": "forty", "class": "static"},
+    {"character": "ana", "key": "gender", "value_norm": "female", "class": "static"},
+    {"character": "beatriz", "key": "gender", "value_norm": "female", "class": "static"},
+    {"character": "daniel", "key": "gender", "value_norm": "male", "class": "static"},
     {"character": "daniel", "key": "status", "value_norm": "dead", "class": "stateful"}
   ]
 }

@@ -240,7 +240,7 @@ Cada milestone tiene un **criterio de aceptación**. No se avanza al siguiente s
 - **M6 · Story Wiki.** Generación y mantenimiento diff-aware de la wiki markdown (híbrida grafo + prosa — ver `docs/graph-north.md`). *DoD: editar un capítulo regenera solo las páginas afectadas.*
 - **M7 · Análisis.** Arco emocional, heatmap de ritmo, foreshadowing/payoff, informe de lectura. *DoD: informe generado, sin afirmaciones sin cita.*
 - **M8 · Frontend.** Mapa de personajes, timeline, dashboard, informe, wiki navegable. *DoD: recorrido completo desde subir libro hasta explorar resultados.*
-- **M8 · Endurecimiento.** Orquestación, observabilidad, coste, caching. *DoD: re-proceso incremental barato + trazas y coste por etapa visibles.*
+- **M9 · Endurecimiento.** Orquestación, observabilidad, coste, caching. *DoD: re-proceso incremental barato + trazas y coste por etapa visibles.*
 
 ---
 

@@ -40,7 +40,9 @@ def main() -> None:
     args = _parse_args()
 
     from backend.core.errors import (
-        LLMUnavailableError, ManuscriptNotFoundError, NotExtractedError,
+        LLMUnavailableError,
+        ManuscriptNotFoundError,
+        NotExtractedError,
     )
     from backend.extraction.attributes.pipeline import run_attributes_pipeline
     from backend.llm.litellm_client import LiteLLMClient

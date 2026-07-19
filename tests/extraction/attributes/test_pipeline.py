@@ -1,4 +1,3 @@
-import pytest
 
 from backend.extraction.attributes.schemas import (
     SceneAttributeEvidence,
@@ -8,7 +7,10 @@ from backend.extraction.attributes.schemas import (
 
 def test_attributes_cache_roundtrip(tmp_path):
     from backend.extraction.attributes.schemas import (
-        AttributeSceneContext, CastEntry, SceneAttributes, SceneAttributeEvidence,
+        AttributeSceneContext,
+        CastEntry,
+        SceneAttributeEvidence,
+        SceneAttributes,
     )
     from backend.llm.cache import AttributesCache
 

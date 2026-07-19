@@ -16,7 +16,8 @@ class _FakeLLM:
 
     def complete_structured(self, system, user, schema):
         from backend.extraction.attributes.schemas import (
-            SceneAttributes, SceneAttributeEvidence,
+            SceneAttributeEvidence,
+            SceneAttributes,
         )
         if "s0" in user:
             return SceneAttributes(evidences=[SceneAttributeEvidence(
@@ -49,8 +50,9 @@ def _seed(sess):
 
 
 def test_e2e_no_collapse_and_provenance(neo4j_session):
-    from backend.graph import schema, attributes as attr_graph
     from backend.extraction.attributes.pipeline import run_attributes_pipeline
+    from backend.graph import attributes as attr_graph
+    from backend.graph import schema
     schema.apply_schema(neo4j_session)
     _seed(neo4j_session)
 
@@ -86,8 +88,8 @@ def _seed_no_m1(sess):
 
 def test_pipeline_raises_without_m1(neo4j_session):
     """FR-015: sin capa M1 (personajes) el pipeline debe fallar explícito, no en silencio."""
-    from backend.graph import schema
     from backend.extraction.attributes.pipeline import run_attributes_pipeline
+    from backend.graph import schema
     schema.apply_schema(neo4j_session)
     _seed_no_m1(neo4j_session)
 
@@ -100,7 +102,8 @@ class _FakeLLMFailsOnS0:
 
     def complete_structured(self, system, user, schema):
         from backend.extraction.attributes.schemas import (
-            SceneAttributes, SceneAttributeEvidence,
+            SceneAttributeEvidence,
+            SceneAttributes,
         )
         if "s0" in user:
             raise ExtractionError("fallo simulado del LLM en s0")
@@ -133,8 +136,9 @@ def _seed_fail(sess):
 
 def test_scene_failure_skips_and_continues(neo4j_session):
     """FR-016: una escena que falla se descarta pero no aborta el resto del trabajo."""
-    from backend.graph import schema, attributes as attr_graph
     from backend.extraction.attributes.pipeline import run_attributes_pipeline
+    from backend.graph import attributes as attr_graph
+    from backend.graph import schema
     schema.apply_schema(neo4j_session)
     _seed_fail(neo4j_session)
 

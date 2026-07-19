@@ -2,7 +2,9 @@ import pytest
 from pydantic import ValidationError
 
 from backend.extraction.attributes.schemas import (
-    SceneAttributeEvidence, SceneAttributes, key_class,
+    SceneAttributeEvidence,
+    SceneAttributes,
+    key_class,
 )
 
 

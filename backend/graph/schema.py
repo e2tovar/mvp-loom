@@ -44,6 +44,17 @@ SCHEMA_STATEMENTS: tuple[str, ...] = (
     "FOR (re:RelationEvidence) ON (re.manuscript_id)",
     "CREATE INDEX relation_evidence_by_scene IF NOT EXISTS "
     "FOR (re:RelationEvidence) ON (re.scene_id)",
+    # ── M3: atributos de personaje ────────────────────────────────────────────
+    "CREATE CONSTRAINT attribute_id_unique IF NOT EXISTS "
+    "FOR (a:Attribute) REQUIRE a.attribute_id IS UNIQUE",
+    "CREATE CONSTRAINT attribute_evidence_id_unique IF NOT EXISTS "
+    "FOR (ae:AttributeEvidence) REQUIRE ae.evidence_id IS UNIQUE",
+    "CREATE INDEX attribute_by_manuscript IF NOT EXISTS "
+    "FOR (a:Attribute) ON (a.manuscript_id)",
+    "CREATE INDEX attribute_evidence_by_manuscript IF NOT EXISTS "
+    "FOR (ae:AttributeEvidence) ON (ae.manuscript_id)",
+    "CREATE INDEX attribute_evidence_by_scene IF NOT EXISTS "
+    "FOR (ae:AttributeEvidence) ON (ae.scene_id)",
 )
 
 

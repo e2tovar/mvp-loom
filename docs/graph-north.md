@@ -24,12 +24,12 @@ Fuente: README §5. Estado verificado contra `backend/graph/schema.py` y specs.
 | `Character`/`Mention`/`APPEARS_IN`/`MergeCandidate` | reparto resuelto + evidencia | ✅ en grafo | M1 |
 | `RELATES_TO`/`RelationEvidence` | red de vínculos + evidencia | ✅ en grafo | M2 |
 | `Attribute` | hechos por personaje (`key`,`value_norm`,`AttributeEvidence`) | ✅ en grafo | M3 |
-| `Event` (+`BEFORE`,`INVOLVES`) | orden narrativo vs cronológico | ⬜ pendiente | bloque M3 |
+| `Event` (+`BEFORE`,`INVOLVES`) | orden narrativo vs cronológico | ⬜ pendiente | M4 |
 | `Location` (+`SET_IN`) | dónde ocurre cada escena | ⬜ sin milestone asignado |  |
 | `PlotThread`/`Theme`/`Motif` (+`PLANTED_IN`/`PAID_OFF_IN`) | tramas, temas, foreshadowing | ⬜ sin milestone asignado |  |
-| `Passage` (`text`,`embedding`) | **unidad de recuperación y fuente de toda cita** | ⬜ pendiente | M4 |
-| `CommunitySummary` | resúmenes jerárquicos GraphRAG | ⬜ pendiente | M4 |
-| `Scene.summary`/`tension_score`/`sentiment`/`time_marker` | señal por escena para arcos/timeline | ⬜ pendiente | bloque M3/M4 |
+| `Passage` (`text`,`embedding`) | **unidad de recuperación y fuente de toda cita** | ⬜ pendiente | M5 |
+| `CommunitySummary` | resúmenes jerárquicos GraphRAG | ⬜ pendiente | M5 |
+| `Scene.summary`/`tension_score`/`sentiment`/`time_marker` | señal por escena para arcos/timeline | ⬜ pendiente | M4/M5 |
 
 **Módulos backend aún inexistentes**: `analysis/`, `retrieval/`, `wiki/`,
 `orchestration/` — toda la mitad "consumidora" del sistema es terreno virgen;
@@ -44,10 +44,10 @@ correspondiente del grafo debe garantizar **hoy** para no bloquearlo mañana.
 
 | Consumidor | Qué hace | Qué exige del grafo |
 |---|---|---|
-| **Detector de continuidad** (`analysis/`) | mismo `key`, `value` incompatible → alerta | `Attribute` con `asserted_in_scene`, cita literal y orden narrativo; valores comparables (no prosa libre); distinción atributo estático vs con estado (`status`) |
+| **Detector de continuidad** (`analysis/`) | mismo `key`, `value` incompatible → alerta | `Attribute` + su `AttributeEvidence` por escena (cita literal `value_quote` y orden narrativo); valores normalizados comparables (no prosa libre); distinción atributo estático vs con estado (`status`) |
 | **Timeline / flashbacks** (`analysis/`) | orden narrativo vs cronológico, tau de Kendall | `Event.order_narrative` y `order_chronological` separados; `Scene.time_marker`; `BEFORE` entre eventos |
-| **Retrieval + GraphRAG** (`retrieval/`, M4) | Q&A local/global con citas obligatorias | `Passage` enlazado a `Scene`; toda entidad alcanzable desde sus evidencias (la cadena entidad→evidencia→escena→cita ya existe en M1/M2 y debe mantenerse en cada capa nueva) |
-| **Story Wiki** (`wiki/`, M5) | páginas markdown por entidad, diff-aware | IDs estables (slugs deterministas → nombres de página); descriptores legibles por humanos (p. ej. `RELATES_TO.descriptor`); saber qué escenas sustentan cada página para regenerar solo lo afectado |
+| **Retrieval + GraphRAG** (`retrieval/`, M5) | Q&A local/global con citas obligatorias | `Passage` enlazado a `Scene`; toda entidad alcanzable desde sus evidencias (la cadena entidad→evidencia→escena→cita ya existe en M1/M2/M3 y debe mantenerse en cada capa nueva) |
+| **Story Wiki** (`wiki/`, M6) | páginas markdown por entidad, diff-aware | IDs estables (slugs deterministas → nombres de página); descriptores legibles por humanos (p. ej. `RELATES_TO.descriptor`); saber qué escenas sustentan cada página para regenerar solo lo afectado |
 | **Agentes editores/analistas** (futuros) | insights, revisiones, informes | procedencia total (ningún hecho sin cita), marca `extracted`/`inferred` para no presentar deducciones como hechos, evidencia cruda persistida (re-agregable sin re-extraer) |
 
 ---
@@ -84,7 +84,8 @@ evidencia **no capturada** o capturada **sin procedencia**.
 
 - `Attribute` se modela para sus consumidores: valores normalizados y
   comparables (el detector de continuidad compara igualdad/transición, no
-  prosa), `asserted_in_scene` + cita (retrieval y wiki), keys de catálogo
+  prosa), evidencia por escena (`AttributeEvidence` con `value_quote`) para
+  retrieval y wiki, keys de catálogo
   cerrado (eval medible) — mismo patrón enum+descriptor que M2.
 - La **detección** de continuidad es un consumidor (`analysis/`), no parte de
   la extracción: spec propia sobre el grafo ya poblado.
@@ -97,7 +98,7 @@ evidencia **no capturada** o capturada **sin procedencia**.
 Respaldada por deep-research (2026-07-18, 26 fuentes, 21 claims confirmados con
 voto adversario; ver `docs/research/2026-07-18-wiki-grafo.md` si se archiva).
 
-**Decisión**: la Story Wiki (M5) **NO se deriva solo del grafo**. Se construye
+**Decisión**: la Story Wiki (M6) **NO se deriva solo del grafo**. Se construye
 híbrida: el grafo aporta estructura y navegación; la prosa original —re-anclada
 vía la procedencia escena+cita— aporta el matiz. Regla mnemónica: *el grafo dice
 QUÉ contar y CÓMO enlazarlo; los pasajes originales dicen CON QUÉ PALABRAS.*
@@ -120,8 +121,8 @@ tiene" fue **refutada** en la investigación. El grafo es fiable como registro d
 hechos; lo que pierde es lo **no-enunciado**. Por eso el híbrido, no por
 desconfiar del grafo como fuente de hechos.
 
-**Consecuencia para el roadmap**: la wiki (M5) **depende del nodo `Passage`
-(M4)** como co-fuente — no es derivable solo del grafo. Ya estaba implícito
+**Consecuencia para el roadmap**: la wiki (M6) **depende del nodo `Passage`
+(M5)** como co-fuente — no es derivable solo del grafo. Ya estaba implícito
 (`Passage` = "fuente de toda cita"); ahora es decisión respaldada.
 
 **Guardrails opcionales**: round-trip check (verbalizar → reconstruir grafo →

@@ -233,12 +233,13 @@ Cada milestone tiene un **criterio de aceptación**. No se avanza al siguiente s
 
 - **M0 · Scaffolding.** Repo, docker-compose con Neo4j, FastAPI skeleton, ingesta `.docx`→capítulos/escenas normalizados (capa cruda). *DoD: subir el libro de tu amigo y verlo segmentado correctamente en escenas.*
 - **M1 · Personajes + eval (núcleo del portfolio).** Extracción y resolución de **solo personajes** → grafo. Eval harness con golden dataset. *DoD: F1 de detección ≥ umbral objetivo y precisión de resolución medida sobre el libro real.*
-- **M2 · Relaciones + atributos + continuidad.** Detector de continuidad con el patrón `Attribute`. *DoD: detecta el caso "ojos azules en cap.2 / verdes en cap.18" con precisión de alertas medida.*
-- **M3 · Escenas, eventos y timeline.** Orden narrativo vs cronológico. *DoD: vista de cronología + tau de Kendall vs anotación.*
-- **M4 · Recuperación híbrida + GraphRAG.** Router local/global, community summaries, Q&A **con citas obligatorias**. *DoD: respuestas locales y globales correctas, todas ancladas a pasajes.*
-- **M5 · Story Wiki.** Generación y mantenimiento diff-aware de la wiki markdown. *DoD: editar un capítulo regenera solo las páginas afectadas.*
-- **M6 · Análisis.** Arco emocional, heatmap de ritmo, foreshadowing/payoff, informe de lectura. *DoD: informe generado, sin afirmaciones sin cita.*
-- **M7 · Frontend.** Mapa de personajes, timeline, dashboard, informe, wiki navegable. *DoD: recorrido completo desde subir libro hasta explorar resultados.*
+- **M2 · Relaciones entre personajes + eval.** Extracción de relaciones por par (tipo, descriptor, procedencia) → grafo. *DoD: F1 de detección de pares y accuracy de tipo ≥ umbral sobre obras crafted.* (El bloque "M2 = relaciones + atributos + continuidad" del plan original se descompuso: relaciones aquí, atributos en M3, detección de continuidad como consumidor posterior del grafo.)
+- **M3 · Atributos de personaje + eval.** Extracción de atributos invariantes físicos/identidad + estado vital (`Attribute`/`AttributeEvidence`), con procedencia escena+cita y **sin colapsar valores contradictorios** (la señal que habilita la continuidad). *DoD: F1 de extracción de tripletas `(personaje, key, valor)` ≥ umbral; la contradicción "ojos azules cap.2 / verdes cap.18" queda representada como dos valores del mismo atributo.* La **detección de continuidad** (alertas, precisión de alertas) es una spec de análisis posterior que consume esta capa.
+- **M4 · Escenas, eventos y timeline.** Orden narrativo vs cronológico. *DoD: vista de cronología + tau de Kendall vs anotación.*
+- **M5 · Recuperación híbrida + GraphRAG.** Router local/global, community summaries, Q&A **con citas obligatorias**. *DoD: respuestas locales y globales correctas, todas ancladas a pasajes.*
+- **M6 · Story Wiki.** Generación y mantenimiento diff-aware de la wiki markdown (híbrida grafo + prosa — ver `docs/graph-north.md`). *DoD: editar un capítulo regenera solo las páginas afectadas.*
+- **M7 · Análisis.** Arco emocional, heatmap de ritmo, foreshadowing/payoff, informe de lectura. *DoD: informe generado, sin afirmaciones sin cita.*
+- **M8 · Frontend.** Mapa de personajes, timeline, dashboard, informe, wiki navegable. *DoD: recorrido completo desde subir libro hasta explorar resultados.*
 - **M8 · Endurecimiento.** Orquestación, observabilidad, coste, caching. *DoD: re-proceso incremental barato + trazas y coste por etapa visibles.*
 
 ---

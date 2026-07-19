@@ -1,13 +1,13 @@
 <!-- SPECKIT START -->
-Active feature: **M2 — Extracción de relaciones entre personajes + eval harness**
-(`003-m2-relations`).
+Active feature: **M3 — Capa de atributos de personaje + eval harness**
+(`004-m3-attributes`).
 
 For technologies, project structure, shell commands, and other important
-information, read the current plan:
-`docs/superpowers/plans/2026-07-17-m2-relations.md`
+information, read the spec and (once written) the current plan under
+`specs/004-m3-attributes/` and `docs/superpowers/plans/`.
 
-Related artifacts (all under `specs/003-m2-relations/`): `spec.md`,
-`data-model.md`, `contracts/graph-schema.cypher`, `quickstart.md`.
-Previous milestone (characters): `specs/002-char-extraction-eval/`.
-Raw layer: `specs/001-m0-ingest-segmentation/`.
+Related artifacts (under `specs/004-m3-attributes/`): `spec.md` (plan/data-model/
+contracts to come via `/plan`). Architectural north star: `docs/graph-north.md`.
+Previous milestones: relations `specs/003-m2-relations/`, characters
+`specs/002-char-extraction-eval/`, raw layer `specs/001-m0-ingest-segmentation/`.
 <!-- SPECKIT END -->

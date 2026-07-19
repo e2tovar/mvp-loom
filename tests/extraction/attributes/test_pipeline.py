@@ -1,5 +1,10 @@
 import pytest
 
+from backend.extraction.attributes.schemas import (
+    SceneAttributeEvidence,
+    SceneAttributes,
+)
+
 
 def test_attributes_cache_roundtrip(tmp_path):
     from backend.extraction.attributes.schemas import (
@@ -19,3 +24,20 @@ def test_attributes_cache_roundtrip(tmp_path):
     cache.set(ctx, out)
     again = cache.get(ctx)
     assert again is not None and again.evidences[0].value_norm == "green"
+
+
+def test_validate_drops_out_of_cast_and_dedupes_by_key():
+    from backend.extraction.attributes.pipeline import _validate_evidences
+    out = SceneAttributes(evidences=[
+        SceneAttributeEvidence(character_id="ana", key="eye_color",
+            value_norm="blue", value_quote="ojos azules", confidence=0.6),
+        SceneAttributeEvidence(character_id="ana", key="eye_color",
+            value_norm="green", value_quote="ojos verdes", confidence=0.9),
+        SceneAttributeEvidence(character_id="intruso", key="hair",
+            value_norm="black", value_quote="pelo negro", confidence=0.9),
+    ])
+    kept = _validate_evidences(out, {"ana"}, "s0")
+    # intruso fuera del cast → descartado; ana/eye_color dedup a mayor confianza
+    assert len(kept) == 1
+    assert kept[0]["character_id"] == "ana"
+    assert kept[0]["value_norm"] == "green"

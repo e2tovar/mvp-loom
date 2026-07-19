@@ -174,7 +174,7 @@ sin coste adicional.
 | M0 — Ingesta | `Manuscript` / `Chapter` / `Scene` | ✅ Completo |
 | M1 — Personajes | `Character` / `Mention` / `MergeCandidate` + eval | ✅ Completo |
 | M2 — Relaciones | `RELATES_TO` entre personajes + eval | ✅ Completo |
-| M3 — Atributos | `Attribute` / `AttributeEvidence` + eval | 🟡 Implementado (gate eval real pendiente) |
+| M3 — Atributos | `Attribute` / `AttributeEvidence` + eval | ✅ Completo (gate F1=1.0 sobre keys fiables) |
 | M4 — Eventos | Nodos de evento y orden cronológico real | 🔜 Planificado |
 | M5 — Retrieval | `Passage` y búsqueda híbrida (GraphRAG) | 🔜 Planificado |
 | M6 — Wiki | Páginas markdown generadas desde el grafo | 🔜 Planificado |

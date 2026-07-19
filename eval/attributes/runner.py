@@ -39,7 +39,7 @@ def _load_json(path: Path) -> dict:
 
 def run_eval(work: str, manuscript_id: str | None = None) -> dict:
     from eval.attributes.metrics import align_gold_to_pred, attribute_metrics
-    from eval.attributes.thresholds import TRIPLE_DETECTION_F1
+    from eval.attributes.thresholds import GATE_KEYS, TRIPLE_DETECTION_F1
 
     attr_gold = _load_json(FIXTURES_DIR / f"{work}{ATTR_GOLD_SUFFIX}")
     char_gold = _load_json(FIXTURES_DIR / f"{work}{CHAR_GOLD_SUFFIX}")
@@ -69,10 +69,17 @@ def run_eval(work: str, manuscript_id: str | None = None) -> dict:
         sys.exit(1)
 
     alignment = align_gold_to_pred(char_gold["characters"], pred_entities)
-    m = attribute_metrics(attr_gold["attributes"], pred_attrs, alignment)
+    gold_attrs = attr_gold["attributes"]
 
-    f1_all = m["triple_detection"]["all"]["f1"]
-    passed = f1_all >= TRIPLE_DETECTION_F1
+    # Diagnóstico: TODAS las tripletas (incluye gender/age, no bloqueantes).
+    diag = attribute_metrics(gold_attrs, pred_attrs, alignment)
+
+    # Gate bloqueante: solo GATE_KEYS (los que el modelo extrae con fiabilidad).
+    # Mismo patrón que M2, donde el gate mira solo `extracted`.
+    gold_gate = [g for g in gold_attrs if g["key"] in GATE_KEYS]
+    pred_gate = [p for p in pred_attrs if p["key"] in GATE_KEYS]
+    gate = attribute_metrics(gold_gate, pred_gate, alignment)
+    passed = gate["triple_detection"]["all"]["f1"] >= TRIPLE_DETECTION_F1
 
     import os
 
@@ -84,7 +91,9 @@ def run_eval(work: str, manuscript_id: str | None = None) -> dict:
         "git_sha": _git_sha(),
         "prompt_version": PROMPT_VERSION,
         "model": os.environ.get("LOOM_LLM_MODEL", "unknown"),
-        "triple_detection": m["triple_detection"],
+        "gate_keys": sorted(GATE_KEYS),
+        "gate_detection": gate["triple_detection"],
+        "triple_detection": diag["triple_detection"],
         "thresholds": {"triple_detection_f1": TRIPLE_DETECTION_F1},
         "passed": passed,
     }
@@ -102,15 +111,18 @@ def _save_result(result: dict) -> Path:
 
 def _print_result(result: dict) -> None:
     gate = "✅ PASS" if result["passed"] else "❌ FAIL"
-    det = result["triple_detection"]
+    gd = result.get("gate_detection", result["triple_detection"])
+    diag = result["triple_detection"]
     thr = result["thresholds"]
+    keys = ", ".join(result.get("gate_keys", []))
     print(f"\n{'─'*60}")
     print(f"  Obra        : {result['work']}")
     print(f"  Modelo      : {result['model']}")
-    print(f"  Gate        : {gate}")
-    print(f"  Tripletas   : F1={det['all']['f1']:.3f}  (≥{thr['triple_detection_f1']})")
-    print(f"  Por clase   : static F1={det['static']['f1']:.3f} · "
-          f"stateful F1={det['stateful']['f1']:.3f}")
+    print(f"  Gate        : {gate}  (keys: {keys})")
+    print(f"  Gate F1     : {gd['all']['f1']:.3f}  (≥{thr['triple_detection_f1']})")
+    print(f"  Diagnóstico : todas F1={diag['all']['f1']:.3f} · "
+          f"static F1={diag['static']['f1']:.3f} · "
+          f"stateful F1={diag['stateful']['f1']:.3f}")
     print(f"{'─'*60}\n")
 
 

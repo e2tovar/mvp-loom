@@ -309,9 +309,14 @@ afectado y la agregación se rehace de forma determinista.
   normalizado por el LLM, o hace falta vocabulario controlado por `key` para que el
   futuro detector no falle casando "azul"/"azulado"/"blue"? A confirmar tras la
   primera medición; probablemente empuje trabajo hacia la spec del detector.
-- **`age` en el set estático**: cambia legítimamente en sagas y suele ser vago
-  ("unos cuarenta"). ¿Entra como `static` tolerante, se marca aparte, o se excluye
-  del gate inicial? Decide la primera medición real.
+- **`age` en el set estático** — *RESUELTO (2026-07-19, primera medición real)*:
+  el modelo mal-atribuye la edad por diálogo ("Tienes cuarenta años…") e infiere
+  edad de adjetivos vagos ("el viejo Daniel"). Se **excluye del gate bloqueante**
+  (queda en el catálogo como diagnóstico best-effort). Ver `eval/attributes/
+  thresholds.py::GATE_KEYS`.
+- **`gender` fuera del gate** — *RESUELTO (2026-07-19)*: el modelo no enuncia el
+  género desde nombres/pronombres (recall 0 medido). Se extrae y anota, pero **no
+  bloquea** el gate (best-effort), igual que `age`. Revisar con otro modelo/prompt.
 - **`scar`/`hair` como semi-mutables**: una cicatriz nueva o un corte de pelo son
   cambios legítimos frecuentes. La clase `static` es correcta para el registro,
   pero el futuro detector necesitará tratarlos con más tolerancia que `eye_color`.

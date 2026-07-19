@@ -65,3 +65,24 @@ def test_replace_attributes_is_idempotent(neo4j_session):
     attr_graph.replace_attributes(neo4j_session, "test-attr", nodes)  # 2ª vez
     listed = attr_graph.get_attributes_list(neo4j_session, "test-attr")
     assert len([a for a in listed if a["key"] == "hair"]) == 1
+
+
+def test_replace_attributes_removes_stale_nodes(neo4j_session):
+    """Un valor que deja de afirmarse en una re-agregación no deja nodo fantasma."""
+    from backend.graph import attributes as attr_graph
+    _seed_min_graph(neo4j_session)
+    attr_graph.upsert_attribute_evidence(neo4j_session, "test-attr", "test-attr:s0",
+        {"character_id":"test-attr:ch:ana","key":"eye_color","value_norm":"blue",
+         "value_quote":"ojos azules","confidence":0.9})
+    from backend.extraction.attributes.aggregation import aggregate_character_attributes
+    evs = attr_graph.get_attribute_evidences(neo4j_session, "test-attr")
+    nodes = aggregate_character_attributes(evs)
+    attr_graph.replace_attributes(neo4j_session, "test-attr", nodes)
+
+    listed = attr_graph.get_attributes_list(neo4j_session, "test-attr")
+    assert len(listed) == 1
+
+    attr_graph.replace_attributes(neo4j_session, "test-attr", [])  # re-agregación vacía
+
+    listed_after = attr_graph.get_attributes_list(neo4j_session, "test-attr")
+    assert listed_after == []

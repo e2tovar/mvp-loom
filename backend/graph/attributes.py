@@ -9,16 +9,9 @@ que RELATES_TO en relations.replace_relates_to().
 from __future__ import annotations
 
 import hashlib
-import re
 from typing import Any
 
 from neo4j import Session
-
-_SLUG_RE = re.compile(r"[^a-z0-9]+")
-
-
-def _slug(text: str) -> str:
-    return _SLUG_RE.sub("-", text.lower()).strip("-") or "x"
 
 
 def attribute_evidence_id(scene_id: str, character_id: str, key: str) -> str:
@@ -31,7 +24,8 @@ def attribute_node_id(
     manuscript_id: str, character_id: str, key: str, value_norm: str
 ) -> str:
     """Id determinista del nodo Attribute: por (personaje, key, valor)."""
-    return f"{character_id}:attr:{key}:{_slug(value_norm)}"
+    digest = hashlib.sha256(value_norm.encode()).hexdigest()[:16]
+    return f"{character_id}:attr:{key}:{digest}"
 
 
 # ── Escritura ─────────────────────────────────────────────────────────────────
@@ -44,6 +38,9 @@ def upsert_attribute_evidence(
     eid = attribute_evidence_id(scene_id, ev["character_id"], ev["key"])
     sess.run(
         """
+        MATCH (m:Manuscript {manuscript_id: $mid})
+        MATCH (s:Scene {scene_id: $scene_id})
+        MATCH (c:Character {character_id: $cid})
         MERGE (ae:AttributeEvidence {evidence_id: $eid})
         SET ae.manuscript_id = $mid,
             ae.scene_id      = $scene_id,
@@ -52,14 +49,8 @@ def upsert_attribute_evidence(
             ae.value_norm    = $value_norm,
             ae.value_quote   = $value_quote,
             ae.confidence    = $confidence
-        WITH ae
-        MATCH (m:Manuscript {manuscript_id: $mid})
         MERGE (m)-[:HAS_ATTRIBUTE_EVIDENCE]->(ae)
-        WITH ae
-        MATCH (s:Scene {scene_id: $scene_id})
         MERGE (ae)-[:IN_SCENE]->(s)
-        WITH ae
-        MATCH (c:Character {character_id: $cid})
         MERGE (ae)-[:ABOUT]->(c)
         """,
         eid=eid, mid=manuscript_id, scene_id=scene_id,

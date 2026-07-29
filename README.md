@@ -26,6 +26,18 @@ Este documento es a la vez el README del proyecto y el **contrato de trabajo par
 
 3. **Eval-first.** Cualquiera enchufa un LLM y saca un mapa que *parece* correcto. Lo que diferencia este proyecto (y a un ingeniero senior) es **medir** si la extracción es correcta: dataset de oro, precisión/recall, tests de regresión que bloquean el merge. Ningún módulo se da por terminado sin su eval verde.
 
+### La constitución — principios NO NEGOCIABLES
+
+Las tres ideas de arriba, más las restricciones técnicas transversales, forman la **constitución** del proyecto: los principios que ningún milestone puede violar. Specs, planes y ADRs los citan por número; esta es su definición canónica.
+
+- **Principio I — Eval-first (NO NEGOCIABLE).** Ningún módulo está "hecho" sin su dataset de oro y su métrica (precisión / recall / F1) corriendo como gate de CI que bloquea el merge. Lo que no se puede medir se reporta como "no medido"; nunca se rellena con un número inventado.
+- **Principio II — El grafo es la única fuente de verdad.** Todo se persiste y se lee del grafo Neo4j. No se admite un segundo store (JSON/SQLite) que haya que migrar después; cada milestone solo añade nodos y relaciones, nunca altera las capas previas.
+- **Principio III — Contratos tipados.** Toda salida del LLM se valida contra un esquema Pydantic antes de tocar el sistema. Prohibido el JSON en texto libre parseado a mano: el esquema *es* el contrato.
+- **Principio IV — Una sola puerta por dependencia externa.** El acceso al LLM vive únicamente en `backend/llm/` (vía LiteLLM, agnóstico de proveedor por configuración); el Cypher vive únicamente en `backend/graph/`. El código de aplicación nunca sabe qué proveedor responde ni escribe Cypher suelto.
+- **Principio V — Procedencia y no-alucinación.** Todo hecho del grafo rastrea a su escena y su cita literal. Nada existe sin respaldo textual; ante una ambigüedad irresoluble (p. ej. fusión de identidades dudosa), la decisión va a una cola de revisión humana en lugar de adivinarse.
+- **Principio VI — Idempotencia y cache por hash.** El trabajo se recuerda: re-procesar un libro ya analizado es casi gratis y no duplica nodos ni deshace decisiones. La clave de cache incluye la versión de prompt y de esquema, de modo que un cambio de prompt invalida lo afectado.
+- **Principio VII — Profundidad antes que amplitud.** Una cosa difícil con rigor antes que nueve a medias. No se avanza a la siguiente capa hasta que la actual aprueba su examen.
+
 ---
 
 ## 3. Arquitectura

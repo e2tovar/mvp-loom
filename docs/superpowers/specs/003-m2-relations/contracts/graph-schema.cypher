@@ -1,4 +1,4 @@
-// specs/003-m2-relations/contracts/graph-schema.cypher
+// docs/superpowers/specs/003-m2-relations/contracts/graph-schema.cypher
 // Graph Schema Contract — M2 Relaciones (Neo4j 5.x)
 // Feature: 003-m2-relations
 //

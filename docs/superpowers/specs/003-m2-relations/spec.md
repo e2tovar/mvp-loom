@@ -225,7 +225,7 @@ y la agregación se rehace de forma determinista.
   (`knows/unaware_of`, `open_wounds`) quedan **fuera de alcance** — specs posteriores.
   El bloque "M2" del roadmap se descompone; esta spec cubre su primer tercio.
 - **Contrato M1 cerrado**: M2 consume la capa M1 según los contratos de
-  `specs/002-char-extraction-eval/` en `main` (M1 completo, incluye
+  `docs/superpowers/specs/002-char-extraction-eval/` en `main` (M1 completo, incluye
   `Character.entity_kind`). El cast entregado al LLM de relaciones filtra
   `entity_kind = "person"`: los animales quedan fuera de las relaciones en M2,
   coherente con la política del gold de M1 (que los excluye del reparto). Nada de esta

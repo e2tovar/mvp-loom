@@ -246,7 +246,7 @@ afectado y la agregación se rehace de forma determinista.
   alertas, semántica de transición vivo→muerto) queda **fuera de alcance** — spec
   de análisis posterior que consume esta capa. Esta spec construye la materia prima.
 - **Contrato M1 cerrado**: M3 consume la capa M1 según los contratos de
-  `specs/002-char-extraction-eval/`. El cast entregado al LLM filtra
+  `docs/superpowers/specs/002-char-extraction-eval/`. El cast entregado al LLM filtra
   `entity_kind = "person"`. Nada de esta spec depende de detalles internos de M1.
 - **Catálogo de `key` inicial**: los 7 `key` son un punto de partida (invariantes
   físicos/identidad + estado vital), recalibrable con la primera medición real, con

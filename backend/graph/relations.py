@@ -1,6 +1,6 @@
 """Escritura/lectura idempotente de RelationEvidence/RELATES_TO en Neo4j (M2).
 
-Contrato: specs/003-m2-relations/contracts/graph-schema.cypher. Ids deterministas
+Contrato: docs/superpowers/specs/003-m2-relations/contracts/graph-schema.cypher. Ids deterministas
 (INV-M2-2); Cypher solo vive aquí (constitución). RELATES_TO es una arista
 DERIVADA de las evidencias: se reescribe entera en cada agregación, igual que
 los contadores en characters.recompute_counters().

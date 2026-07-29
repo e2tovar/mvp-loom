@@ -1,4 +1,4 @@
-"""Contratos Pydantic de la extracción de relaciones (specs/003 data-model.md).
+"""Contratos Pydantic de la extracción de relaciones (docs/superpowers/specs/003 data-model.md).
 
 SCHEMA_VERSION entra en la clave de cache junto con PROMPT_VERSION: cambiar
 cualquiera invalida los resultados cacheados (mismo patrón que M1).

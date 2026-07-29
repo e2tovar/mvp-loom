@@ -36,5 +36,5 @@ Persistir la capa cruda directamente como nodos del grafo (`Manuscript`, `Chapte
 
 - El driver `neo4j` 6.x es compatible con el servidor Neo4j 5.x.
 - El esquema (constraints/índices) se define en
-  `specs/001-m0-ingest-segmentation/contracts/graph-schema.cypher` y se aplica de forma
+  `docs/superpowers/specs/001-m0-ingest-segmentation/contracts/graph-schema.cypher` y se aplica de forma
   idempotente al arrancar la API.

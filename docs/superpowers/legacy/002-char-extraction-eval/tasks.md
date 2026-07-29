@@ -139,7 +139,7 @@ cliente falso = 0) y produce el mismo grafo.
 ## Phase 7: Polish & Cross-Cutting Concerns
 
 - [x] T036 [P] Test adversarial de prompt injection en `tests/unit/test_prompt_injection.py`: fixture con instrucciones embebidas → el prompt construido las mantiene delimitadas en el bloque de usuario, nunca en el system (FR-013, research R8)
-- [x] T037 [P] ADR del factory LLM en `docs/adr-002-llm-gateway-litellm.md`: decisión LiteLLM multi-proveedor (OpenCode Go + Azure), alternativas (LangChain, SDK directo, Anthropic) y el modelo-lo-decide-la-eval (research R1)
+- [x] T037 [P] ADR del factory LLM en `docs/adr/0002-llm-gateway-litellm.md`: decisión LiteLLM multi-proveedor (OpenCode Go + Azure), alternativas (LangChain, SDK directo, Anthropic) y el modelo-lo-decide-la-eval (research R1)
 - [x] T038 Ejecutar el quickstart completo contra una obra real (extracción con OpenCode Go + inspección + eval) y corregir fricciones; verificar SC-006 (eval < 10 min) y SC-008 (revisión < 15 min)
 - [x] T039 `uv run ruff check backend eval tests` y suite completa `uv run pytest` en verde; revisar cumplimiento de la constitución (LiteLLM solo en `backend/llm/`, Cypher solo en `backend/graph/`)
 

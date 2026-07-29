@@ -1,6 +1,6 @@
-# ADR-002: LLM Gateway — LiteLLM multi-proveedor
+# ADR-0002 — LLM Gateway: LiteLLM multi-proveedor
 
-**Estado**: Aceptado | **Fecha**: 2026-06-10 | **Feature**: M1 `002-char-extraction-eval`
+**Estado**: Aceptada · **Fecha**: 2026-06-10 · **Milestone**: M1 (`002-char-extraction-eval`)
 
 ## Contexto
 

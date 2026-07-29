@@ -1,6 +1,6 @@
 """Escritura/lectura idempotente de AttributeEvidence/Attribute en Neo4j (M3).
 
-Contrato: specs/004-m3-attributes/contracts/graph-schema.cypher. Ids
+Contrato: docs/superpowers/specs/004-m3-attributes/contracts/graph-schema.cypher. Ids
 deterministas; Cypher solo vive aquí (constitución). Los nodos Attribute son
 DERIVADOS de las evidencias: se borran y reescriben en cada agregación, igual
 que RELATES_TO en relations.replace_relates_to().

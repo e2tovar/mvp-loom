@@ -196,9 +196,9 @@ gold anotado a nivel de mención; sin esa anotación el eval reporta "no medido"
 ## Por dónde empezar
 
 - `CLAUDE.md` — convenciones del proyecto y feature activa.
-- `specs/` — cada milestone reúne su `spec.md` (qué y por qué), `data-model.md` (la ontología)
+- `docs/superpowers/specs/` — cada milestone reúne su `spec.md` (qué y por qué), `data-model.md` (la ontología)
   y `quickstart.md` (el flujo ejecutable de principio a fin).
-- `specs/002-char-extraction-eval/data-model.md` — referencia completa del modelo de M1.
+- `docs/superpowers/specs/002-char-extraction-eval/data-model.md` — referencia completa del modelo de M1.
 - Stack: Python 3.12 · FastAPI · Neo4j 5.x · LiteLLM · pytest (markers `unit`, `integration`, `eval`).
 
 El camino más corto para interiorizar la ontología es levantar Neo4j, ejecutar el quickstart de

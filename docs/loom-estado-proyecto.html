@@ -113,7 +113,7 @@
 
     <!-- 1 · Portada -->
     <section class="slide active center">
-      <div class="kicker">Estado del proyecto · 12 de julio de 2026</div>
+      <div class="kicker">Estado del proyecto · 30 de julio de 2026</div>
       <h1>Loom</h1>
       <p style="font-size:34px; max-width:900px;">Una IA que lee tu novela entera y te devuelve
       un <strong>mapa vivo de tu propia historia</strong>: personajes, escenas, hechos y sus conexiones.</p>
@@ -193,23 +193,28 @@
           <span class="badge done">✓ Completo</span>
         </div>
         <div class="road-row">
-          <span class="mnum warn">M1</span>
+          <span class="mnum ok">M1</span>
           <span class="mdesc">El reparto: quién aparece, con qué nombres, y su examen de calidad</span>
-          <span class="badge wip">En cierre</span>
+          <span class="badge done">✓ Completo</span>
         </div>
         <div class="road-row">
-          <span class="mnum">M2</span>
-          <span class="mdesc">Relaciones entre personajes y detector de contradicciones</span>
-          <span class="badge next">Diseñado</span>
+          <span class="mnum ok">M2</span>
+          <span class="mdesc">Relaciones entre personajes: quién es qué de quién, con evidencia</span>
+          <span class="badge done">✓ Completo</span>
+        </div>
+        <div class="road-row">
+          <span class="mnum ok">M3</span>
+          <span class="mdesc">La ficha física de cada personaje: ojos, pelo, edad, estado vital — con cita</span>
+          <span class="badge done">✓ Completo</span>
         </div>
         <div class="road-row dim">
-          <span class="mnum">M3–M5</span>
+          <span class="mnum">M4–M6</span>
           <span class="mdesc">Línea temporal · preguntas con citas · la wiki de la historia</span>
           <span class="badge next">Futuro</span>
         </div>
         <div class="road-row dim">
-          <span class="mnum">M6–M8</span>
-          <span class="mdesc">Informe de lectura · la aplicación visual · robustez y costes</span>
+          <span class="mnum">M7–M9</span>
+          <span class="mdesc">Continuidad e informe de lectura · la aplicación visual · robustez</span>
           <span class="badge next">Futuro</span>
         </div>
       </div>
@@ -232,7 +237,7 @@
 
     <!-- 8 · M1 casi hecho -->
     <section class="slide">
-      <h2>Casi hecho — M1 · El reparto <span class="badge wip">En cierre</span></h2>
+      <h2>Hecho — M1 · El reparto <span class="badge done">✓ Completo</span></h2>
       <ul>
         <li class="fragment"><strong>Detecta a los personajes</strong> escena a escena mientras la IA lee el libro.</li>
         <li class="fragment"><strong>Unifica identidades</strong>: "Elizabeth Bennet", "Lizzy" y "Miss Bennet"
@@ -258,74 +263,94 @@
     <!-- 10 · El examen -->
     <section class="slide">
       <h2>¿Cómo sabemos que funciona? Con exámenes</h2>
-      <p style="font-size:26px;">Anotamos a mano las respuestas correctas de varios libros — el reparto real,
-      sus alias, dónde aparece cada uno — y el sistema se corrige contra esa referencia.
-      <strong>Nota mínima para aprobar: 90%.</strong></p>
+      <p style="font-size:26px;">Anotamos a mano las respuestas correctas — el reparto, sus alias, las relaciones
+      y los rasgos físicos reales — y el sistema se corrige contra esa referencia. El examen tiene dos niveles:
+      <strong>obras cortas de control</strong>, que bloquean el avance, y <strong>novelas reales</strong>,
+      que se miden como diagnóstico.</p>
       <div class="cols" style="align-items:stretch;">
         <div class="card metric">
-          <div class="num ok">100%</div>
-          <div class="lbl"><strong>Obras de prueba controladas</strong><br>Detección e identidades perfectas.
-          Aprueba el examen completo.</div>
+          <div class="num ok">1.0</div>
+          <div class="lbl"><strong>Obras de control</strong><br>Personajes, relaciones y rasgos físicos:
+          detección, identidades y tipo perfectos. Aprueban el examen bloqueante (M1, M2 y M3).</div>
         </div>
         <div class="card metric">
-          <div class="num warn">38%</div>
-          <div class="lbl"><strong>Novela real larga</strong> (Orgullo y Prejuicio)<br>Última medición, de junio.
-          Suspende: es el frente de trabajo abierto.</div>
+          <div class="num ok">94–100%</div>
+          <div class="lbl"><strong>Novela real, diagnóstico</strong> (Orgullo y Prejuicio, Harry Potter 1)<br>
+          De las relaciones anotadas a mano, el sistema recupera entre el 94% y el 100% y acierta su tipo.</div>
         </div>
       </div>
-      <p class="muted" style="font-size:25px;">Honestidad del sistema: lo que no se puede medir se reporta como
-      "no medido" — nunca se rellena con un número inventado.</p>
+      <p class="muted" style="font-size:25px;">Honestidad del examen: rasgos que el libro rara vez enuncia
+      con palabras (edad, género) se miden pero <strong>no bloquean</strong> — no se aprueba con un número que el
+      texto no sustenta. Lo que no se puede medir se reporta como "no medido".</p>
     </section>
 
-    <!-- 11 · Qué falta para cerrar M1 -->
+    <!-- 11 · Dónde estamos -->
     <section class="slide">
-      <h2>Qué falta para cerrar M1</h2>
+      <h2>Dónde estamos hoy</h2>
       <div class="cols">
         <div>
           <ul>
-            <li class="fragment"><strong>El ensayo general</strong>: ejecutar el recorrido completo — subir una obra real,
-            extraer el reparto, revisar las dudas y pasar el examen — y pulir las fricciones que aparezcan.
-            Es la única tarea del plan aún abierta.</li>
-            <li class="fragment"><strong>Subir la nota en novela larga</strong>: la IA ya aprueba en obras cortas;
-            en un libro de 700 páginas todavía no. Ajustar cómo se le presenta el texto es el siguiente paso.</li>
+            <li class="fragment"><strong>Cuatro capas cerradas</strong>: el libro entra (M0), se identifica el
+            reparto (M1), se traza el mapa de relaciones (M2) y se ficha a cada personaje (M3) — cada una con su
+            examen aprobado.</li>
+            <li class="fragment"><strong>El frente abierto</strong>: ampliar la anotación de referencia en
+            novelas reales, para que la precisión sea medible más allá de las obras de control.</li>
+            <li class="fragment"><strong>Siguiente capa</strong>: la línea temporal de los hechos (M4).</li>
           </ul>
         </div>
         <div class="card">
-          <p class="accent" style="font-family:var(--sans); font-size:22px; font-weight:700; letter-spacing:1px;">DÓNDE ESTAMOS</p>
-          <p style="font-size:26px; margin-top:14px;"><strong>38 de 39</strong> tareas del plan completadas.</p>
-          <p style="font-size:26px; margin-top:12px;"><strong>81 pruebas automáticas</strong> en verde.</p>
-          <p style="font-size:26px; margin-top:12px;">La deuda técnica del examen de identidades quedó
-          <strong>saldada el 11 de julio</strong>: ahora mide de verdad, no un simulacro.</p>
+          <p class="accent" style="font-family:var(--sans); font-size:22px; font-weight:700; letter-spacing:1px;">EN NÚMEROS</p>
+          <p style="font-size:26px; margin-top:14px;"><strong>318 pruebas automáticas</strong> cubren las cuatro capas
+          (248 unitarias en verde en segundos; el resto exige base de datos y modelo).</p>
+          <p style="font-size:26px; margin-top:12px;">Los exámenes bloqueantes de relaciones y atributos dan
+          <strong>1.0 de 1.0</strong> en las obras de control.</p>
+          <p style="font-size:26px; margin-top:12px;">Re-analizar un libro ya procesado es casi gratis:
+          el trabajo se recuerda y no se repite.</p>
         </div>
       </div>
     </section>
 
-    <!-- 12 · Lo que viene: M2 -->
+    <!-- 12 · M2 hecho -->
     <section class="slide">
-      <h2>Lo que viene — M2 · Relaciones y continuidad</h2>
-      <p class="muted" style="font-size:25px;">El diseño ya está escrito; arranca al cerrar M1.</p>
+      <h2>Hecho — M2 · El mapa de relaciones <span class="badge done">✓ Completo</span></h2>
       <ul>
-        <li class="fragment"><strong>Relaciones entre personajes</strong>: quién es aliado, rival, familia o amor de quién
-        — y cómo cambia eso a lo largo del libro.</li>
-        <li class="fragment"><strong>Atributos con memoria</strong>: cada dato ("ojos azules") queda anclado a la escena
-        donde se afirma.</li>
-        <li class="fragment"><strong>El detector de contradicciones</strong>: si el capítulo 2 dice "ojos azules"
-        y el 18 dice "ojos verdes", Loom lo señala — con las dos citas en la mano.</li>
+        <li class="fragment"><strong>Relaciones entre personajes</strong>: quién es familia, amor, aliado, rival
+        o colega de quién — con su tipo y un descriptor corto ("tío y tutor").</li>
+        <li class="fragment"><strong>Enunciado vs deducido</strong>: cada relación marca si está dicha en la prosa
+        ("su hermana Jane") o deducida de la interacción. Lo deducido nunca se presenta como hecho sin la marca.</li>
+        <li class="fragment"><strong>Todo con evidencia</strong>: cada relación se ancla a las escenas y citas que
+        la sustentan — igual que un personaje se ancla a sus menciones.</li>
       </ul>
-      <p class="fragment">Es la primera funcionalidad que un autor <strong>pagaría por sí sola</strong>.</p>
+      <p class="fragment">Es la primera funcionalidad que un autor <strong>pagaría por sí sola</strong>:
+      el mapa de vínculos de su reparto, comprobable frase a frase.</p>
+    </section>
+
+    <!-- 12b · M3 hecho -->
+    <section class="slide">
+      <h2>Hecho — M3 · La ficha de cada personaje <span class="badge done">✓ Completo</span></h2>
+      <ul>
+        <li class="fragment"><strong>Rasgos fijos con procedencia</strong>: ojos, pelo, altura, cicatrices,
+        edad, género y estado vital (vivo/muerto) — cada dato anclado a la escena y la cita exacta que lo afirma.</li>
+        <li class="fragment"><strong>No elige un ganador</strong>: si el capítulo 2 dice "ojos azules" y el 18 dice
+        "verdes", Loom <strong>guarda los dos</strong>, cada uno con su cita — nunca descarta uno para quedar limpio.</li>
+        <li class="fragment"><strong>Materia prima de la continuidad</strong>: esos valores en conflicto, servidos
+        con su evidencia, son justo lo que el futuro detector de gazapos necesitará. Aquí se fichan; detectarlos
+        es la capa siguiente.</li>
+      </ul>
+      <p class="fragment">El grafo pasa de "quién se relaciona con quién" a <strong>"quién es cada quién"</strong>.</p>
     </section>
 
     <!-- 13 · El horizonte -->
     <section class="slide">
-      <h2>Y después — el horizonte M3 a M8</h2>
+      <h2>Y después — el horizonte M4 a M9</h2>
       <ul>
-        <li><strong>M3 · Línea temporal</strong>: ordenar los hechos como ocurrieron, aunque el libro use flashbacks.</li>
-        <li><strong>M4 · Preguntas con citas</strong>: "¿cuándo se conocieron Elena y Marco?" — respuesta anclada
+        <li><strong>M4 · Línea temporal</strong>: ordenar los hechos como ocurrieron, aunque el libro use flashbacks.</li>
+        <li><strong>M5 · Preguntas con citas</strong>: "¿cuándo se conocieron Elena y Marco?" — respuesta anclada
         a los pasajes exactos. Sin cita, no hay respuesta.</li>
-        <li><strong>M5 · La wiki de la historia</strong>: la "biblia" de la saga en páginas navegables,
+        <li><strong>M6 · La wiki de la historia</strong>: la "biblia" de la saga en páginas navegables,
         que se actualiza sola cuando el autor edita.</li>
-        <li><strong>M6–M8</strong>: informe de lectura profesional, la aplicación visual (mapa, timeline, panel)
-        y el endurecimiento final: costes, trazas, escala.</li>
+        <li><strong>M7–M9</strong>: detector de contradicciones de continuidad e informe de lectura profesional,
+        la aplicación visual (mapa, timeline, panel) y el endurecimiento final: costes, trazas, escala.</li>
       </ul>
     </section>
 
@@ -338,7 +363,7 @@
           <ul style="margin-top:14px;">
             <li style="font-size:25px;"><code>docs/ABOUT.md</code> — el modelo mental (este deck, en prosa).</li>
             <li style="font-size:25px;"><code>README.md</code> — la visión completa y el roadmap.</li>
-            <li style="font-size:25px;"><code>specs/</code> — cada milestone con su qué, su modelo de datos y su guía ejecutable.</li>
+            <li style="font-size:25px;"><code>docs/superpowers/specs/</code> — cada milestone con su qué, su modelo de datos y su guía ejecutable.</li>
           </ul>
         </div>
         <div>
@@ -356,7 +381,7 @@
       <h1 style="font-size:48px; max-width:1040px;">Una cosa difícil, hecha con rigor.</h1>
       <p style="font-size:29px; max-width:960px;">Loom apuesta por dominar la parte dura — leer una novela
       y no equivocarse — antes de construir nada encima. Cada capa aprueba su examen o no se avanza.</p>
-      <p class="muted">Loom · estado a 12 de julio de 2026 · milestone activo: M1 en cierre</p>
+      <p class="muted">Loom · estado a 30 de julio de 2026 · cuatro capas cerradas (M0 · M1 · M2 · M3) · siguiente: M4</p>
     </section>
 
     <div id="counter"></div>

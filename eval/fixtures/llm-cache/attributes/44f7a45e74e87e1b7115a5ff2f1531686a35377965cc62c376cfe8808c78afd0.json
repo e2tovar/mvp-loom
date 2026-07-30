@@ -1,0 +1,19 @@
+{
+  "evidences": [
+    {
+      "character_id": "8e132b22e0f341a2bdf9fcf53668097010a63c884c3472ead53b677233c07c64:ch:4b8a6227898688e0",
+      "key": "eye_color",
+      "value_norm": "blue",
+      "value_quote": "sus ojos azules",
+      "confidence": 1.0
+    },
+    {
+      "character_id": "8e132b22e0f341a2bdf9fcf53668097010a63c884c3472ead53b677233c07c64:ch:826e313290ab6cec",
+      "key": "status",
+      "value_norm": "dead",
+      "value_quote": "Daniel había muerto en el invierno",
+      "confidence": 1.0
+    }
+  ],
+  "notes": null
+}

@@ -1,0 +1,15 @@
+{
+  "mentions": [
+    {
+      "surface": "Elena",
+      "kind": "name",
+      "links_to": "Elena",
+      "quote": "Elena bajó del tren tras el separador tipográfico."
+    }
+  ],
+  "new_characters": [],
+  "present_entities": [
+    "Elena"
+  ],
+  "notes": null
+}

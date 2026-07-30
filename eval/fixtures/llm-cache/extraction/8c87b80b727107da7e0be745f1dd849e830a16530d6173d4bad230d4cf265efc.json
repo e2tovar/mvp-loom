@@ -1,0 +1,28 @@
+{
+  "mentions": [
+    {
+      "surface": "Beatriz",
+      "kind": "name",
+      "links_to": "Beatriz",
+      "quote": "Más tarde, Beatriz y Daniel repasaron las cuentas de la fábrica que los dos socios dirigían juntos."
+    },
+    {
+      "surface": "Daniel",
+      "kind": "name",
+      "links_to": "Daniel",
+      "quote": "Más tarde, Beatriz y Daniel repasaron las cuentas de la fábrica que los dos socios dirigían juntos."
+    },
+    {
+      "surface": "socios",
+      "kind": "description",
+      "links_to": null,
+      "quote": "Más tarde, Beatriz y Daniel repasaron las cuentas de la fábrica que los dos socios dirigían juntos."
+    }
+  ],
+  "new_characters": [],
+  "present_entities": [
+    "Beatriz",
+    "Daniel"
+  ],
+  "notes": null
+}

@@ -1,0 +1,67 @@
+{
+  "mentions": [
+    {
+      "surface": "Ana",
+      "kind": "name",
+      "links_to": null,
+      "quote": "Ana entró en la sala."
+    },
+    {
+      "surface": "Sus",
+      "kind": "pronoun_resolved",
+      "links_to": null,
+      "quote": "Sus ojos verdes recorrieron la estancia con calma."
+    },
+    {
+      "surface": "su hermana",
+      "kind": "description",
+      "links_to": null,
+      "quote": "más baja que su hermana"
+    },
+    {
+      "surface": "Beatriz",
+      "kind": "name",
+      "links_to": null,
+      "quote": "Junto a la ventana, Beatriz la observaba"
+    },
+    {
+      "surface": "la",
+      "kind": "pronoun_resolved",
+      "links_to": null,
+      "quote": "Beatriz la observaba"
+    },
+    {
+      "surface": "le",
+      "kind": "pronoun_resolved",
+      "links_to": null,
+      "quote": "le dijo Ana"
+    },
+    {
+      "surface": "Ana",
+      "kind": "name",
+      "links_to": null,
+      "quote": "le dijo Ana"
+    }
+  ],
+  "new_characters": [
+    {
+      "canonical_name": "Ana",
+      "aliases": [],
+      "role": "unknown",
+      "entity_kind": "person",
+      "is_present_in_scene": true
+    },
+    {
+      "canonical_name": "Beatriz",
+      "aliases": [],
+      "role": "unknown",
+      "entity_kind": "person",
+      "is_present_in_scene": true
+    }
+  ],
+  "present_entities": [
+    "Ana",
+    "Beatriz"
+  ],
+  "notes": null
+}

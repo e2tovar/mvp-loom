@@ -1,0 +1,15 @@
+{
+  "mentions": [
+    {
+      "surface": "Elena",
+      "kind": "name",
+      "links_to": "Elena",
+      "quote": "Elena bajó sola, con la maleta y una carta sin abrir."
+    }
+  ],
+  "new_characters": [],
+  "present_entities": [
+    "Elena"
+  ],
+  "notes": null
+}

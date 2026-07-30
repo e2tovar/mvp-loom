@@ -1,0 +1,36 @@
+{
+  "mentions": [
+    {
+      "surface": "Marco",
+      "kind": "name",
+      "links_to": null,
+      "quote": "Marco la esperaba en la estación."
+    },
+    {
+      "surface": "ella",
+      "kind": "pronoun_resolved",
+      "links_to": "Elena",
+      "quote": "Marco la esperaba en la estación."
+    },
+    {
+      "surface": "ella",
+      "kind": "pronoun_resolved",
+      "links_to": "Elena",
+      "quote": "el abrigo gris que ella le había regalado años atrás."
+    }
+  ],
+  "new_characters": [
+    {
+      "canonical_name": "Marco",
+      "aliases": [],
+      "role": "unknown",
+      "entity_kind": "person",
+      "is_present_in_scene": true
+    }
+  ],
+  "present_entities": [
+    "Marco",
+    "Elena"
+  ],
+  "notes": null
+}

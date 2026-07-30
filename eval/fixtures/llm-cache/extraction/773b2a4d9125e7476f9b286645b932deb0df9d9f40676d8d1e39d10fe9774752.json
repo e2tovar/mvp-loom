@@ -1,0 +1,61 @@
+{
+  "mentions": [
+    {
+      "surface": "Ana",
+      "kind": "name",
+      "links_to": null,
+      "quote": "Ana caminaba junto a su hermana Beatriz por el mercado del pueblo."
+    },
+    {
+      "surface": "Beatriz",
+      "kind": "name",
+      "links_to": null,
+      "quote": "Ana caminaba junto a su hermana Beatriz por el mercado del pueblo."
+    },
+    {
+      "surface": "su hermana",
+      "kind": "description",
+      "links_to": "Beatriz",
+      "quote": "Ana caminaba junto a su hermana Beatriz por el mercado del pueblo."
+    },
+    {
+      "surface": "Beatriz",
+      "kind": "name",
+      "links_to": null,
+      "quote": "Siempre cuidaré de ti, Beatriz"
+    },
+    {
+      "surface": "Ana",
+      "kind": "name",
+      "links_to": null,
+      "quote": "dijo Ana"
+    },
+    {
+      "surface": "las dos hermanas",
+      "kind": "description",
+      "links_to": null,
+      "quote": "la promesa que las dos hermanas se habían hecho de niñas."
+    }
+  ],
+  "new_characters": [
+    {
+      "canonical_name": "Ana",
+      "aliases": [],
+      "role": "protagonist",
+      "entity_kind": "person",
+      "is_present_in_scene": true
+    },
+    {
+      "canonical_name": "Beatriz",
+      "aliases": [],
+      "role": "protagonist",
+      "entity_kind": "person",
+      "is_present_in_scene": true
+    }
+  ],
+  "present_entities": [
+    "Ana",
+    "Beatriz"
+  ],
+  "notes": null
+}

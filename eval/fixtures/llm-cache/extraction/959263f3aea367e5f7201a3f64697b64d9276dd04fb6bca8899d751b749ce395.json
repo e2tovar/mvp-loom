@@ -1,0 +1,48 @@
+{
+  "mentions": [
+    {
+      "surface": "Carlos",
+      "kind": "name",
+      "links_to": "Carlos",
+      "quote": "Carlos se encontró con Daniel en la taberna."
+    },
+    {
+      "surface": "Daniel",
+      "kind": "name",
+      "links_to": null,
+      "quote": "Carlos se encontró con Daniel en la taberna."
+    },
+    {
+      "surface": "Carlos",
+      "kind": "name",
+      "links_to": "Carlos",
+      "quote": "No se saludaron: Carlos despreciaba a Daniel desde el viejo duelo, y Daniel le devolvía el mismo rencor de enemigo."
+    },
+    {
+      "surface": "Daniel",
+      "kind": "name",
+      "links_to": null,
+      "quote": "No se saludaron: Carlos despreciaba a Daniel desde el viejo duelo, y Daniel le devolvía el mismo rencor de enemigo."
+    },
+    {
+      "surface": "enemigo",
+      "kind": "description",
+      "links_to": "Daniel",
+      "quote": "y Daniel le devolvía el mismo rencor de enemigo."
+    }
+  ],
+  "new_characters": [
+    {
+      "canonical_name": "Daniel",
+      "aliases": [],
+      "role": "unknown",
+      "entity_kind": "person",
+      "is_present_in_scene": true
+    }
+  ],
+  "present_entities": [
+    "Carlos",
+    "Daniel"
+  ],
+  "notes": null
+}

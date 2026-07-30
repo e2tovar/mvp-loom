@@ -1,0 +1,16 @@
+{
+  "evidences": [
+    {
+      "character_a_id": "c423f56d2cb1c9a507aa577fdf7e5ea0328280fd24899d3a99749469a7b8de40:ch:f3692b96a6ff1f62",
+      "character_b_id": "c423f56d2cb1c9a507aa577fdf7e5ea0328280fd24899d3a99749469a7b8de40:ch:629dcf3a8a79d049",
+      "rel_type": "romantic",
+      "descriptor": "enamorados que sueñan con futuro juntos",
+      "role_a": null,
+      "role_b": null,
+      "provenance": "extracted",
+      "confidence": 0.95,
+      "quote": "Carlos cortejó a Ana bajo los almendros. Le declaró su amor y los dos enamorados soñaron con el futuro que compartirían"
+    }
+  ],
+  "notes": null
+}

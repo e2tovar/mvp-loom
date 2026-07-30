@@ -1,0 +1,36 @@
+{
+  "mentions": [
+    {
+      "surface": "Carlos",
+      "kind": "name",
+      "links_to": null,
+      "quote": "Aquella noche, Carlos cortejó a Ana bajo los almendros."
+    },
+    {
+      "surface": "Ana",
+      "kind": "name",
+      "links_to": "Ana",
+      "quote": "Aquella noche, Carlos cortejó a Ana bajo los almendros."
+    },
+    {
+      "surface": "dos enamorados",
+      "kind": "description",
+      "links_to": null,
+      "quote": "Le declaró su amor y los dos enamorados soñaron con el futuro que compartirían."
+    }
+  ],
+  "new_characters": [
+    {
+      "canonical_name": "Carlos",
+      "aliases": [],
+      "role": "unknown",
+      "entity_kind": "person",
+      "is_present_in_scene": true
+    }
+  ],
+  "present_entities": [
+    "Carlos",
+    "Ana"
+  ],
+  "notes": null
+}

@@ -1,0 +1,23 @@
+{
+  "mentions": [
+    {
+      "surface": "Marco",
+      "kind": "name",
+      "links_to": null,
+      "quote": "Marco esperaba en la estación del segundo capítulo."
+    }
+  ],
+  "new_characters": [
+    {
+      "canonical_name": "Marco",
+      "aliases": [],
+      "role": "unknown",
+      "entity_kind": "person",
+      "is_present_in_scene": true
+    }
+  ],
+  "present_entities": [
+    "Marco"
+  ],
+  "notes": null
+}

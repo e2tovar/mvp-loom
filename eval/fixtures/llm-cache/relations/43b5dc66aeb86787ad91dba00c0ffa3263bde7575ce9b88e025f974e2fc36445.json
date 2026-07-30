@@ -1,0 +1,16 @@
+{
+  "evidences": [
+    {
+      "character_a_id": "c423f56d2cb1c9a507aa577fdf7e5ea0328280fd24899d3a99749469a7b8de40:ch:f3692b96a6ff1f62",
+      "character_b_id": "c423f56d2cb1c9a507aa577fdf7e5ea0328280fd24899d3a99749469a7b8de40:ch:406fdddc50ae6594",
+      "rel_type": "antagonism",
+      "descriptor": "enemigos con rencor mutuo",
+      "role_a": null,
+      "role_b": null,
+      "provenance": "extracted",
+      "confidence": 0.95,
+      "quote": "Carlos despreciaba a Daniel desde el viejo duelo, y Daniel le devolvía el mismo rencor de enemigo"
+    }
+  ],
+  "notes": null
+}

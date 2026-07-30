@@ -1,0 +1,23 @@
+{
+  "mentions": [
+    {
+      "surface": "Elena",
+      "kind": "name",
+      "links_to": null,
+      "quote": "Elena abrió la puerta con acentós y eñes."
+    }
+  ],
+  "new_characters": [
+    {
+      "canonical_name": "Elena",
+      "aliases": [],
+      "role": "unknown",
+      "entity_kind": "person",
+      "is_present_in_scene": true
+    }
+  ],
+  "present_entities": [
+    "Elena"
+  ],
+  "notes": null
+}

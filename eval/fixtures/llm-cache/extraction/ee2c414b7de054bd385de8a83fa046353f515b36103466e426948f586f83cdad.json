@@ -1,0 +1,42 @@
+{
+  "mentions": [
+    {
+      "surface": "Ana",
+      "kind": "name",
+      "links_to": "Ana",
+      "quote": "Ana volvió al mismo salón"
+    },
+    {
+      "surface": "Daniel",
+      "kind": "name",
+      "links_to": null,
+      "quote": "muerte del viejo Daniel"
+    },
+    {
+      "surface": "Beatriz",
+      "kind": "name",
+      "links_to": "Beatriz",
+      "quote": "Beatriz, de luto, guardaba silencio"
+    },
+    {
+      "surface": "Daniel",
+      "kind": "name",
+      "links_to": null,
+      "quote": "Daniel había muerto en el invierno"
+    }
+  ],
+  "new_characters": [
+    {
+      "canonical_name": "Daniel",
+      "aliases": [],
+      "role": "minor",
+      "entity_kind": "person",
+      "is_present_in_scene": false
+    }
+  ],
+  "present_entities": [
+    "Ana",
+    "Beatriz"
+  ],
+  "notes": null
+}

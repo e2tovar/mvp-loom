@@ -1,0 +1,54 @@
+{
+  "evidences": [
+    {
+      "character_id": "8e132b22e0f341a2bdf9fcf53668097010a63c884c3472ead53b677233c07c64:ch:4b8a6227898688e0",
+      "key": "eye_color",
+      "value_norm": "green",
+      "value_quote": "Sus ojos verdes recorrieron la estancia con calma",
+      "confidence": 1.0
+    },
+    {
+      "character_id": "8e132b22e0f341a2bdf9fcf53668097010a63c884c3472ead53b677233c07c64:ch:4b8a6227898688e0",
+      "key": "hair",
+      "value_norm": "blonde",
+      "value_quote": "cabello rubio recogido en una trenza",
+      "confidence": 1.0
+    },
+    {
+      "character_id": "8e132b22e0f341a2bdf9fcf53668097010a63c884c3472ead53b677233c07c64:ch:4b8a6227898688e0",
+      "key": "height",
+      "value_norm": "tall",
+      "value_quote": "Era alta",
+      "confidence": 1.0
+    },
+    {
+      "character_id": "8e132b22e0f341a2bdf9fcf53668097010a63c884c3472ead53b677233c07c64:ch:8cddc0f5cef4674a",
+      "key": "eye_color",
+      "value_norm": "brown",
+      "value_quote": "de ojos castaños",
+      "confidence": 1.0
+    },
+    {
+      "character_id": "8e132b22e0f341a2bdf9fcf53668097010a63c884c3472ead53b677233c07c64:ch:8cddc0f5cef4674a",
+      "key": "height",
+      "value_norm": "short",
+      "value_quote": "más baja que su hermana",
+      "confidence": 1.0
+    },
+    {
+      "character_id": "8e132b22e0f341a2bdf9fcf53668097010a63c884c3472ead53b677233c07c64:ch:8cddc0f5cef4674a",
+      "key": "scar",
+      "value_norm": "eyebrow",
+      "value_quote": "una cicatriz fina sobre la ceja izquierda",
+      "confidence": 1.0
+    },
+    {
+      "character_id": "8e132b22e0f341a2bdf9fcf53668097010a63c884c3472ead53b677233c07c64:ch:8cddc0f5cef4674a",
+      "key": "age",
+      "value_norm": "40",
+      "value_quote": "Tienes cuarenta años",
+      "confidence": 1.0
+    }
+  ],
+  "notes": null
+}

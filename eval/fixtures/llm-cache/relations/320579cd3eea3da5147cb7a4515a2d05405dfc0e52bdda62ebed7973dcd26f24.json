@@ -1,0 +1,16 @@
+{
+  "evidences": [
+    {
+      "character_a_id": "c423f56d2cb1c9a507aa577fdf7e5ea0328280fd24899d3a99749469a7b8de40:ch:629dcf3a8a79d049",
+      "character_b_id": "c423f56d2cb1c9a507aa577fdf7e5ea0328280fd24899d3a99749469a7b8de40:ch:0745e88932493892",
+      "rel_type": "family",
+      "descriptor": "hermanas",
+      "role_a": null,
+      "role_b": null,
+      "provenance": "extracted",
+      "confidence": 1.0,
+      "quote": "su hermana Beatriz"
+    }
+  ],
+  "notes": null
+}

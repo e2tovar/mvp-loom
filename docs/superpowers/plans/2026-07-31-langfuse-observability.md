@@ -298,36 +298,41 @@ def traced(
         if not _langfuse_enabled():
             return func
 
+        def _inner(*args, **kwargs):
+            if metadata_fn is not None:
+                try:
+                    from langfuse import get_client
+
+                    get_client().update_current_trace(metadata=metadata_fn(*args, **kwargs))
+                except Exception as exc:
+                    log.warning("No se pudo adjuntar metadata a la traza Langfuse: %s", exc)
+            return func(*args, **kwargs)
+
         try:
             from langfuse import observe
+
+            return functools.wraps(func)(observe(name=name)(_inner))
         except Exception as exc:
             log.warning("Langfuse configurado pero no disponible (%s); sin trazas.", exc)
             return func
 
-        observed = observe(name=name)(func)
-
-        if metadata_fn is None:
-            return observed
-
-        @functools.wraps(func)
-        def wrapper(*args, **kwargs):
-            try:
-                from langfuse import get_client
-
-                get_client().update_current_trace(metadata=metadata_fn(*args, **kwargs))
-            except Exception as exc:
-                log.warning("No se pudo adjuntar metadata a la traza Langfuse: %s", exc)
-            return observed(*args, **kwargs)
-
-        return wrapper
-
     return decorator
 ```
+
+**Nota post-review (corrección aplicada tras Task 1):** la primera versión de este
+código llamaba a `observe(name=name)(func)` fuera del `try/except` del import (un
+fallo ahí rompía el import del módulo pipeline entero, no solo esa llamada — viola
+"fail-open, siempre") y llamaba a `update_current_trace` **antes** de ejecutar la
+función observada, cuando el SDK de Langfuse todavía no tiene una traza activa en
+contexto (la metadata nunca se adjuntaba realmente). La versión de arriba mete
+`observe(...)` dentro del mismo `try/except` que el import, y mueve la llamada a
+`update_current_trace` a `_inner`, que `observe()` envuelve directamente — así corre
+con el contexto de traza ya activo.
 
 - [ ] **Step 7: Ejecutar y verificar que pasan**
 
 Run: `pytest tests/unit/test_tracing.py -v`
-Expected: 8 PASSED.
+Expected: 7 PASSED (el número correcto de tests del Step 4 — no 8).
 
 - [ ] **Step 8: Commit**
 

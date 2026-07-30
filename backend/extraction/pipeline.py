@@ -21,6 +21,7 @@ from backend.extraction.resolution import (
 from backend.extraction.schemas import SceneContext, SceneExtraction
 from backend.graph import characters as char_graph
 from backend.graph.client import session as db_session
+from backend.observability.tracing import traced
 
 log = logging.getLogger(__name__)
 
@@ -131,6 +132,16 @@ def _write_merge_candidate(
         )
 
 
+def _trace_metadata(manuscript_id: str, llm_client=None, cache=None, force: bool = False) -> dict:
+    return {
+        "manuscript_id": manuscript_id,
+        "model": cache.model if cache is not None else None,
+        "prompt_version": cache.prompt_version if cache is not None else None,
+        "schema_version": cache.schema_version if cache is not None else None,
+    }
+
+
+@traced("extraction.characters", metadata_fn=_trace_metadata)
 def run_pipeline(
     manuscript_id: str,
     llm_client=None,

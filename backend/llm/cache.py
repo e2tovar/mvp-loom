@@ -56,6 +56,21 @@ class ExtractionCache:
         """Directorio donde esta caché lee y escribe (solo lectura)."""
         return self._dir
 
+    @property
+    def model(self) -> str:
+        """Modelo LLM con el que se compone la clave de cache (solo lectura)."""
+        return self._model
+
+    @property
+    def prompt_version(self) -> int:
+        """PROMPT_VERSION con el que se compone la clave de cache (solo lectura)."""
+        return self._prompt_version
+
+    @property
+    def schema_version(self) -> int:
+        """SCHEMA_VERSION con el que se compone la clave de cache (solo lectura)."""
+        return self._schema_version
+
     def _key(self, ctx: SceneContext) -> str:
         raw = (
             ctx.scene_text
@@ -116,6 +131,21 @@ class RelationsCache:
         """Directorio donde esta caché lee y escribe (solo lectura)."""
         return self._dir
 
+    @property
+    def model(self) -> str:
+        """Modelo LLM con el que se compone la clave de cache (solo lectura)."""
+        return self._model
+
+    @property
+    def prompt_version(self) -> int:
+        """PROMPT_VERSION con el que se compone la clave de cache (solo lectura)."""
+        return self._prompt_version
+
+    @property
+    def schema_version(self) -> int:
+        """SCHEMA_VERSION con el que se compone la clave de cache (solo lectura)."""
+        return self._schema_version
+
     def _key(self, ctx: RelationSceneContext) -> str:  # noqa: F821
         cast_fp = ",".join(sorted(c.character_id for c in ctx.cast))
         raw = (
@@ -175,6 +205,21 @@ class AttributesCache:
     def dir(self) -> Path:
         """Directorio donde esta caché lee y escribe (solo lectura)."""
         return self._dir
+
+    @property
+    def model(self) -> str:
+        """Modelo LLM con el que se compone la clave de cache (solo lectura)."""
+        return self._model
+
+    @property
+    def prompt_version(self) -> int:
+        """PROMPT_VERSION con el que se compone la clave de cache (solo lectura)."""
+        return self._prompt_version
+
+    @property
+    def schema_version(self) -> int:
+        """SCHEMA_VERSION con el que se compone la clave de cache (solo lectura)."""
+        return self._schema_version
 
     def _key(self, ctx: AttributeSceneContext) -> str:  # noqa: F821
         cast_fp = ",".join(sorted(c.character_id for c in ctx.cast))

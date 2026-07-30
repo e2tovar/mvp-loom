@@ -110,3 +110,10 @@ def test_invalid_cache_file_returns_none(cache, cache_dir):
     cache_dir.mkdir(parents=True, exist_ok=True)
     path.write_text("{ invalid json }", encoding="utf-8")
     assert cache.get(ctx) is None
+
+
+def test_exposes_model_and_versions_as_public_properties(cache_dir):
+    cache = ExtractionCache(3, 2, "openai/kimi-k2.5", cache_dir=cache_dir)
+    assert cache.model == "openai/kimi-k2.5"
+    assert cache.prompt_version == 3
+    assert cache.schema_version == 2

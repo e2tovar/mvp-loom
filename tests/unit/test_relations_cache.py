@@ -54,3 +54,10 @@ def test_version_change_invalidates(tmp_path: Path) -> None:
         _ctx(), SceneRelations(evidences=[])
     )
     assert RelationsCache(2, 1, "test-model", cache_dir=tmp_path).get(_ctx()) is None
+
+
+def test_exposes_model_and_versions_as_public_properties(tmp_path):
+    cache = RelationsCache(1, 1, "test-model", cache_dir=tmp_path)
+    assert cache.model == "test-model"
+    assert cache.prompt_version == 1
+    assert cache.schema_version == 1

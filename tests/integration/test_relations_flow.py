@@ -15,8 +15,6 @@ import pytest
 from backend.extraction.relations.pipeline import run_relations_pipeline
 from backend.extraction.relations.schemas import SceneRelationEvidence, SceneRelations
 from backend.extraction.schemas import CharacterCandidateOut, MentionOut, SceneExtraction
-from backend.graph import relations as rel_graph
-from backend.graph.client import session as db_session
 from backend.graph.raw_layer import write_raw_layer
 from backend.ingest.models import Chapter, Manuscript, Scene
 

@@ -116,7 +116,7 @@ class RelationsCache:
         """Directorio donde esta caché lee y escribe (solo lectura)."""
         return self._dir
 
-    def _key(self, ctx: "RelationSceneContext") -> str:  # noqa: F821
+    def _key(self, ctx: RelationSceneContext) -> str:  # noqa: F821
         cast_fp = ",".join(sorted(c.character_id for c in ctx.cast))
         raw = (
             ctx.scene_text
@@ -130,7 +130,7 @@ class RelationsCache:
     def _path(self, key: str) -> Path:
         return self._dir / f"{key}.json"
 
-    def get(self, ctx: "RelationSceneContext") -> "SceneRelations | None":  # noqa: F821
+    def get(self, ctx: RelationSceneContext) -> SceneRelations | None:  # noqa: F821
         from backend.extraction.relations.schemas import SceneRelations
 
         path = self._path(self._key(ctx))
@@ -143,7 +143,7 @@ class RelationsCache:
             log.warning("Cache inválida en %s: %s — ignorada", path, exc)
             return None
 
-    def set(self, ctx: "RelationSceneContext", out: "SceneRelations") -> None:  # noqa: F821
+    def set(self, ctx: RelationSceneContext, out: SceneRelations) -> None:  # noqa: F821
         path = self._path(self._key(ctx))
         try:
             path.write_text(out.model_dump_json(indent=2), encoding="utf-8")
@@ -176,7 +176,7 @@ class AttributesCache:
         """Directorio donde esta caché lee y escribe (solo lectura)."""
         return self._dir
 
-    def _key(self, ctx: "AttributeSceneContext") -> str:  # noqa: F821
+    def _key(self, ctx: AttributeSceneContext) -> str:  # noqa: F821
         cast_fp = ",".join(sorted(c.character_id for c in ctx.cast))
         raw = (
             ctx.scene_text
@@ -190,7 +190,7 @@ class AttributesCache:
     def _path(self, key: str) -> Path:
         return self._dir / f"{key}.json"
 
-    def get(self, ctx: "AttributeSceneContext") -> "SceneAttributes | None":  # noqa: F821
+    def get(self, ctx: AttributeSceneContext) -> SceneAttributes | None:  # noqa: F821
         from backend.extraction.attributes.schemas import SceneAttributes
 
         path = self._path(self._key(ctx))
@@ -203,7 +203,7 @@ class AttributesCache:
             log.warning("Cache inválida en %s: %s — ignorada", path, exc)
             return None
 
-    def set(self, ctx: "AttributeSceneContext", out: "SceneAttributes") -> None:  # noqa: F821
+    def set(self, ctx: AttributeSceneContext, out: SceneAttributes) -> None:  # noqa: F821
         path = self._path(self._key(ctx))
         try:
             path.write_text(out.model_dump_json(indent=2), encoding="utf-8")

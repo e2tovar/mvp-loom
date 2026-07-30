@@ -67,7 +67,8 @@ def run_eval(work: str, manuscript_id: str | None = None) -> dict:
     except Exception as exc:  # noqa: BLE001
         print(f"[eval] No se pudo cargar la salida del sistema: {exc}", file=sys.stderr)
         print(
-            "[eval] ¿Se ejecutó M1 y M2? (backend.extraction.run + backend.extraction.relations.run)",
+            "[eval] ¿Se ejecutó M1 y M2? "
+            "(backend.extraction.run + backend.extraction.relations.run)",
             file=sys.stderr,
         )
         sys.exit(1)

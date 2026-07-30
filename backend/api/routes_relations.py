@@ -27,7 +27,10 @@ def list_relations(
         if not rel_graph.has_relations(sess, manuscript_id):
             raise HTTPException(
                 409,
-                {"error": "not_extracted", "detail": "Relaciones no extraídas para este manuscrito."},
+                {
+                    "error": "not_extracted",
+                    "detail": "Relaciones no extraídas para este manuscrito.",
+                },
             )
         relations = rel_graph.get_relations_list(sess, manuscript_id, provenance=provenance)
     return {

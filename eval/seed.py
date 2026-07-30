@@ -51,8 +51,9 @@ GATE_WORKS: tuple[SeedWork, ...] = (
 
 
 def _use_frozen_cache() -> None:
-    """Apunta las cachés LLM al directorio versionado, si no se fijó otra raíz."""
+    """Apunta las cachés LLM al directorio versionado y aísla de Langfuse (ADR-0003)."""
     os.environ.setdefault("LOOM_CACHE_DIR", str(FROZEN_CACHE_DIR))
+    os.environ.setdefault("LOOM_DISABLE_LANGFUSE", "1")
 
 
 def _ingest(work: SeedWork) -> str:

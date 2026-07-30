@@ -29,7 +29,6 @@ jobs:
       NEO4J_PASSWORD: loom-dev-password
       LOOM_LLM_MODEL: openai/kimi-k2.5
       LOOM_CACHE_DIR: eval/fixtures/llm-cache
-      LOOM_EVAL_STRICT: "1"
 
     steps:
       - uses: actions/checkout@v4
@@ -46,10 +45,15 @@ jobs:
         run: uv run ruff check backend/ eval/ tests/
 
       - name: Suite de tests
+        # LOOM_EVAL_STRICT NO va aquí: el grafo aún no está sembrado en este
+        # paso (eso ocurre después), así que los gates de eval deben poder
+        # omitirse todavía. El modo estricto solo aplica al paso final.
         run: uv run pytest tests/ -q
 
       - name: Sembrar el grafo (sin clave de API — respuestas congeladas)
         run: uv run python -m eval.seed
 
       - name: Gates de eval en modo estricto
+        env:
+          LOOM_EVAL_STRICT: "1"
         run: uv run pytest tests/eval -v -rs

@@ -104,6 +104,38 @@ de prioridad:
    es una decisión aparte. Hoy la deuda es que ni siquiera está declarada en el
    docstring de la clase.
 
+10. **[Lint] La carpeta `neo4j/` del repo enmascara localmente errores reales de
+    `ruff` en el paquete `neo4j` de Python. ✅ resuelto 2026-07-30.**
+    Descubierto al fallar el primer push con CI: `ruff check` marcaba I001 (imports
+    mal agrupados) en `backend/graph/{client,merge_candidates,raw_layer}.py` en CI,
+    pero pasaba limpio en local. Con `ruff -v` se vio la causa exacta:
+    ```
+    Categorized 'neo4j' as Known(FirstParty) (SourceMatch("<raíz-del-repo>"))
+    ```
+    La detección first-party/third-party de `ruff` para el import `neo4j` (la
+    librería de Python) hace *source match* contra la carpeta `neo4j/` que
+    `docker-compose.yml` monta en el repo para los datos y logs del contenedor
+    (`./neo4j/data`, `./neo4j/logs`). Esa carpeta no está versionada (git no guarda
+    directorios vacíos ni contenido ignorado), así que un clon limpio no la tiene y
+    `ruff` clasifica `neo4j` correctamente como third-party. Pero en cualquier
+    máquina de desarrollo donde ya se haya hecho `docker compose up` — es decir,
+    casi cualquier máquina de desarrollo real — la carpeta existe en disco y `ruff`
+    confunde el import con un paquete propio del proyecto, dando un falso "todo
+    limpio" que CI rechaza. **Verificado**: reproducido en clon limpio (`git clone`
+    a otra ruta + `uv sync`), confirmada la causa con `ruff check -v`, y confirmado
+    que desaparece comparando resultados con y sin la carpeta `neo4j/` presente.
+    **Resolución:** reordenados los imports de los 3 archivos afectados (grupo
+    third-party antes que first-party, con la línea en blanco que exige `isort`);
+    verificado en un clon limpio nuevo que `ruff check` queda en verde. No se tocó
+    `docker-compose.yml` ni la carpeta `neo4j/` — es la única vía práctica sin un
+    cambio de infraestructura más amplio. **Pendiente real**: `make lint` y
+    `.venv/bin/ruff check` en local seguirán pudiendo dar falsos negativos en
+    *futuros* cambios que toquen imports de `neo4j` mientras la carpeta exista en
+    disco; solo un clon limpio (o borrar `./neo4j/` del árbol de trabajo, lo cual
+    rompe el volumen de datos) reproduce fielmente lo que ve CI. Antes de fiarse de
+    un `ruff check` en verde tras tocar imports de `backend/graph/`, preferir el
+    juicio de CI sobre el de una máquina con Neo4j ya levantado.
+
 ---
 
 ## M2 · Follow-ups tras la implementación de relaciones (rama `feature/m2-relations`, 2026-07-17)

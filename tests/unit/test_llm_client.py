@@ -8,6 +8,7 @@ from __future__ import annotations
 import json
 from unittest.mock import MagicMock, patch
 
+import litellm
 import pytest
 from pydantic import BaseModel
 
@@ -110,3 +111,39 @@ def test_raises_llm_unavailable_on_auth_error(client, monkeypatch):
         )
         with pytest.raises(LLMUnavailableError):
             client.complete_structured("sys", "user", _SimpleSchema)
+
+
+def test_langfuse_callback_registered_when_enabled(monkeypatch):
+    monkeypatch.setenv("LOOM_LLM_MODEL", "openai/test-model")
+    monkeypatch.delenv("LOOM_DISABLE_LANGFUSE", raising=False)
+    monkeypatch.setenv("LANGFUSE_PUBLIC_KEY", "pk-test")
+    monkeypatch.setenv("LANGFUSE_SECRET_KEY", "sk-test")
+    monkeypatch.setattr(litellm, "success_callback", [])
+
+    LiteLLMClient()
+
+    assert litellm.success_callback == ["langfuse"]
+
+
+def test_langfuse_callback_not_registered_when_disabled(monkeypatch):
+    monkeypatch.setenv("LOOM_LLM_MODEL", "openai/test-model")
+    monkeypatch.setenv("LOOM_DISABLE_LANGFUSE", "1")
+    monkeypatch.setenv("LANGFUSE_PUBLIC_KEY", "pk-test")
+    monkeypatch.setenv("LANGFUSE_SECRET_KEY", "sk-test")
+    monkeypatch.setattr(litellm, "success_callback", [])
+
+    LiteLLMClient()
+
+    assert litellm.success_callback == []
+
+
+def test_langfuse_callback_not_registered_without_keys(monkeypatch):
+    monkeypatch.setenv("LOOM_LLM_MODEL", "openai/test-model")
+    monkeypatch.delenv("LOOM_DISABLE_LANGFUSE", raising=False)
+    monkeypatch.delenv("LANGFUSE_PUBLIC_KEY", raising=False)
+    monkeypatch.delenv("LANGFUSE_SECRET_KEY", raising=False)
+    monkeypatch.setattr(litellm, "success_callback", [])
+
+    LiteLLMClient()
+
+    assert litellm.success_callback == []

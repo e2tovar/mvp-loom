@@ -24,6 +24,17 @@ T = TypeVar("T", bound=BaseModel)
 _MAX_RETRIES = 1
 
 
+def _langfuse_enabled() -> bool:
+    """Señal de habilitación duplicada a propósito de `backend/observability/tracing.py`
+    (ADR-0003): esta capa (callback nativo de litellm) y la de `traced()` son
+    independientes — ninguna importa a la otra."""
+    if os.environ.get("LOOM_DISABLE_LANGFUSE") == "1":
+        return False
+    return bool(os.environ.get("LANGFUSE_PUBLIC_KEY")) and bool(
+        os.environ.get("LANGFUSE_SECRET_KEY")
+    )
+
+
 def _build_tool(schema: type[BaseModel]) -> dict:
     """Convierte un modelo Pydantic en una tool definition de OpenAI."""
     return {
@@ -58,6 +69,12 @@ class LiteLLMClient:
         # p. ej. '{"thinking_budget_tokens": 0}' para desactivar thinking en Kimi K2.5.
         raw_extra = os.environ.get("LOOM_LLM_EXTRA_BODY", "")
         self._extra_body: dict | None = json.loads(raw_extra) if raw_extra.strip() else None
+
+        if _langfuse_enabled():
+            try:
+                litellm.success_callback = ["langfuse"]
+            except Exception as exc:  # fail-open (ADR-0003)
+                log.warning("No se pudo activar el callback nativo de Langfuse: %s", exc)
 
     def complete_structured(
         self,

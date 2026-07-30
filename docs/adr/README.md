@@ -19,3 +19,4 @@ elección técnica es difícil de revertir o condiciona milestones posteriores.
 |-----|--------|--------|-----------|
 | [0001](0001-raw-layer-in-neo4j.md) | La capa cruda vive en Neo4j desde M0 | Aceptada | M0 |
 | [0002](0002-llm-gateway-litellm.md) | LLM Gateway: LiteLLM multi-proveedor | Aceptada | M1 |
+| [0003](0003-langfuse-observability.md) | Observabilidad de producción con Langfuse (self-hosted) | Aceptada | cross-cutting |

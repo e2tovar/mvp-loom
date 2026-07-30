@@ -42,27 +42,22 @@ def traced(
         if not _langfuse_enabled():
             return func
 
+        def _inner(*args, **kwargs):
+            if metadata_fn is not None:
+                try:
+                    from langfuse import get_client
+
+                    get_client().update_current_trace(metadata=metadata_fn(*args, **kwargs))
+                except Exception as exc:
+                    log.warning("No se pudo adjuntar metadata a la traza Langfuse: %s", exc)
+            return func(*args, **kwargs)
+
         try:
             from langfuse import observe
+
+            return functools.wraps(func)(observe(name=name)(_inner))
         except Exception as exc:
             log.warning("Langfuse configurado pero no disponible (%s); sin trazas.", exc)
             return func
-
-        observed = observe(name=name)(func)
-
-        if metadata_fn is None:
-            return observed
-
-        @functools.wraps(func)
-        def wrapper(*args, **kwargs):
-            try:
-                from langfuse import get_client
-
-                get_client().update_current_trace(metadata=metadata_fn(*args, **kwargs))
-            except Exception as exc:
-                log.warning("No se pudo adjuntar metadata a la traza Langfuse: %s", exc)
-            return observed(*args, **kwargs)
-
-        return wrapper
 
     return decorator

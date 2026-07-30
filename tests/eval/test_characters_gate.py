@@ -20,6 +20,8 @@ from pathlib import Path
 
 import pytest
 
+from eval.strict import skip_or_fail
+
 FIXTURES_DIR = Path(__file__).resolve().parent.parent.parent / "eval" / "fixtures"
 GOLD_SUFFIX = ".characters.gold.json"
 EVAL_WORKS = [
@@ -88,20 +90,20 @@ def _has_raw_layer(manuscript_id: str) -> bool:
 def test_characters_gate(work: str) -> None:
     """Gate: métricas ≥ umbrales para la obra `work`."""
     if not _neo4j_available():
-        pytest.skip("Neo4j no disponible — levanta docker compose up para el gate")
+        skip_or_fail("Neo4j no disponible — levanta docker compose up para el gate")
 
     gold_path = FIXTURES_DIR / f"{work}{GOLD_SUFFIX}"
     if not gold_path.exists():
-        pytest.skip(f"Gold dataset no encontrado: {gold_path}")
+        skip_or_fail(f"Gold dataset no encontrado: {gold_path}")
 
     manuscript_id = _manuscript_id(work)
     if not _has_extraction(manuscript_id):
-        pytest.skip(
+        skip_or_fail(
             f"Extracción no ejecutada para '{work}'. "
             f"Ejecuta: python -m backend.extraction.run {manuscript_id}"
         )
     if not _has_raw_layer(manuscript_id):
-        pytest.skip("Capa cruda destruida (wipe de la suite de integración) — re-ingerir la obra")
+        skip_or_fail("Capa cruda destruida (wipe de la suite de integración) — re-ingerir la obra")
 
     from eval.characters.runner import run_eval
 

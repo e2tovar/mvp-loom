@@ -16,6 +16,8 @@ from pathlib import Path
 
 import pytest
 
+from eval.strict import skip_or_fail
+
 FIXTURES_DIR = Path(__file__).resolve().parent.parent.parent / "eval" / "fixtures"
 ATTR_GOLD_SUFFIX = ".attributes.gold.json"
 CHAR_GOLD_SUFFIX = ".characters.gold.json"
@@ -59,16 +61,16 @@ def _has_layer(manuscript_id: str, checker: str) -> bool:
 @pytest.mark.parametrize("work", EVAL_WORKS)
 def test_attributes_gate(work: str) -> None:
     if not _neo4j_available():
-        pytest.skip("Neo4j no disponible — docker compose up para el gate")
+        skip_or_fail("Neo4j no disponible — docker compose up para el gate")
     for suffix in (ATTR_GOLD_SUFFIX, CHAR_GOLD_SUFFIX):
         if not (FIXTURES_DIR / f"{work}{suffix}").exists():
-            pytest.skip(f"Gold {suffix} no encontrado para {work}")
+            skip_or_fail(f"Gold {suffix} no encontrado para {work}")
 
     mid = _manuscript_id(work)
     if not _has_layer(mid, "m1"):
-        pytest.skip(f"M1 sin ejecutar para '{work}': python -m backend.extraction.run {mid}")
+        skip_or_fail(f"M1 sin ejecutar para '{work}': python -m backend.extraction.run {mid}")
     if not _has_layer(mid, "m3"):
-        pytest.skip(
+        skip_or_fail(
             f"M3 sin ejecutar para '{work}': "
             f"python -m backend.extraction.attributes.run {mid}"
         )

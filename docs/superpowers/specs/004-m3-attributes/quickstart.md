@@ -1,5 +1,20 @@
 # Quickstart — M3 Atributos
 
+## La vía corta (gate de CI, sin coste)
+
+```bash
+make up      # Neo4j
+make seed    # siembra el grafo desde las respuestas congeladas (gratis)
+make gates   # los tres gates en modo estricto
+```
+
+`make seed` no gasta cuota LLM: las respuestas de las obras crafted están
+versionadas en `eval/fixtures/llm-cache/`. Si cambias el prompt o el modelo, esas
+respuestas dejan de acertar y el sembrado volverá a llamar al LLM — es lo
+correcto: cambiar el prompt obliga a re-medir.
+
+## Manual, sobre un manuscrito propio
+
 Requiere: Neo4j arriba (`docker compose up -d`), obra ingerida (M0) y
 personajes extraídos (M1: `python -m backend.extraction.run <mid>`).
 

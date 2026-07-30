@@ -262,7 +262,7 @@ Cada milestone tiene un **criterio de aceptación**. No se avanza al siguiente s
 - **Una sola puerta al LLM.** Todas las llamadas pasan por `backend/llm/`; nada de SDKs dispersos por el código.
 - **Citas obligatorias.** Toda afirmación analítica referencia un `Passage` por id. Sin cita, no se emite.
 - **Idempotencia y cache.** La extracción se cachea por hash de contenido; re-ejecutar debe ser barato y determinista en lo posible.
-- **Eval antes de merge.** Un milestone no está "hecho" sin su eval verde; la regresión es gate de CI.
+- **Eval antes de merge.** Un milestone no está "hecho" sin su eval verde. Los tres gates (M1 personajes, M2 relaciones, M3 atributos) corren en CI sobre las obras crafted, con las respuestas del LLM congeladas en `eval/fixtures/llm-cache/` — así el gate mide el código, es determinista y no gasta cuota. `LOOM_EVAL_STRICT=1` impide que un gate se omita en silencio. En local: `make verify`. Las novelas completas siguen siendo diagnóstico manual, no gate.
 - **Cypher revisable.** Las consultas al grafo viven en `backend/graph/` con nombre, no incrustadas ad hoc.
 - **Docs vivas.** La carpeta `docs/` y la Story Wiki se mantienen con el patrón LLM Wiki: cada cambio relevante actualiza la página correspondiente.
 

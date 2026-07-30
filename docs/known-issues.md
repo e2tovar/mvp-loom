@@ -7,7 +7,7 @@ resolverse antes de dar una métrica por válida. Cada entrada cita su ubicació
 
 ## M3 · Follow-ups tras la implementación de atributos (2026-07-19, registrados 2026-07-30)
 
-**Estado:** ⏳ abiertos · puntos 1 y 2 resueltos 2026-07-30
+**Estado:** ⏳ abiertos · puntos 1, 2, 4 y 6 resueltos 2026-07-30
 
 M3 (atributos de personaje) quedó completo: 14 tasks, una por commit (ver
 `docs/superpowers/plans/2026-07-19-m3-attributes.md` → "Estado de ejecución"), gate en
@@ -43,15 +43,21 @@ de prioridad:
    (`eval/results/attributes-crafted-attributes-txt-20260719-11815af.json`). Ampliar
    el gold — no bajar el umbral — es lo que haría el gate significativo.
 
-4. **[Estructural] Los tres gates de eval son skip-por-defecto.** M1, M2 y M3 skipean
-   si la extracción no está en el grafo. En una base limpia (CI desde cero, o
-   simplemente un `docker compose` recreado) los tres se omiten y **la suite pasa en
-   verde sin haber medido nada**. Confirmado el 2026-07-30 en esta máquina: gate de M1
-   SKIP ×2 (crafted-three-chapters y crafted-two-chapters sin extracción en la base),
-   M2 y M3 PASS. La política de skip es correcta en local — extraer cuesta cuota LLM —
-   pero un CI real necesita un paso previo que siembre el grafo, o un modo estricto que
-   convierta el skip en fallo. Sin eso, "suite verde" y "milestones medidos" no son lo
-   mismo.
+4. **[Estructural] Los tres gates de eval son skip-por-defecto. ✅ resuelto 2026-07-30.**
+   M1, M2 y M3 skipeaban si la extracción no estaba en el grafo. En una base limpia
+   (CI desde cero, o simplemente un `docker compose` recreado) los tres se omitían y
+   **la suite pasaba en verde sin haber medido nada**. Confirmado el 2026-07-30 en
+   esta máquina: gate de M1 SKIP ×2 (crafted-three-chapters y crafted-two-chapters sin
+   extracción en la base), M2 y M3 PASS.
+   **Resolución:** las respuestas del LLM de las 4 obras crafted están congeladas en
+   `eval/fixtures/llm-cache/` (21 escenas: 15 de M1, 4 de M2, 2 de M3), `python -m
+   eval.seed` siembra el grafo de forma determinista y gratuita reutilizando
+   `write_raw_layer` y los pipelines M1/M2/M3 (sin Cypher propio, sin borrar nada), y
+   `LOOM_EVAL_STRICT=1` convierte cualquier omisión en fallo (`eval/strict.py`). El CI
+   (`.github/workflows/ci.yml`) lo ejecuta en cada push sin necesidad de clave de API.
+   Verificado: base recreada desde cero, `LOOM_LLM_API_KEY=` vacía,
+   `make seed && make gates` — los tres gates corren con cero omitidos. En local: un
+   solo comando, `make verify` (lint + suite + siembra + gates estrictos).
 
 5. **[Diagnóstico] M3 nunca se ha corrido sobre novela real.** M2 sí tuvo su corrida
    sobre P&P y HP1 (ver más abajo). De M3 solo existen resultados de
@@ -61,12 +67,14 @@ de prioridad:
    cap.2 / verdes cap.18" representada como dos valores) está verificado solo en
    sintético.
 
-6. **[Docs] Open Question del umbral de escritura desfasada.** `spec.md:324` sigue
-   diciendo "A confirmar en `/plan`", pero el plan ya la resolvió: los atributos se
-   escriben siempre con `confidence` como dato (a diferencia de M2, que retiene bajo
-   `WRITE_THRESHOLD`); la agregación conserva la confianza máxima del grupo y hay test
-   con `confidence=0.5` que persiste. Actualizar la spec para que refleje la decisión
-   tomada.
+6. **[Docs] Open Question del umbral de escritura desfasada. ✅ resuelto 2026-07-30.**
+   `spec.md:324` decía "A confirmar en `/plan`", pero el plan ya la había resuelto: los
+   atributos se escriben siempre con `confidence` como dato (a diferencia de M2, que
+   retiene bajo `WRITE_THRESHOLD`); la agregación conserva la confianza máxima del
+   grupo. **Resolución:** la spec se actualizó para reflejar la decisión tomada, y se
+   añadió `test_low_confidence_evidence_is_not_discarded`
+   (`tests/extraction/attributes/test_aggregation.py`) para fijar el contrato — antes
+   no existía ningún test que lo garantizara.
 
 7. **[M0, descubierto al cerrar M3] `test_get_structure` es flaky en suite completa.**
    `tests/integration/test_get_structure.py::test_structure_can_omit_snippets` falló
@@ -82,6 +90,19 @@ de prioridad:
    etiquetado "[M3] abordar cuando M3 toque re-resolución": la evidencia de relación
    con `character_id` muertos nunca se purga. M3 ya pasó y no se abordó. Sigue siendo
    deuda de M2, ahora sin milestone asignado.
+
+9. **[Eval] La clave de caché de M1 ignora el registro de entidades.**
+   `ExtractionCache._key` (`backend/llm/cache.py:38-45`) es
+   `SHA-256(scene_text + prompt_version + model + schema_version)` — no incluye
+   `known_entities`, aunque el prompt sí lo recibe y la respuesta del modelo depende
+   de él (`backend/extraction/pipeline.py:173-177`). Las cachés de M2 y M3 sí incluyen
+   el fingerprint del cast (`cache.py:97`, `cache.py:155`): es una asimetría, no una
+   decisión documentada. Congelar las respuestas de las obras crafted (2026-07-30) la
+   vuelve inofensiva en el gate — deja de producir variación — pero cristaliza una
+   respuesta generada con un registro de entidades concreto. Arreglar la clave
+   invalidaría toda la caché de las novelas y obligaría a re-medir M1 pagando, así que
+   es una decisión aparte. Hoy la deuda es que ni siquiera está declarada en el
+   docstring de la clase.
 
 ---
 

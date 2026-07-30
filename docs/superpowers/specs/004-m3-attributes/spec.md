@@ -321,13 +321,20 @@ afectado y la agregación se rehace de forma determinista.
   cambios legítimos frecuentes. La clase `static` es correcta para el registro,
   pero el futuro detector necesitará tratarlos con más tolerancia que `eye_color`.
   Anotado para la spec del detector; no afecta la extracción.
-- **Umbral de confianza de escritura**: M2 tenía umbral de escritura de aristas.
-  ¿Los atributos de baja confianza se escriben igual (con la confianza como dato) o
-  se retienen? Propuesta: escribir siempre y dejar el filtro al consumidor, ya que
-  descartar un valor podría ocultar un gazapo. A confirmar en `/plan`.
+- **Umbral de confianza de escritura** — *RESUELTO (en `/plan`, confirmado
+  2026-07-30)*: **no hay umbral**. A diferencia de M2 (que retiene aristas bajo
+  `WRITE_THRESHOLD`), los atributos se escriben siempre y la `confidence` viaja como
+  dato; la agregación conserva la confianza máxima del grupo y el filtro queda en el
+  consumidor. Razón: descartar un valor de baja confianza podría ocultar el gazapo
+  que esta capa existe para exponer. Evidencia: no existe constante de umbral en
+  `backend/graph/attributes.py` ni en `backend/extraction/attributes/`, y
+  `aggregate_character_attributes` no filtra por confianza — fijado por
+  `test_low_confidence_evidence_is_not_discarded`
+  (`tests/extraction/attributes/test_aggregation.py`).
 
 ## Change Log
 
 | Fecha | Cambio | Razón |
 |-------|--------|-------|
 | 2026-07-19 | Creación de la spec | Brainstorm de M3; frontera fijada en solo atributos. |
+| 2026-07-30 | Open Question del umbral de escritura marcada resuelta | Desfase spec↔código: el plan ya la había decidido (escribir siempre). Ver `docs/known-issues.md` → "M3 · Follow-ups", punto 6. |

@@ -47,6 +47,26 @@ def _neo4j_available() -> bool:
         return False
 
 
+def pytest_collection_modifyitems(config: pytest.Config, items: list[pytest.Item]) -> None:
+    """El marker `integration` skipea de verdad cuando Neo4j no está levantado.
+
+    Sin esto el marker era decorativo: solo se omitían los tests que además pedían
+    la fixture `neo4j_session` (la que hace el `pytest.skip`). Un test marcado
+    `integration` que golpee la API directamente — el endpoint sí consulta el
+    grafo — dejaba la suite roja en cualquier máquina sin `docker compose up`.
+    """
+    if not any(item.get_closest_marker("integration") for item in items):
+        return
+    if _neo4j_available():
+        return
+    skip = pytest.mark.skip(
+        reason="Neo4j no disponible (docker compose up para tests de integración)"
+    )
+    for item in items:
+        if item.get_closest_marker("integration"):
+            item.add_marker(skip)
+
+
 @lru_cache(maxsize=1)
 def _crafted_manuscript_ids() -> tuple[str, ...]:
     """manuscript_id de las fixtures crafted, derivados del pipeline de ingesta.

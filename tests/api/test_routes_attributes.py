@@ -1,12 +1,15 @@
 import pytest
-from fastapi.testclient import TestClient
 
 
 @pytest.mark.integration
-def test_attributes_endpoint_404_when_manuscript_absent(monkeypatch):
-    from backend.api.app import app
-    client = TestClient(app)
-    r = client.get("/manuscripts/does-not-exist/attributes")
+def test_attributes_endpoint_404_when_manuscript_absent(api_client):
+    """404 para un manuscrito inexistente.
+
+    Marcado `integration` porque el endpoint consulta el grafo para decidir el
+    404: sin Neo4j la ruta devuelve 500, no 404. Usa la fixture `api_client`
+    para no cerrar el driver compartido entre tests (ver conftest).
+    """
+    r = api_client.get("/manuscripts/does-not-exist/attributes")
     assert r.status_code == 404
 
 

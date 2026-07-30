@@ -5,6 +5,86 @@ resolverse antes de dar una métrica por válida. Cada entrada cita su ubicació
 
 ---
 
+## M3 · Follow-ups tras la implementación de atributos (2026-07-19, registrados 2026-07-30)
+
+**Estado:** ⏳ abiertos · puntos 1 y 2 resueltos 2026-07-30
+
+M3 (atributos de personaje) quedó completo: 14 tasks, una por commit (ver
+`docs/superpowers/plans/2026-07-19-m3-attributes.md` → "Estado de ejecución"), gate en
+verde sobre `crafted-attributes.txt` y suite en verde. Lo que quedó suelto, en orden
+de prioridad:
+
+1. **[CI] El gate de M3 no estaba en la suite. ✅ resuelto 2026-07-30.**
+   Existían `tests/eval/test_characters_gate.py` (M1) y `test_relations_gate.py` (M2),
+   pero **no** el de atributos: el eval de M3 solo se corría a mano
+   (`python -m eval.attributes.runner`). Contradecía el principio del README §13
+   ("la regresión es gate de CI"). **Resolución:** `tests/eval/test_attributes_gate.py`
+   con la misma política de skip que M2 (Neo4j caído / golds ausentes / M1 o M3 sin
+   ejecutar → skip; fallo solo si hay salida bajo umbral). Incluye
+   `test_gate_keys_are_a_subset_of_the_annotated_gold`, que rompe si una key de
+   `GATE_KEYS` deja de estar anotada en el gold — el gate mediría sobre menos
+   tripletas sin avisar. Verificado con Neo4j levantado: 3 passed, cero skips.
+
+2. **[Tests] El marker `integration` era decorativo. ✅ resuelto 2026-07-30.**
+   `tests/api/test_routes_attributes.py` estaba marcado `@pytest.mark.integration`,
+   pero no existía ningún `pytest_collection_modifyitems`: el skip real lo hacía solo
+   la fixture `neo4j_session`, que ese test no pedía (instanciaba su propio
+   `TestClient`). Sin `docker compose up` la suite quedaba **roja**, no skipeada.
+   **Resolución:** hook en `tests/conftest.py` que skipea todo lo marcado
+   `integration` cuando Neo4j no responde, y el test pasa a usar la fixture
+   `api_client` (que no cierra el driver compartido).
+
+3. **[Gate] El gate mide 8 de las 12 tripletas del gold.** `GATE_KEYS`
+   (`eval/attributes/thresholds.py:19`) excluye `gender` (3 tripletas, recall 0
+   medido) y `age` (1, mal-atribuida por diálogo). La exclusión está justificada y
+   fechada, pero el efecto es que el gate bloqueante corre sobre **8 tripletas de una
+   obra sintética**: un F1 = 1.0 ahí no discrimina calidad. El número interpretable
+   es el diagnóstico de todas las keys, **F1 = 0.727**
+   (`eval/results/attributes-crafted-attributes-txt-20260719-11815af.json`). Ampliar
+   el gold — no bajar el umbral — es lo que haría el gate significativo.
+
+4. **[Estructural] Los tres gates de eval son skip-por-defecto.** M1, M2 y M3 skipean
+   si la extracción no está en el grafo. En una base limpia (CI desde cero, o
+   simplemente un `docker compose` recreado) los tres se omiten y **la suite pasa en
+   verde sin haber medido nada**. Confirmado el 2026-07-30 en esta máquina: gate de M1
+   SKIP ×2 (crafted-three-chapters y crafted-two-chapters sin extracción en la base),
+   M2 y M3 PASS. La política de skip es correcta en local — extraer cuesta cuota LLM —
+   pero un CI real necesita un paso previo que siembre el grafo, o un modo estricto que
+   convierta el skip en fallo. Sin eso, "suite verde" y "milestones medidos" no son lo
+   mismo.
+
+5. **[Diagnóstico] M3 nunca se ha corrido sobre novela real.** M2 sí tuvo su corrida
+   sobre P&P y HP1 (ver más abajo). De M3 solo existen resultados de
+   `crafted-attributes.txt`. El plan lo dejó como seguimiento explícito (FR-009,
+   "Notas de cierre"). Sin esa corrida no hay medida de atributos en prosa real ni
+   gold parcial que ampliar, y el DoD del roadmap (la contradicción "ojos azules
+   cap.2 / verdes cap.18" representada como dos valores) está verificado solo en
+   sintético.
+
+6. **[Docs] Open Question del umbral de escritura desfasada.** `spec.md:324` sigue
+   diciendo "A confirmar en `/plan`", pero el plan ya la resolvió: los atributos se
+   escriben siempre con `confidence` como dato (a diferencia de M2, que retiene bajo
+   `WRITE_THRESHOLD`); la agregación conserva la confianza máxima del grupo y hay test
+   con `confidence=0.5` que persiste. Actualizar la spec para que refleje la decisión
+   tomada.
+
+7. **[M0, descubierto al cerrar M3] `test_get_structure` es flaky en suite completa.**
+   `tests/integration/test_get_structure.py::test_structure_can_omit_snippets` falló
+   una vez de tres corridas de la suite completa con Neo4j arriba: `_ingest` esperaba
+   `201` y recibió `200` (el manuscrito ya existía → ruta idempotente). Aislado, el
+   archivo pasa siempre; con el conftest anterior y con el nuevo, igual — **no es
+   regresión del hook de skip**, es contaminación de estado entre archivos de test que
+   el wipe scoped de `neo4j_session` no cubre en algún orden concreto. El test asume
+   base limpia en vez de aceptar `{200, 201}` o derivar el id sin depender del código.
+   No investigado a fondo (fuera del alcance del cierre de M3).
+
+8. **[Deuda heredada] El punto 4 de los follow-ups de M2 sigue abierto.** Estaba
+   etiquetado "[M3] abordar cuando M3 toque re-resolución": la evidencia de relación
+   con `character_id` muertos nunca se purga. M3 ya pasó y no se abordó. Sigue siendo
+   deuda de M2, ahora sin milestone asignado.
+
+---
+
 ## M2 · Follow-ups tras la implementación de relaciones (rama `feature/m2-relations`, 2026-07-17)
 
 **Estado:** ⏳ abiertos · registrados 2026-07-17

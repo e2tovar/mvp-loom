@@ -32,5 +32,19 @@ def test_attr_class_is_stamped():
     assert aggregate_character_attributes(evs)[0]["attr_class"] == "stateful"
 
 
+def test_low_confidence_evidence_is_not_discarded():
+    """Contrato: no hay umbral de escritura en atributos (spec, Open Questions).
+
+    A diferencia de M2 (que retiene aristas bajo `WRITE_THRESHOLD`), aquí se escribe
+    todo y la confianza viaja como dato: descartar un valor de baja confianza podría
+    ocultar el gazapo que esta capa existe para exponer.
+    """
+    evs = [_ev("ana", "eye_color", "blue", "s0:ae:x", conf=0.1)]
+    nodes = aggregate_character_attributes(evs)
+    assert len(nodes) == 1
+    assert nodes[0]["value_norm"] == "blue"
+    assert nodes[0]["confidence"] == 0.1
+
+
 def test_empty_input():
     assert aggregate_character_attributes([]) == []

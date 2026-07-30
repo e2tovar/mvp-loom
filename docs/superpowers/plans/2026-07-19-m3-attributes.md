@@ -1968,3 +1968,34 @@ Sin huecos.
 - **Rama**: ya renombrada a `feature/m3-attributes`; `CLAUDE.md` ya apunta a esta spec.
 - **Prerequisito de tests de integración**: Neo4j arriba y aislamiento de base (`neo4j_session` fixture existente). Si el known-issue de wipes sin scope sigue abierto, correr integración contra base desechable.
 - **Diagnóstico en novela real** (FR-009): tras el gate crafted, correr `eval.attributes.runner` sobre P&P o HP1 como diagnóstico y anotar el gold parcial — trabajo de seguimiento, no bloquea el milestone.
+
+---
+
+## Estado de ejecución (cerrado 2026-07-30)
+
+Las 14 tasks se ejecutaron, una por commit, en el orden del plan. Los checkboxes de
+step individuales quedan sin marcar a propósito: los steps "run test to verify it
+fails" no son verificables a posteriori, y marcarlos sería afirmar sin evidencia. La
+evidencia real es la tabla de abajo — commit + artefacto en el árbol + test verde.
+
+| Task | Commit | Artefacto |
+|---|---|---|
+| 1 · Contratos Pydantic + catálogo `key` | `595bcf7` | `backend/extraction/attributes/schemas.py` · `tests/extraction/attributes/test_schemas.py` |
+| 2 · Prompt versionado | `c5955f0` | `backend/extraction/attributes/prompts.py` (`PROMPT_VERSION`) |
+| 3 · Agregación sin colapsar | `4a2a709` | `backend/extraction/attributes/aggregation.py` · `test_aggregation.py` |
+| 4 · Esquema del grafo | `3237546` | `backend/graph/schema.py:49-57` (constraints + índices) |
+| 5 · Capa de grafo | `2bd9bc4`, fix `4f89bdd` | `backend/graph/attributes.py` · `tests/graph/test_attributes.py` |
+| 6 · Cache de escena | `7fd7a97` | `backend/llm/cache.py:131` (`.cache/attributes`) |
+| 7 · Pipeline de extracción | `2664a56` | `backend/extraction/attributes/pipeline.py` · `test_pipeline.py` |
+| 8 · CLI `run.py` | `c9166ba` | `backend/extraction/attributes/run.py` |
+| 9 · Endpoint de inspección | `ff8d8f3` | `backend/api/routes_attributes.py` · `tests/api/test_routes_attributes.py` |
+| 10 · Fixture crafted + gold | `9f43bc2`, `a5e8127` | `eval/fixtures/crafted-attributes.txt{,.attributes.gold.json}` |
+| 11 · Métricas del eval | `fc310f6` | `eval/attributes/metrics.py` · `tests/eval/test_attributes_metrics.py` |
+| 12 · Runner + umbrales | `b00dca6`, recalibrado `f94fd45` | `eval/attributes/{runner,thresholds}.py` |
+| 13 · E2E + invariantes | `f3900a4`, fix `c6d9d7e` | `tests/integration/test_attributes_e2e.py` |
+| 14 · Documentación | `2ddda07` | `data-model.md`, `quickstart.md`, `ABOUT.md`, `graph-north.md` |
+
+**Gate de CI (faltaba, añadido 2026-07-30):** `tests/eval/test_attributes_gate.py`.
+Hasta esa fecha el eval de M3 solo se corría a mano — M1 y M2 sí tenían su gate en
+la suite. Verificado con Neo4j levantado: 3 passed, cero skips, gate F1 = 1.0 sobre
+`GATE_KEYS`. Ver `docs/known-issues.md` → "M3 · Follow-ups".

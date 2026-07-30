@@ -1,7 +1,10 @@
 """Cache contenido-direccionada de respuestas LLM (research R6, Principio VI).
 
 Clave: SHA-256(scene_text + str(PROMPT_VERSION) + model + str(SCHEMA_VERSION))
-Store: JSON en .cache/extraction/<hex>.json (gitignored).
+Store: JSON en <LOOM_CACHE_DIR o .cache>/{extraction,relations,attributes}/<hex>.json
+       Por defecto gitignored; el eval apunta LOOM_CACHE_DIR a un directorio
+       versionado (eval/fixtures/llm-cache) para que sus gates no dependan de
+       llamadas de pago.
 Invalidación automática al cambiar PROMPT_VERSION, SCHEMA_VERSION o modelo.
 """
 
@@ -16,7 +19,20 @@ from backend.extraction.schemas import SceneContext, SceneExtraction
 
 log = logging.getLogger(__name__)
 
-_CACHE_DIR = Path(".cache") / "extraction"
+_CACHE_ROOT_ENV = "LOOM_CACHE_DIR"
+_DEFAULT_CACHE_ROOT = Path(".cache")
+
+
+def _cache_root() -> Path:
+    """Raíz de las cachés LLM, configurable por entorno.
+
+    Se lee en cada instanciación (no al importar) para que el sembrador del eval
+    pueda apuntar a `eval/fixtures/llm-cache` sin tocar los CLIs de extracción.
+    """
+    import os
+
+    raw = os.environ.get(_CACHE_ROOT_ENV)
+    return Path(raw) if raw else _DEFAULT_CACHE_ROOT
 
 
 class ExtractionCache:
@@ -32,8 +48,13 @@ class ExtractionCache:
         self._prompt_version = prompt_version
         self._schema_version = schema_version
         self._model = model
-        self._dir = (cache_dir or _CACHE_DIR).resolve()
+        self._dir = (cache_dir or _cache_root() / "extraction").resolve()
         self._dir.mkdir(parents=True, exist_ok=True)
+
+    @property
+    def dir(self) -> Path:
+        """Directorio donde esta caché lee y escribe (solo lectura)."""
+        return self._dir
 
     def _key(self, ctx: SceneContext) -> str:
         raw = (
@@ -70,9 +91,6 @@ class ExtractionCache:
             log.warning("No se pudo escribir en cache %s: %s", path, exc)
 
 
-_RELATIONS_CACHE_DIR = Path(".cache") / "relations"
-
-
 class RelationsCache:
     """Cache en disco para SceneRelations (M2), keyed por contenido + cast.
 
@@ -90,8 +108,13 @@ class RelationsCache:
         self._prompt_version = prompt_version
         self._schema_version = schema_version
         self._model = model
-        self._dir = (cache_dir or _RELATIONS_CACHE_DIR).resolve()
+        self._dir = (cache_dir or _cache_root() / "relations").resolve()
         self._dir.mkdir(parents=True, exist_ok=True)
+
+    @property
+    def dir(self) -> Path:
+        """Directorio donde esta caché lee y escribe (solo lectura)."""
+        return self._dir
 
     def _key(self, ctx: "RelationSceneContext") -> str:  # noqa: F821
         cast_fp = ",".join(sorted(c.character_id for c in ctx.cast))
@@ -128,9 +151,6 @@ class RelationsCache:
             log.warning("No se pudo escribir en cache %s: %s", path, exc)
 
 
-_ATTRIBUTES_CACHE_DIR = Path(".cache") / "attributes"
-
-
 class AttributesCache:
     """Cache en disco para SceneAttributes (M3), keyed por contenido + cast.
 
@@ -148,8 +168,13 @@ class AttributesCache:
         self._prompt_version = prompt_version
         self._schema_version = schema_version
         self._model = model
-        self._dir = (cache_dir or _ATTRIBUTES_CACHE_DIR).resolve()
+        self._dir = (cache_dir or _cache_root() / "attributes").resolve()
         self._dir.mkdir(parents=True, exist_ok=True)
+
+    @property
+    def dir(self) -> Path:
+        """Directorio donde esta caché lee y escribe (solo lectura)."""
+        return self._dir
 
     def _key(self, ctx: "AttributeSceneContext") -> str:  # noqa: F821
         cast_fp = ",".join(sorted(c.character_id for c in ctx.cast))

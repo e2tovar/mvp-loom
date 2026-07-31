@@ -159,6 +159,12 @@ LOOM_DISABLE_LANGFUSE=1               # el eval harness lo fija por código, no 
   versión estable. Chainguard poda digests viejos, así que ese pin caducará y habrá
   que refrescarlo a mano cada cierto tiempo (síntoma: `docker compose pull` falla con
   manifest desconocido para `cgr.dev/chainguard/minio@sha256:…`).
+- `container_name` es global al daemon Docker, no al proyecto de compose: si el
+  `docker-compose.yml` principal (Neo4j) ya está arriba desde el checkout normal del
+  repo, correr `docker compose -f docker-compose.yml -f docker-compose.langfuse.yml up`
+  desde un worktree falla (colisión de nombre de contenedor). Workaround verificado:
+  levantar solo `-f docker-compose.langfuse.yml` cuando Neo4j ya esté arriba por
+  separado.
 
 ## Notas
 

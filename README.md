@@ -221,6 +221,7 @@ La wiki se **deriva del grafo** y se **mantiene con awareness del diff**: cuando
 loom/
 ├── README.md                 # este documento
 ├── docker-compose.yml        # Neo4j + API
+├── docker-compose.langfuse.yml # stack Langfuse self-hosted (opt-in, ADR-0003)
 ├── backend/
 │   ├── ingest/               # parsers docx/epub → capa cruda
 │   ├── extraction/           # LLM + Pydantic schemas + entity resolution

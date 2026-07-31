@@ -5,10 +5,13 @@
 ## Contexto
 
 El pipeline de extracción (`backend/extraction/{pipeline,relations,attributes}.py`)
-llama al LLM en dos caminos reales: los endpoints FastAPI (`backend/api/routes_*`) y
-los CLI (`backend/extraction/{run,relations/run,attributes/run}.py`). Hoy la única
+llama al LLM por un solo camino real hoy: los tres CLI
+(`backend/extraction/{run,relations/run,attributes/run}.py`). Ningún módulo de
+`backend/api/` invoca las pipelines de extracción todavía; cuando se expongan por
+HTTP, heredarán la instrumentación sin cambios porque cuelga de las funciones de
+entrada de las pipelines, no del transporte. Hoy la única
 observabilidad de esas llamadas es un `log.debug("LLM cost=...")` en
-`litellm_client.py:105` — sin trazas, sin agrupación por manuscrito, sin forma de ver
+`litellm_client.py` — sin trazas, sin agrupación por manuscrito, sin forma de ver
 qué prompt/respuesta produjo un resultado concreto en una corrida real.
 
 El eval harness (`eval/`) ya resuelve un problema distinto: reproducibilidad y
@@ -34,18 +37,35 @@ capas independientes que Langfuse anida automáticamente:
 
 **1. Callback nativo de litellm — vive solo en `backend/llm/litellm_client.py`.**
 Captura cada llamada cruda al LLM (system/user prompt, respuesta, coste, latencia,
-modelo) sin que ningún otro módulo lo sepa. Cambio de una línea: registrar
-`litellm.success_callback = ["langfuse"]` en el constructor de `LiteLLMClient`,
-condicionado a que Langfuse esté habilitado (ver aislamiento de eval, abajo).
+modelo) sin que ningún otro módulo lo sepa. Cambio de una línea: añadir
+`"langfuse_otel"` a `litellm.success_callback` en el constructor de `LiteLLMClient`,
+condicionado a que Langfuse esté habilitado (ver aislamiento de eval, abajo). El
+nombre importa: el callback `"langfuse"` de litellm es la integración legacy atada al
+SDK `langfuse` 2.x y no funciona con el pin `langfuse>=3.0,<4` de este repo;
+`"langfuse_otel"` es el logger compatible con v3. Se añade a la lista en vez de
+reasignarla, para no pisar callbacks de terceros. Ese callback arrastra una dependencia
+que litellm no declara fuera de su extra `proxy`: `pydantic-settings`, que
+`litellm.integrations.otel` importa sin condicionar. Sin ella el callback no se
+inicializa (error no bloqueante en el log) y esta capa no emite nada, así que
+`pydantic-settings` es dependencia directa del proyecto.
 
 **2. Módulo propio `backend/observability/tracing.py`** — la puerta única para
 Langfuse fuera de `backend/llm/`, en el mismo espíritu que `backend/llm/` y
-`backend/graph/`. Expone un único decorador `traced(name: str)` que envuelve
-`langfuse.observe` (o es un no-op si Langfuse está deshabilitado). Solo
+`backend/graph/`. Expone un único decorador `traced(name, metadata_fn=None)` que
+envuelve `langfuse.observe` (o es un no-op si Langfuse está deshabilitado):
+`name` es el nombre de la traza y `metadata_fn`, si se pasa, recibe los mismos
+argumentos que la función decorada y su dict resultante se adjunta a la traza. Solo
 `backend/extraction/pipeline.py`, `relations/pipeline.py` y `attributes/pipeline.py`
 lo importan, decorando su función de entrada (`run_pipeline`,
 `run_relations_pipeline`, `run_attributes_pipeline`) con
-`@traced("extraction.characters")` (y análogos).
+`@traced("extraction.characters", metadata_fn=_trace_metadata)` (y análogos).
+
+**Captura de inputs desactivada (`capture_input=False`).** La captura automática de
+`observe` serializa los kwargs tal cual, y las pipelines reciben el propio
+`llm_client`, cuyo `__dict__` incluye `_api_key`: dejarla activa escribiría la clave
+del proveedor en claro en Postgres, ClickHouse y los blobs de MinIO. `metadata_fn` ya
+aporta lo que interesa de las entradas (`manuscript_id`, modelo, versiones), así que
+capturarlas de nuevo sería riesgo sin beneficio.
 
 **Anidado automático, sin tocar el protocolo.** El SDK de Langfuse propaga contexto
 vía OpenTelemetry: si `run_pipeline` (decorado) llama internamente a
@@ -60,10 +80,13 @@ nivel superior, taggeada con `manuscript_id`, nombre del pipeline, modelo,
 cache (Principio VI), así que una traza siempre es cruzable con la entrada de cache
 que la originó (o la evitó).
 
-**Aislamiento del eval harness (obligatorio, no opcional).** `eval/seed.py` y los
-runners de `eval/{characters,relations,attributes}/runner.py` fijan
-`LOOM_DISABLE_LANGFUSE=1` **antes** de instanciar `LiteLLMClient`, sin importar si
-`LANGFUSE_*` está configurado en el entorno. `litellm_client.py` y
+**Aislamiento del eval harness (obligatorio, no opcional).** `eval/seed.py` fija
+`LOOM_DISABLE_LANGFUSE=1` **antes** de instanciar `LiteLLMClient`, con una asignación
+dura (`os.environ[...] = "1"`, no `setdefault`): sin importar qué haya en el entorno y
+sin escape hatch. Es el único punto que hace falta, porque es el único del harness que
+construye un `LiteLLMClient`: los runners de
+`eval/{characters,relations,attributes}/runner.py` leen el grafo ya sembrado y nunca
+llaman al LLM. `litellm_client.py` y
 `backend/observability/tracing.py` respetan ese flag: ni el callback nativo ni
 `traced` hacen nada si está a `"1"`. Así CI y los gates nunca dependen de que
 Langfuse esté arriba, y una máquina de desarrollo con Langfuse configurado para
@@ -84,6 +107,12 @@ docker compose -f docker-compose.yml -f docker-compose.langfuse.yml up
 
 El `docker-compose.yml` del proyecto (Neo4j) no cambia. La mayoría de sesiones de
 desarrollo y el CI nunca levantan Langfuse ni pagan su coste de RAM.
+
+Todos los puertos del stack se publican en `127.0.0.1` (el upstream deja la UI en 3000
+y MinIO en 9090 abiertos a la red; con las credenciales por defecto del archivo eso
+expondría los prompts —fragmentos de novela— a cualquiera en la LAN), y cada línea de
+puerto lleva un comentario inline con lo que sirve, igual que los de Neo4j en
+`docker-compose.yml`.
 
 **Variables de entorno nuevas** (documentadas en `.env.example`, sin valores por
 defecto commiteados):
@@ -122,9 +151,14 @@ LOOM_DISABLE_LANGFUSE=1               # el eval harness lo fija por código, no 
   ser opt-in (archivo de compose separado).
 - Un módulo nuevo (`backend/observability/`) y tres puntos de instrumentación
   (`pipeline.py`, `relations/pipeline.py`, `attributes/pipeline.py`) que mantener.
-- El aislamiento de eval depende de que `eval/seed.py` y los tres runners fijen el
-  flag correctamente — un olvido ahí filtraría trazas de eval a Langfuse (mitigado:
-  se cubre con un test unitario que lo verifique, ver mini-plan).
+- El aislamiento de eval depende de que `eval/seed.py` fije el flag correctamente — un
+  olvido ahí filtraría trazas de eval a Langfuse (mitigado: se cubre con tests
+  unitarios en `tests/unit/test_eval_disables_langfuse.py`). Si en el futuro algún
+  runner llega a construir un `LiteLLMClient`, tendrá que fijar el flag igual.
+- La imagen de MinIO va pinneada por digest porque Chainguard no publica tags de
+  versión estable. Chainguard poda digests viejos, así que ese pin caducará y habrá
+  que refrescarlo a mano cada cierto tiempo (síntoma: `docker compose pull` falla con
+  manifest desconocido para `cgr.dev/chainguard/minio@sha256:…`).
 
 ## Notas
 

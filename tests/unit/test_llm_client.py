@@ -118,11 +118,17 @@ def test_langfuse_callback_registered_when_enabled(monkeypatch):
     monkeypatch.delenv("LOOM_DISABLE_LANGFUSE", raising=False)
     monkeypatch.setenv("LANGFUSE_PUBLIC_KEY", "pk-test")
     monkeypatch.setenv("LANGFUSE_SECRET_KEY", "sk-test")
-    monkeypatch.setattr(litellm, "success_callback", [])
+    # Se siembra un callback ajeno: registrar Langfuse debe añadir, no pisar.
+    monkeypatch.setattr(litellm, "success_callback", ["some_other_callback"])
 
     LiteLLMClient()
 
-    assert litellm.success_callback == ["langfuse"]
+    # "langfuse_otel" (v3-compatible), no el "langfuse" legacy atado al SDK 2.x.
+    assert litellm.success_callback == ["some_other_callback", "langfuse_otel"]
+
+    # Idempotente: una segunda instancia no duplica el callback.
+    LiteLLMClient()
+    assert litellm.success_callback == ["some_other_callback", "langfuse_otel"]
 
 
 def test_langfuse_callback_not_registered_when_disabled(monkeypatch):

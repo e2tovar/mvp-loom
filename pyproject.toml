@@ -17,6 +17,12 @@ dependencies = [
     "python-docx>=1.1",
     "litellm>=1.56",
     "langfuse>=3.0,<4",
+    # Requerida por el callback "langfuse_otel" de litellm (ADR-0003, capa 1):
+    # litellm.integrations.otel importa pydantic_settings sin condicionarlo, pero solo
+    # la declara en su extra `proxy`. Sin ella el callback no se inicializa (error
+    # no bloqueante en el log) y la capa 1 no produce ninguna traza — verificado
+    # end-to-end contra un stack Langfuse real el 2026-07-31.
+    "pydantic-settings>=2.14.1",
 ]
 
 [dependency-groups]

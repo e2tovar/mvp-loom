@@ -72,7 +72,15 @@ class LiteLLMClient:
 
         if _langfuse_enabled():
             try:
-                litellm.success_callback = ["langfuse"]
+                # "langfuse_otel", NO "langfuse": el callback llamado "langfuse" es la
+                # integración legacy de litellm, atada al SDK langfuse 2.x
+                # (`from langfuse.client import Langfuse`), que no existe con el pin
+                # `langfuse>=3.0,<4` de pyproject.toml. "langfuse_otel" es el logger
+                # compatible con v3 y además emite spans OTel en el contexto ambiente,
+                # que es el mecanismo por el que anidan bajo traced() (ADR-0003).
+                # Se añade sin pisar callbacks que otro componente ya hubiera registrado.
+                if "langfuse_otel" not in litellm.success_callback:
+                    litellm.success_callback.append("langfuse_otel")
             except Exception as exc:  # fail-open (ADR-0003)
                 log.warning("No se pudo activar el callback nativo de Langfuse: %s", exc)
 

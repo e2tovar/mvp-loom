@@ -1,6 +1,8 @@
-"""Aísla el eval harness de Langfuse (ADR-0003): mismo patrón que
-_use_frozen_cache() ya aplica para LOOM_CACHE_DIR — setdefault, nunca pisa un
-valor que el entorno ya trae."""
+"""Aísla el eval harness de Langfuse (ADR-0003): _use_frozen_cache() fija
+LOOM_DISABLE_LANGFUSE=1 de forma dura, sin importar qué haya en el entorno — el
+aislamiento es obligatorio, no opcional, y no tiene escape hatch. (LOOM_CACHE_DIR
+sí sigue siendo setdefault: ese sí es un valor que el entorno puede legítimamente
+sobreescribir.)"""
 
 from __future__ import annotations
 
@@ -15,7 +17,8 @@ def test_use_frozen_cache_disables_langfuse_by_default(monkeypatch):
     assert os.environ["LOOM_DISABLE_LANGFUSE"] == "1"
 
 
-def test_use_frozen_cache_respects_existing_langfuse_flag(monkeypatch):
+def test_use_frozen_cache_overrides_existing_langfuse_flag(monkeypatch):
+    """Un LOOM_DISABLE_LANGFUSE=0 preexistente NO sobrevive: sin escape hatch."""
     monkeypatch.setenv("LOOM_DISABLE_LANGFUSE", "0")
     _use_frozen_cache()
-    assert os.environ["LOOM_DISABLE_LANGFUSE"] == "0"
+    assert os.environ["LOOM_DISABLE_LANGFUSE"] == "1"

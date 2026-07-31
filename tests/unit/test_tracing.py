@@ -62,11 +62,11 @@ def test_traced_wraps_with_langfuse_observe_when_enabled(monkeypatch):
     monkeypatch.setenv("LANGFUSE_PUBLIC_KEY", "pk-test")
     monkeypatch.setenv("LANGFUSE_SECRET_KEY", "sk-test")
 
-    observed_names = []
+    observe_kwargs = []
 
-    def fake_observe(*, name):
+    def fake_observe(**kwargs):
         def decorator(func):
-            observed_names.append(name)
+            observe_kwargs.append(kwargs)
             return func
 
         return decorator
@@ -80,7 +80,35 @@ def test_traced_wraps_with_langfuse_observe_when_enabled(monkeypatch):
         return x + 1
 
     assert fn(1) == 2
-    assert observed_names == ["test.op"]
+    assert [kw["name"] for kw in observe_kwargs] == ["test.op"]
+
+
+def test_traced_disables_input_capture(monkeypatch):
+    """capture_input=False es obligatorio: la captura por defecto serializaría el
+    `llm_client` que reciben las pipelines, cuyo __dict__ expone `_api_key`."""
+    monkeypatch.delenv("LOOM_DISABLE_LANGFUSE", raising=False)
+    monkeypatch.setenv("LANGFUSE_PUBLIC_KEY", "pk-test")
+    monkeypatch.setenv("LANGFUSE_SECRET_KEY", "sk-test")
+
+    observe_kwargs = []
+
+    def fake_observe(**kwargs):
+        def decorator(func):
+            observe_kwargs.append(kwargs)
+            return func
+
+        return decorator
+
+    fake_module = types.ModuleType("langfuse")
+    fake_module.observe = fake_observe
+    monkeypatch.setitem(sys.modules, "langfuse", fake_module)
+
+    @traced("test.op")
+    def fn(secret):
+        return "ok"
+
+    assert fn("sk-SUPERSECRET") == "ok"
+    assert observe_kwargs == [{"name": "test.op", "capture_input": False}]
 
 
 def test_traced_fails_open_when_langfuse_import_raises(monkeypatch):
@@ -111,7 +139,7 @@ def test_traced_calls_metadata_fn_and_attaches_to_trace(monkeypatch):
 
     attached = []
 
-    def fake_observe(*, name):
+    def fake_observe(**_kwargs):
         def decorator(func):
             return func
 
@@ -142,7 +170,7 @@ def test_traced_metadata_attachment_fails_open(monkeypatch):
     monkeypatch.setenv("LANGFUSE_PUBLIC_KEY", "pk-test")
     monkeypatch.setenv("LANGFUSE_SECRET_KEY", "sk-test")
 
-    def fake_observe(*, name):
+    def fake_observe(**_kwargs):
         def decorator(func):
             return func
 

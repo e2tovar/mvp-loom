@@ -12,7 +12,8 @@ from __future__ import annotations
 import functools
 import logging
 import os
-from typing import Callable, TypeVar
+from collections.abc import Callable
+from typing import TypeVar
 
 log = logging.getLogger(__name__)
 
@@ -20,6 +21,15 @@ F = TypeVar("F", bound=Callable)
 
 
 def _langfuse_enabled() -> bool:
+    """Señal de habilitación duplicada a propósito de `backend/llm/litellm_client.py`
+    (ADR-0003): las dos capas son independientes y ninguna importa a la otra.
+
+    Momento de decisión asimétrico (deliberado): aquí se evalúa al DECORAR, es decir
+    al importar el módulo de la pipeline; en `LiteLLMClient` se evalúa al CONSTRUIR el
+    cliente. Consecuencia práctica: cambiar `LOOM_DISABLE_LANGFUSE`/`LANGFUSE_*`
+    después de importar la pipeline ya no afecta a `traced`, pero sí a un
+    `LiteLLMClient` creado más tarde.
+    """
     if os.environ.get("LOOM_DISABLE_LANGFUSE") == "1":
         return False
     return bool(os.environ.get("LANGFUSE_PUBLIC_KEY")) and bool(
@@ -55,7 +65,12 @@ def traced(
         try:
             from langfuse import observe
 
-            return functools.wraps(func)(observe(name=name)(_inner))
+            # capture_input=False: la captura por defecto serializa los kwargs tal
+            # cual, y las pipelines reciben el propio `llm_client` — cuyo `__dict__`
+            # incluye `_api_key`. Eso escribiría la clave del proveedor en claro en
+            # Postgres/ClickHouse/MinIO. `metadata_fn` ya aporta lo que el ADR quiere
+            # de las entradas, así que capturarlas es riesgo puro.
+            return functools.wraps(func)(observe(name=name, capture_input=False)(_inner))
         except Exception as exc:
             log.warning("Langfuse configurado pero no disponible (%s); sin trazas.", exc)
             return func

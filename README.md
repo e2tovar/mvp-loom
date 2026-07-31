@@ -229,6 +229,7 @@ loom/
 │   ├── wiki/                 # generador/mantenedor de la Story Wiki
 │   ├── analysis/             # continuidad, arcos, ritmo, foreshadowing, informe
 │   ├── llm/                  # interfaz agnóstica de proveedor
+│   ├── observability/        # puerta única a Langfuse (opt-in, ADR-0003)
 │   ├── orchestration/        # flujos Prefect/Temporal
 │   └── api/                  # FastAPI
 ├── eval/                     # golden datasets, runner, métricas, reportes
@@ -265,6 +266,7 @@ Cada milestone tiene un **criterio de aceptación**. No se avanza al siguiente s
 - **Eval antes de merge.** Un milestone no está "hecho" sin su eval verde. Los tres gates (M1 personajes, M2 relaciones, M3 atributos) corren en CI sobre las obras crafted, con las respuestas del LLM congeladas en `eval/fixtures/llm-cache/` — así el gate mide el código, es determinista y no gasta cuota. `LOOM_EVAL_STRICT=1` impide que un gate se omita en silencio. En local: `make verify`. Las novelas completas siguen siendo diagnóstico manual, no gate.
 - **Cypher revisable.** Las consultas al grafo viven en `backend/graph/` con nombre, no incrustadas ad hoc.
 - **Docs vivas.** La carpeta `docs/` y la Story Wiki se mantienen con el patrón LLM Wiki: cada cambio relevante actualiza la página correspondiente.
+- **Observabilidad opt-in, nunca gate.** Langfuse (ADR-0003) instrumenta corridas reales de extracción; el eval harness lo deshabilita explícitamente y CI nunca depende de que esté arriba.
 
 ---
 

@@ -37,9 +37,22 @@ capas independientes que Langfuse anida automáticamente:
 
 **1. Callback nativo de litellm — vive solo en `backend/llm/litellm_client.py`.**
 Captura cada llamada cruda al LLM (system/user prompt, respuesta, coste, latencia,
-modelo) sin que ningún otro módulo lo sepa. Cambio de una línea: añadir
-`"langfuse_otel"` a `litellm.success_callback` en el constructor de `LiteLLMClient`,
-condicionado a que Langfuse esté habilitado (ver aislamiento de eval, abajo). El
+modelo) sin que ningún otro módulo lo sepa. Cambio mínimo, contenido en el
+constructor de `LiteLLMClient`: añadir `"langfuse_otel"` a
+`litellm.success_callback`, condicionado a que Langfuse esté habilitado (ver
+aislamiento de eval, abajo), más el puente `LANGFUSE_BASE_URL` →
+`LANGFUSE_OTEL_HOST` que litellm necesita para no caer al SaaS público (ver
+«Consecuencias»).
+
+Cada llamada real a `complete_structured` pasa `metadata={"generation_name":
+schema.__name__}` a `litellm.completion()`: litellm usa ese valor para nombrar el
+span (en vez del genérico `raw_gen_ai_request` por defecto), así que en Langfuse se
+distinguen por nombre las llamadas de extracción por escena (`SceneExtraction`,
+`SceneRelations`, `SceneAttributes`) de las de resolución de personajes
+(`MergeJudgement`) — sin cambiar la firma de `complete_structured`, porque `schema`
+ya es un parámetro del protocolo (Principio IV intacto). Deliberadamente **no**
+identifica por escena/manuscrito individual: eso sí exigiría pasar un identificador
+nuevo (ver la alternativa rechazada más abajo). El
 nombre importa: el callback `"langfuse"` de litellm es la integración legacy atada al
 SDK `langfuse` 2.x y no funciona con el pin `langfuse>=3.0,<4` de este repo;
 `"langfuse_otel"` es el logger compatible con v3. Se añade a la lista en vez de
@@ -120,7 +133,7 @@ defecto commiteados):
 ```bash
 LANGFUSE_PUBLIC_KEY=
 LANGFUSE_SECRET_KEY=
-LANGFUSE_HOST=http://localhost:3000   # instancia self-hosted local
+LANGFUSE_BASE_URL=http://localhost:3000   # instancia self-hosted local (LANGFUSE_HOST es alias deprecado del SDK)
 LOOM_DISABLE_LANGFUSE=1               # el eval harness lo fija por código, no por .env
 ```
 
@@ -132,7 +145,7 @@ LOOM_DISABLE_LANGFUSE=1               # el eval harness lo fija por código, no 
 | **Solo callback nativo de litellm, sin `@observe`** | No agrupa las llamadas de un mismo manuscrito bajo una traza — que es justo el problema a resolver (depurar una extracción real que salió mal). Más barato de montar, pero no resuelve la motivación declarada. |
 | **Instrumentar también el eval harness** | Mezclaría trazas de CI/gates con las de uso real y acoplaría la disponibilidad de los gates a que Langfuse esté arriba — contradice que el CI no dependa de secretos ni de servicios externos (ver `docs/superpowers/plans/2026-07-30-eval-gates-no-skip.md`). |
 | **Meterlo dentro del alcance de M3** | Langfuse toca el gateway LLM completo (`backend/llm/`) y las tres pipelines de extracción, no el esquema de atributos. Es ortogonal a M3; merece su propio ADR y plan, igual que ADR-0002 (gateway LiteLLM) se escribió aparte de la spec de M1. |
-| **Pasar el `trace_id`/`session_id` a mano por `LLMClient.complete_structured`** | Cambiaría la firma del protocolo por una preocupación de observabilidad, no de dominio. El SDK de Langfuse ya propaga contexto vía OpenTelemetry sin necesidad de tocarla. |
+| **Pasar el `trace_id`/`session_id` a mano por `LLMClient.complete_structured`** | Cambiaría la firma del protocolo por una preocupación de observabilidad, no de dominio. El SDK de Langfuse ya propaga contexto vía OpenTelemetry sin necesidad de tocarla. Distinto de nombrar por `schema.__name__` (sí adoptado, ver capa 1 arriba): eso reutiliza un parámetro que el protocolo ya tenía, no agrega uno nuevo para identificar la escena/manuscrito individual. |
 
 ## Consecuencias
 
@@ -165,6 +178,20 @@ LOOM_DISABLE_LANGFUSE=1               # el eval harness lo fija por código, no 
   desde un worktree falla (colisión de nombre de contenedor). Workaround verificado:
   levantar solo `-f docker-compose.langfuse.yml` cuando Neo4j ya esté arriba por
   separado.
+- **litellm no conoce `LANGFUSE_BASE_URL` (puenteado en código).** El SDK
+  `langfuse` (capa 2, `backend/observability/tracing.py`) prioriza
+  `LANGFUSE_BASE_URL` sobre el `LANGFUSE_HOST` deprecado, pero el callback nativo
+  `langfuse_otel` de litellm (capa 1) resuelve su host leyendo él mismo, de forma
+  hardcodeada, `LANGFUSE_OTEL_HOST`/`LANGFUSE_HOST` (litellm/integrations/langfuse/
+  langfuse_otel.py) — sin fallback a `LANGFUSE_BASE_URL`. Sin puentear esto, con
+  solo `LANGFUSE_BASE_URL` fijada la capa 1 caería en silencio al SaaS público
+  (`https://cloud.langfuse.com`), justo el escenario que este ADR rechazó (ver
+  «Alternativas consideradas»). `LiteLLMClient.__init__` traduce
+  `LANGFUSE_BASE_URL` → `LANGFUSE_OTEL_HOST` en el entorno del proceso (en memoria,
+  no reescribe `.env`) antes de registrar el callback, solo si litellm no trae ya
+  una de sus dos variables — así `.env` mantiene una sola variable de host y la
+  limitación queda contenida en `backend/llm/`, que es su puerta única. Cubierto
+  por `tests/unit/test_llm_client.py::test_langfuse_base_url_bridges_to_otel_host`.
 
 ## Notas
 

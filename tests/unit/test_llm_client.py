@@ -6,6 +6,7 @@ Sin red: se usa un transporte falso que intercepta litellm.completion.
 from __future__ import annotations
 
 import json
+import os
 from unittest.mock import MagicMock, patch
 
 import litellm
@@ -48,6 +49,18 @@ def test_returns_validated_schema(client, monkeypatch):
     assert isinstance(result, _SimpleSchema)
     assert result.name == "Hamlet"
     assert result.value == 42
+
+
+def test_generation_name_tagged_with_schema_name(client):
+    """El nombre del schema viaja como metadata.generation_name (ADR-0003): distingue
+    en Langfuse las llamadas de extracción de las de resolución/otros tipos, sin
+    tocar la firma de complete_structured — `schema` ya es parte del protocolo."""
+    with patch("backend.llm.litellm_client.litellm.completion") as mock_completion:
+        mock_completion.return_value = _make_response({"name": "Hamlet", "value": 42})
+        client.complete_structured("sys", "user", _SimpleSchema)
+
+    _, call_kwargs = mock_completion.call_args
+    assert call_kwargs["metadata"] == {"generation_name": "_SimpleSchema"}
 
 
 def test_retries_on_invalid_response(client, monkeypatch):
@@ -153,3 +166,38 @@ def test_langfuse_callback_not_registered_without_keys(monkeypatch):
     LiteLLMClient()
 
     assert litellm.success_callback == []
+
+
+def test_langfuse_base_url_bridges_to_otel_host(monkeypatch):
+    """litellm solo lee LANGFUSE_OTEL_HOST/LANGFUSE_HOST (hardcodeado en su propio
+    código); sin este puente, con solo LANGFUSE_BASE_URL fijada (la única variable
+    de host documentada en .env.example) la capa 1 caería en silencio al Langfuse
+    Cloud público — el escenario que ADR-0003 rechazó."""
+    monkeypatch.setenv("LOOM_LLM_MODEL", "openai/test-model")
+    monkeypatch.delenv("LOOM_DISABLE_LANGFUSE", raising=False)
+    monkeypatch.setenv("LANGFUSE_PUBLIC_KEY", "pk-test")
+    monkeypatch.setenv("LANGFUSE_SECRET_KEY", "sk-test")
+    monkeypatch.delenv("LANGFUSE_OTEL_HOST", raising=False)
+    monkeypatch.delenv("LANGFUSE_HOST", raising=False)
+    monkeypatch.setenv("LANGFUSE_BASE_URL", "http://localhost:3000")
+    monkeypatch.setattr(litellm, "success_callback", [])
+
+    LiteLLMClient()
+
+    assert os.environ.get("LANGFUSE_OTEL_HOST") == "http://localhost:3000"
+    assert litellm.success_callback == ["langfuse_otel"]
+
+
+def test_langfuse_existing_otel_host_not_overridden(monkeypatch):
+    """Si LANGFUSE_OTEL_HOST ya está fijada explícitamente, el puente no la pisa."""
+    monkeypatch.setenv("LOOM_LLM_MODEL", "openai/test-model")
+    monkeypatch.delenv("LOOM_DISABLE_LANGFUSE", raising=False)
+    monkeypatch.setenv("LANGFUSE_PUBLIC_KEY", "pk-test")
+    monkeypatch.setenv("LANGFUSE_SECRET_KEY", "sk-test")
+    monkeypatch.setenv("LANGFUSE_OTEL_HOST", "http://explicit-host:3000")
+    monkeypatch.setenv("LANGFUSE_BASE_URL", "http://localhost:3000")
+    monkeypatch.setattr(litellm, "success_callback", [])
+
+    LiteLLMClient()
+
+    assert os.environ.get("LANGFUSE_OTEL_HOST") == "http://explicit-host:3000"

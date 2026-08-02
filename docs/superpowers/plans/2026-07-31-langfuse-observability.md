@@ -803,7 +803,7 @@ Al final de `.env.example`, siguiendo el mismo estilo de sección `── X ─�
 # deshabilitada por completo (fail-open, ninguna extracción depende de esto).
 # LANGFUSE_PUBLIC_KEY=
 # LANGFUSE_SECRET_KEY=
-# LANGFUSE_HOST=http://localhost:3000
+# LANGFUSE_BASE_URL=http://localhost:3000
 #
 # El eval harness fija LOOM_DISABLE_LANGFUSE=1 por código (eval/seed.py), no
 # hace falta fijarlo aquí salvo que quieras forzarlo también fuera del eval.
@@ -829,7 +829,7 @@ Añadir un bullet al final de la lista de `## 13. Convenciones para los agentes 
 
 - [ ] **Step 4: Verificación manual de cierre**
 
-Con Langfuse self-hosted arriba (`docker compose -f docker-compose.yml -f docker-compose.langfuse.yml up`) y `LANGFUSE_PUBLIC_KEY`/`LANGFUSE_SECRET_KEY`/`LANGFUSE_HOST` configuradas en `.env` (sin `LOOM_DISABLE_LANGFUSE`), correr:
+Con Langfuse self-hosted arriba (`docker compose -f docker-compose.yml -f docker-compose.langfuse.yml up`) y `LANGFUSE_PUBLIC_KEY`/`LANGFUSE_SECRET_KEY`/`LANGFUSE_BASE_URL` configuradas en `.env` (sin `LOOM_DISABLE_LANGFUSE`), correr:
 
 ```bash
 python -m backend.extraction.run <manuscript_id>

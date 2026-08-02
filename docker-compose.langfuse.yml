@@ -98,7 +98,7 @@ services:
     restart: always
     depends_on: *langfuse-depends-on
     ports:
-      - 127.0.0.1:3000:3000 # UI/API de Langfuse (LANGFUSE_HOST)
+      - 127.0.0.1:3000:3000 # UI/API de Langfuse (LANGFUSE_BASE_URL)
     environment:
       <<: *langfuse-worker-env
       NEXTAUTH_SECRET: ${NEXTAUTH_SECRET:-mysecret} # CHANGEME

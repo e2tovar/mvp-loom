@@ -72,6 +72,21 @@ class LiteLLMClient:
 
         if _langfuse_enabled():
             try:
+                # litellm resuelve el host del callback "langfuse_otel" leyendo él mismo
+                # LANGFUSE_OTEL_HOST/LANGFUSE_HOST del entorno (litellm/integrations/
+                # langfuse/langfuse_otel.py) — no conoce LANGFUSE_BASE_URL, que es la
+                # variable que usa el SDK langfuse (capa 2, tracing.py) y la única que
+                # documentamos en .env.example. Sin este puente, con las keys puestas
+                # pero sin LANGFUSE_OTEL_HOST/LANGFUSE_HOST, litellm cae por defecto al
+                # Langfuse Cloud público — justo lo que ADR-0003 rechazó. Se traduce acá,
+                # en memoria, para que `.env` tenga una sola variable de host.
+                if not os.environ.get("LANGFUSE_OTEL_HOST") and not os.environ.get(
+                    "LANGFUSE_HOST"
+                ):
+                    base_url = os.environ.get("LANGFUSE_BASE_URL")
+                    if base_url:
+                        os.environ["LANGFUSE_OTEL_HOST"] = base_url
+
                 # "langfuse_otel", NO "langfuse": el callback llamado "langfuse" es la
                 # integración legacy de litellm, atada al SDK langfuse 2.x
                 # (`from langfuse.client import Langfuse`), que no existe con el pin
@@ -106,6 +121,12 @@ class LiteLLMClient:
             "tools": [tool],
             "tool_choice": {"type": "function", "function": {"name": schema.__name__}},
             "temperature": 0,
+            # Nombra el span "raw_gen_ai_request" del callback langfuse_otel (capa 1,
+            # ADR-0003) con el nombre del schema (SceneExtraction/MergeJudgement/…) en
+            # vez del genérico por defecto — distingue tipos de llamada (extracción vs.
+            # resolución de personajes) sin tocar la firma de complete_structured, ya
+            # que `schema` ya es un parámetro del protocolo.
+            "metadata": {"generation_name": schema.__name__},
         }
         if self._api_base:
             kwargs["api_base"] = self._api_base

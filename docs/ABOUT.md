@@ -174,12 +174,20 @@ sin coste adicional.
 | M0 — Ingesta | `Manuscript` / `Chapter` / `Scene` | ✅ Completo |
 | M1 — Personajes | `Character` / `Mention` / `MergeCandidate` + eval | ✅ Completo |
 | M2 — Relaciones | `RELATES_TO` entre personajes + eval | ✅ Completo |
-| M3 — Atributos | `Attribute` / `AttributeEvidence` + eval | ✅ Completo (gate F1=1.0 sobre keys fiables) |
-| M4 — Eventos | Nodos de evento y orden cronológico real | 🔜 Planificado |
-| M5 — Retrieval | `Passage` y búsqueda híbrida (GraphRAG) | 🔜 Planificado |
-| M6 — Wiki | Páginas markdown generadas desde el grafo | 🔜 Planificado |
+| M3 — Atributos | `Attribute` / `AttributeEvidence` + eval | ✅ Completo (gate F1=1.0 sobre keys fiables; **sin diagnóstico en novela real**) |
+| M4 — Pasajes y cita | `Passage` + índice léxico/vectorial + eval de respuesta con cita | 🔜 Siguiente |
+| M5 — Voz | `Utterance`: quién dice qué a quién | 🔜 Planificado |
+| M6 — Escena | `summary` jerárquico, `place`, `time_marker`, plano narrativo | 🔜 Planificado |
+| M7 — Hechos y cronología | `Event` a nivel escena, orden cronológico inferido | 🔜 Planificado |
+| M8 — Wiki | Páginas markdown, híbridas grafo + prosa | 🔜 Planificado |
+| M9 — Análisis | Continuidad, ritmo, arco: **consumidores, fuera del grafo** | 🔜 Planificado |
 
 Cada milestone solo añade nodos y relaciones; nunca altera las capas previas.
+
+**Roadmap revisado el 2026-08-02** tras contrastar la ontología con la literatura de
+NLP narrativo: `Passage` se adelantó de M5 a M4 (sin él no se puede medir si el grafo
+aporta), se añadió la capa de diálogo, y se descartaron `Theme`, `Motif`, `PlotThread`,
+`CommunitySummary`, `Scene.sentiment` y `Location` como nodo. Motivos en README §5 y §12.
 
 ---
 

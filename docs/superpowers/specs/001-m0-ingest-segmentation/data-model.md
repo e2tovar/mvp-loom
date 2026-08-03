@@ -131,9 +131,15 @@ Subconjunto de §5 del README necesario para M0:
 
 ## Notas de evolución (fuera de M0)
 
-- `Scene` ganará `summary`, `tension_score`, `sentiment`, `time_marker`, `pov_character`
-  en milestones de análisis (M3/M6).
+> **Desfasado — revisar contra README §5 y §12 (roadmap revisado el 2026-08-02).**
+> Estas notas se escribieron durante M0 y anticipaban un modelo que ya no es el vigente.
+> Se conservan como registro; lo que sigue en vigor está marcado abajo.
+
+- ~~`Scene` ganará `summary`, `tension_score`, `sentiment`, `time_marker`, `pov_character`~~
+  → **vigente**: `Scene` ganará `summary` (jerárquico), `place` y `time_marker` en M6.
+  `tension_score`, `sentiment` y `pov_character` fueron **descartados** del modelo.
 - Aparecerá `Passage` (texto + embedding, índice vectorial) como unidad de recuperación
-  y fuente de citas (M4); las `Scene` de M0 ya guardan los offsets que lo habilitan.
+  y fuente de citas (**M4**, adelantado desde M5); las `Scene` de M0 ya guardan los
+  offsets que lo habilitan. **Sigue en vigor.**
 - La identidad por hash de M0 se reutiliza para el re-procesamiento incremental
-  diff-aware (M5/M8).
+  diff-aware (**M8/M11** en la numeración nueva). **Sigue en vigor.**
